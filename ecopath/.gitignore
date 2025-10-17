@@ -7,7 +7,7 @@ build/
 .flutter-plugins-dependencies
 flutter_export_environment.sh
 
-# Visual Studio Code / IDE
+# IDE
 .vscode/
 .idea/
 *.iml
