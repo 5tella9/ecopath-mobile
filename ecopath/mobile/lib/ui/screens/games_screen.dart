@@ -130,6 +130,13 @@ class _GamesScreenState extends State<GamesScreen> {
                       tileColor: const Color(0xFFD8E6BF),
                       onTap: _openCommunity,
                     ),
+                    _GameTile(
+                      title: 'Eco Marketplace',
+                      rewardText: '+5',
+                      assetPath: 'assets/images/marketplace.png',
+                      tileColor: const Color(0xFFdedaf4),
+                      onTap: _openCommunity,
+                    ),
                   ],
                 ),
               ),
