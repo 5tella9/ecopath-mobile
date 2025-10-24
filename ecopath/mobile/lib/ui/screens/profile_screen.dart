@@ -350,7 +350,7 @@ class _StatBlock extends StatelessWidget {
 // --- Weekday header text ---
 class _Weekday extends StatelessWidget {
   final String text;
-  const _Weekday(this.text, {super.key});
+  const _Weekday(this.text);
   @override
   Widget build(BuildContext context) {
     return SizedBox(

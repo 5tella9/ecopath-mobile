@@ -80,11 +80,16 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _steps = [
-      () => _WelcomePage(onNext: _next), // NEW: first page after Intro
+      () => _WelcomePage(onNext: _next), // first page after Intro
       () => _NameStep(data: data, onNext: _next),
       () => _AgeStep(data: data, onNext: _next),
       () => _GenderStep(data: data, onNext: _next),
-      () => _AddressStep(data: data, onNext: _next, getMap: () => _sidoSigungu, loading: _loadingAddr),
+      () => _AddressStep(
+            data: data,
+            onNext: _next,
+            getMap: () => _sidoSigungu,
+            loading: _loadingAddr,
+          ),
       () => _InterstitialPage(
             text: "Now, we got your address.\nI will write it down.",
             imageAsset: 'assets/images/survey2.png',
@@ -162,7 +167,8 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                           onTap: _back,
                           borderRadius: BorderRadius.circular(10),
                           child: Container(
-                            width: 40, height: 40,
+                            width: 40,
+                            height: 40,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: _fg.withOpacity(.6)),
@@ -173,13 +179,15 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                       else
                         const SizedBox(width: 40, height: 40),
                       const Spacer(),
-                      Text('EcoPath',
-                          style: GoogleFonts.lato(
-                            fontSize: 16,
-                            color: _fg,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: .5,
-                          )),
+                      Text(
+                        'EcoPath',
+                        style: GoogleFonts.lato(
+                          fontSize: 16,
+                          color: _fg,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: .5,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -199,23 +207,32 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                   ),
                 ),
 
-              // Content (no white card; directly on gradient)
+              // Content
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 280),
                   transitionBuilder: (child, anim) {
-                    final slide = Tween<Offset>(begin: const Offset(0.06, 0), end: Offset.zero).animate(anim);
-                    return FadeTransition(opacity: anim, child: SlideTransition(position: slide, child: child));
+                    final slide = Tween<Offset>(
+                      begin: const Offset(0.06, 0),
+                      end: Offset.zero,
+                    ).animate(anim);
+                    return FadeTransition(
+                      opacity: anim,
+                      child: SlideTransition(position: slide, child: child),
+                    );
                   },
                   child: Padding(
                     key: ValueKey(index),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     child: _steps[index](),
                   ),
                 ),
               ),
 
-              // Progress
+              // Progress bar
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
                 child: ClipRRect(
@@ -249,7 +266,8 @@ class _WelcomePage extends StatefulWidget {
   State<_WelcomePage> createState() => _WelcomePageState();
 }
 
-class _WelcomePageState extends State<_WelcomePage> with SingleTickerProviderStateMixin {
+class _WelcomePageState extends State<_WelcomePage>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ac;
   late final Animation<double> _fadeImg;
   late final Animation<Offset> _slideImg;
@@ -260,22 +278,46 @@ class _WelcomePageState extends State<_WelcomePage> with SingleTickerProviderSta
   @override
   void initState() {
     super.initState();
-    _ac = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..forward();
+    _ac = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..forward();
 
     // 1) Image first
-    _fadeImg  = CurvedAnimation(parent: _ac, curve: const Interval(0.0, 0.45, curve: Curves.easeOut));
-    _slideImg = Tween<Offset>(begin: const Offset(0, .10), end: Offset.zero).animate(
-      CurvedAnimation(parent: _ac, curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic)),
+    _fadeImg = CurvedAnimation(
+      parent: _ac,
+      curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
+    );
+    _slideImg = Tween<Offset>(
+      begin: const Offset(0, .10),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _ac,
+        curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
+      ),
     );
 
     // 2) Texts second
-    _fadeText  = CurvedAnimation(parent: _ac, curve: const Interval(0.35, 0.8, curve: Curves.easeOut));
-    _slideText = Tween<Offset>(begin: const Offset(0, .08), end: Offset.zero).animate(
-      CurvedAnimation(parent: _ac, curve: const Interval(0.35, 0.8, curve: Curves.easeOutCubic)),
+    _fadeText = CurvedAnimation(
+      parent: _ac,
+      curve: const Interval(0.35, 0.8, curve: Curves.easeOut),
+    );
+    _slideText = Tween<Offset>(
+      begin: const Offset(0, .08),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _ac,
+        curve: const Interval(0.35, 0.8, curve: Curves.easeOutCubic),
+      ),
     );
 
     // 3) Button last
-    _fadeBtn = CurvedAnimation(parent: _ac, curve: const Interval(0.75, 1.0, curve: Curves.easeOut));
+    _fadeBtn = CurvedAnimation(
+      parent: _ac,
+      curve: const Interval(0.75, 1.0, curve: Curves.easeOut),
+    );
   }
 
   @override
@@ -292,6 +334,7 @@ class _WelcomePageState extends State<_WelcomePage> with SingleTickerProviderSta
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
+
           // Texts
           FadeTransition(
             opacity: _fadeText,
@@ -323,20 +366,24 @@ class _WelcomePageState extends State<_WelcomePage> with SingleTickerProviderSta
               ),
             ),
           ),
+
           const SizedBox(height: 16),
-          // Image
+
+          // Image (FIXED PATH HERE)
           FadeTransition(
             opacity: _fadeImg,
             child: SlideTransition(
               position: _slideImg,
               child: Image.asset(
-                'assets/images/welcome.png',
+                'assets/images/welcome.png', // <-- fixed (no leading '/')
                 width: 280,
                 fit: BoxFit.contain,
               ),
             ),
           ),
+
           const Spacer(),
+
           // Button
           FadeTransition(
             opacity: _fadeBtn,
@@ -364,7 +411,8 @@ class _InterstitialPage extends StatefulWidget {
   State<_InterstitialPage> createState() => _InterstitialPageState();
 }
 
-class _InterstitialPageState extends State<_InterstitialPage> with SingleTickerProviderStateMixin {
+class _InterstitialPageState extends State<_InterstitialPage>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _ac;
   late final Animation<double> _fadeText;
   late final Animation<Offset> _slideText;
@@ -375,16 +423,43 @@ class _InterstitialPageState extends State<_InterstitialPage> with SingleTickerP
   @override
   void initState() {
     super.initState();
-    _ac = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..forward();
-    _fadeText = CurvedAnimation(parent: _ac, curve: const Interval(0.0, .45, curve: Curves.easeOut));
-    _slideText = Tween<Offset>(begin: const Offset(0, .1), end: Offset.zero).animate(
-      CurvedAnimation(parent: _ac, curve: const Interval(0.0, .45, curve: Curves.easeOutCubic)),
+    _ac = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
+
+    _fadeText = CurvedAnimation(
+      parent: _ac,
+      curve: const Interval(0.0, .45, curve: Curves.easeOut),
     );
-    _fadeImg = CurvedAnimation(parent: _ac, curve: const Interval(.25, .75, curve: Curves.easeOut));
-    _slideImg = Tween<Offset>(begin: const Offset(0, .12), end: Offset.zero).animate(
-      CurvedAnimation(parent: _ac, curve: const Interval(.25, .75, curve: Curves.easeOutCubic)),
+    _slideText = Tween<Offset>(
+      begin: const Offset(0, .1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _ac,
+        curve: const Interval(0.0, .45, curve: Curves.easeOutCubic),
+      ),
     );
-    _fadeBtn = CurvedAnimation(parent: _ac, curve: const Interval(.7, 1, curve: Curves.easeOut));
+
+    _fadeImg = CurvedAnimation(
+      parent: _ac,
+      curve: const Interval(.25, .75, curve: Curves.easeOut),
+    );
+    _slideImg = Tween<Offset>(
+      begin: const Offset(0, .12),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _ac,
+        curve: const Interval(.25, .75, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    _fadeBtn = CurvedAnimation(
+      parent: _ac,
+      curve: const Interval(.7, 1, curve: Curves.easeOut),
+    );
   }
 
   @override
@@ -441,68 +516,130 @@ class _InterstitialPageState extends State<_InterstitialPage> with SingleTickerP
 /* -------------------- SURVEY STEPS -------------------- */
 
 class _NameStep extends StatefulWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   const _NameStep({required this.data, required this.onNext});
-  @override State<_NameStep> createState() => _NameStepState();
+  @override
+  State<_NameStep> createState() => _NameStepState();
 }
+
 class _NameStepState extends State<_NameStep> {
   final _ctl = TextEditingController();
-  @override void initState(){ super.initState(); _ctl.text = widget.data.name; }
-  @override void dispose(){ _ctl.dispose(); super.dispose(); }
-  @override Widget build(BuildContext context){
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Enter your real name or nickname'),
-      const SizedBox(height: 10),
-      _darkTextField(controller: _ctl, hint: 'e.g., Minji Kim ', onDone: _go),
-      const Spacer(),
-      _nextBtn('Next', _go),
-    ]);
+  @override
+  void initState() {
+    super.initState();
+    _ctl.text = widget.data.name;
   }
-  void _go(){ widget.data.name = _ctl.text.trim(); widget.onNext(); }
+
+  @override
+  void dispose() {
+    _ctl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _hint('Enter your real name or nickname'),
+        const SizedBox(height: 10),
+        _darkTextField(
+          controller: _ctl,
+          hint: 'e.g., Minji Kim ',
+          onDone: _go,
+        ),
+        const Spacer(),
+        _nextBtn('Next', _go),
+      ],
+    );
+  }
+
+  void _go() {
+    widget.data.name = _ctl.text.trim();
+    widget.onNext();
+  }
 }
 
 class _AgeStep extends StatefulWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   const _AgeStep({required this.data, required this.onNext});
-  @override State<_AgeStep> createState() => _AgeStepState();
+  @override
+  State<_AgeStep> createState() => _AgeStepState();
 }
+
 class _AgeStepState extends State<_AgeStep> {
   final _ctl = TextEditingController();
-  @override void initState(){ super.initState(); _ctl.text = widget.data.age?.toString() ?? ''; }
-  @override void dispose(){ _ctl.dispose(); super.dispose(); }
-  @override Widget build(BuildContext context){
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Enter your age'),
-      const SizedBox(height: 10),
-      _darkTextField(
-        controller: _ctl,
-        hint: 'e.g., 24',
-        keyboardType: TextInputType.number,
-        onDone: _go,
-      ),
-      const Spacer(),
-      _nextBtn('Next', _go),
-    ]);
+  @override
+  void initState() {
+    super.initState();
+    _ctl.text = widget.data.age?.toString() ?? '';
   }
-  void _go(){ widget.data.age = int.tryParse(_ctl.text.trim()); widget.onNext(); }
+
+  @override
+  void dispose() {
+    _ctl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _hint('Enter your age'),
+        const SizedBox(height: 10),
+        _darkTextField(
+          controller: _ctl,
+          hint: 'e.g., 24',
+          keyboardType: TextInputType.number,
+          onDone: _go,
+        ),
+        const Spacer(),
+        _nextBtn('Next', _go),
+      ],
+    );
+  }
+
+  void _go() {
+    widget.data.age = int.tryParse(_ctl.text.trim());
+    widget.onNext();
+  }
 }
 
 class _GenderStep extends StatelessWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   const _GenderStep({required this.data, required this.onNext});
-  @override Widget build(BuildContext context){
-    final options = ['Female','Male','Non-binary','Prefer not to say'];
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Choose one'),
-      const SizedBox(height: 10),
-      ...options.map((o) => _pill(o, (){ data.gender = o; onNext(); })),
-      const Spacer(),
-    ]);
+  @override
+  Widget build(BuildContext context) {
+    final options = [
+      'Female',
+      'Male',
+      'Non-binary',
+      'Prefer not to say'
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _hint('Choose one'),
+        const SizedBox(height: 10),
+        ...options.map(
+          (o) => _pill(o, () {
+            data.gender = o;
+            onNext();
+          }),
+        ),
+        const Spacer(),
+      ],
+    );
   }
 }
 
 class _AddressStep extends StatefulWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   final Map<String, List<String>> Function() getMap;
   final bool loading;
   const _AddressStep({
@@ -511,46 +648,92 @@ class _AddressStep extends StatefulWidget {
     required this.getMap,
     required this.loading,
   });
-  @override State<_AddressStep> createState() => _AddressStepState();
+  @override
+  State<_AddressStep> createState() => _AddressStepState();
 }
-class _AddressStepState extends State<_AddressStep> {
-  String? _sido; String? _sigungu;
-  final _dongCtl = TextEditingController(); final _detailCtl = TextEditingController();
 
-  @override void initState(){
+class _AddressStepState extends State<_AddressStep> {
+  String? _sido;
+  String? _sigungu;
+  final _dongCtl = TextEditingController();
+  final _detailCtl = TextEditingController();
+
+  @override
+  void initState() {
     super.initState();
     _sido = widget.data.sido.isEmpty ? null : widget.data.sido;
     _sigungu = widget.data.sigungu.isEmpty ? null : widget.data.sigungu;
-    _dongCtl.text = widget.data.dong; _detailCtl.text = widget.data.detail;
+    _dongCtl.text = widget.data.dong;
+    _detailCtl.text = widget.data.detail;
   }
-  @override void dispose(){ _dongCtl.dispose(); _detailCtl.dispose(); super.dispose(); }
 
-  @override Widget build(BuildContext context){
-    if (widget.loading) return const Center(child: CircularProgressIndicator(color: _fg));
+  @override
+  void dispose() {
+    _dongCtl.dispose();
+    _detailCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.loading) {
+      return const Center(
+        child: CircularProgressIndicator(color: _fg),
+      );
+    }
     final map = widget.getMap();
     final sidos = map.keys.toList()..sort();
     final sigungus = (_sido == null) ? <String>[] : (map[_sido] ?? []);
 
-    return SingleChildScrollView(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Korean address format'),
-      const SizedBox(height: 10),
-      _label('Province / Metropolitan City (시/도)'),
-      _darkDropdown(value: _sido, items: sidos, onChanged: (v){ setState((){ _sido=v; _sigungu=null; }); }),
-      const SizedBox(height: 12),
-      _label('City / District (시/군/구)'),
-      _darkDropdown(value: _sigungu, items: sigungus, onChanged: (v){ setState((){ _sigungu=v; }); }),
-      const SizedBox(height: 12),
-      _label('Neighborhood (동/읍/면)'),
-      _darkTextField(controller: _dongCtl, hint: 'e.g., Yeoksam-dong'),
-      const SizedBox(height: 12),
-      _label('Detailed address'),
-      _darkTextField(controller: _detailCtl, hint: 'e.g., 123-45, #101', onDone: _go),
-      const SizedBox(height: 16),
-      _nextBtn('Next', _go),
-    ]));
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _hint('Korean address format'),
+          const SizedBox(height: 10),
+          _label('Province / Metropolitan City (시/도)'),
+          _darkDropdown(
+            value: _sido,
+            items: sidos,
+            onChanged: (v) {
+              setState(() {
+                _sido = v;
+                _sigungu = null;
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+          _label('City / District (시/군/구)'),
+          _darkDropdown(
+            value: _sigungu,
+            items: sigungus,
+            onChanged: (v) {
+              setState(() {
+                _sigungu = v;
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+          _label('Neighborhood (동/읍/면)'),
+          _darkTextField(
+            controller: _dongCtl,
+            hint: 'e.g., Yeoksam-dong',
+          ),
+          const SizedBox(height: 12),
+          _label('Detailed address'),
+          _darkTextField(
+            controller: _detailCtl,
+            hint: 'e.g., 123-45, #101',
+            onDone: _go,
+          ),
+          const SizedBox(height: 16),
+          _nextBtn('Next', _go),
+        ],
+      ),
+    );
   }
 
-  void _go(){
+  void _go() {
     widget.data.sido = _sido ?? '';
     widget.data.sigungu = _sigungu ?? '';
     widget.data.dong = _dongCtl.text.trim();
@@ -560,96 +743,187 @@ class _AddressStepState extends State<_AddressStep> {
 }
 
 class _HouseTypeStep extends StatelessWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   const _HouseTypeStep({required this.data, required this.onNext});
-  @override Widget build(BuildContext context){
-    final options = ['Apartment','House','One-room (studio)','Shared house','Other'];
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Select one'),
-      const SizedBox(height: 10),
-      ...options.map((o) => _pill(o, (){ data.houseType = o; onNext(); })),
-      const Spacer(),
-    ]);
+  @override
+  Widget build(BuildContext context) {
+    final options = [
+      'Apartment',
+      'House',
+      'One-room (studio)',
+      'Shared house',
+      'Other'
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _hint('Select one'),
+        const SizedBox(height: 10),
+        ...options.map(
+          (o) => _pill(o, () {
+            data.houseType = o;
+            onNext();
+          }),
+        ),
+        const Spacer(),
+      ],
+    );
   }
 }
 
 class _LivingWithStep extends StatelessWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   const _LivingWithStep({required this.data, required this.onNext});
-  @override Widget build(BuildContext context){
-    final options = ['Parents','Siblings','Friends','Relatives','Spouse/Partner','Alone'];
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Select one'),
-      const SizedBox(height: 10),
-      ...options.map((o) => _pill(o, (){ data.livingWith = o; onNext(); })),
-      const Spacer(),
-    ]);
+  @override
+  Widget build(BuildContext context) {
+    final options = [
+      'Parents',
+      'Siblings',
+      'Friends',
+      'Relatives',
+      'Spouse/Partner',
+      'Alone'
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _hint('Select one'),
+        const SizedBox(height: 10),
+        ...options.map(
+          (o) => _pill(o, () {
+            data.livingWith = o;
+            onNext();
+          }),
+        ),
+        const Spacer(),
+      ],
+    );
   }
 }
 
 class _GoalsStep extends StatefulWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   const _GoalsStep({required this.data, required this.onNext});
-  @override State<_GoalsStep> createState() => _GoalsStepState();
+  @override
+  State<_GoalsStep> createState() => _GoalsStepState();
 }
+
 class _GoalsStepState extends State<_GoalsStep> {
-  final goals = ['Reduce electricity use','Reduce gas use','Recycle more','Cut food waste','Use public transit more'];
+  final goals = [
+    'Reduce electricity use',
+    'Reduce gas use',
+    'Recycle more',
+    'Cut food waste',
+    'Use public transit more'
+  ];
   final selected = <String>{};
-  @override void initState(){ super.initState(); selected.addAll(widget.data.ecoGoals); }
-  @override Widget build(BuildContext context){
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Choose your eco goals (multiple selections allowed)'),
-      const SizedBox(height: 10),
-      Wrap(
-        spacing: 10, runSpacing: 10,
-        children: goals.map((g){
-          final on = selected.contains(g);
-          return _chip(g, on, (){
-            setState(()=> on ? selected.remove(g) : selected.add(g));
-          });
-        }).toList(),
-      ),
-      const Spacer(),
-      _nextBtn('Next', (){
-        widget.data.ecoGoals = selected.toList();
-        widget.onNext();
-      }),
-    ]);
+
+  @override
+  void initState() {
+    super.initState();
+    selected.addAll(widget.data.ecoGoals);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _hint('Choose your eco goals (multiple selections allowed)'),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: goals.map((g) {
+            final on = selected.contains(g);
+            return _chip(g, on, () {
+              setState(() => on ? selected.remove(g) : selected.add(g));
+            });
+          }).toList(),
+        ),
+        const Spacer(),
+        _nextBtn('Next', () {
+          widget.data.ecoGoals = selected.toList();
+          widget.onNext();
+        }),
+      ],
+    );
   }
 }
 
 class _EnergyPlanStep extends StatefulWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   const _EnergyPlanStep({required this.data, required this.onNext});
-  @override State<_EnergyPlanStep> createState() => _EnergyPlanStepState();
+  @override
+  State<_EnergyPlanStep> createState() => _EnergyPlanStepState();
 }
-class _EnergyPlanStepState extends State<_EnergyPlanStep> {
-  final _elecCtl = TextEditingController(); final _gasCtl = TextEditingController();
-  @override void initState(){ super.initState(); _elecCtl.text = widget.data.electricProvider; _gasCtl.text = widget.data.gasProvider; }
-  @override void dispose(){ _elecCtl.dispose(); _gasCtl.dispose(); super.dispose(); }
 
-  @override Widget build(BuildContext context){
-    return SingleChildScrollView(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Set up bill linking and points deduction preferences'),
-      const SizedBox(height: 10),
-      _toggleRow(label: 'Use electricity bill features', value: widget.data.hasElectricBill, onChanged: (v)=>setState(()=>widget.data.hasElectricBill=v)),
-      if (widget.data.hasElectricBill) ...[
-        const SizedBox(height: 8),
-        _label('Electricity provider'),
-        _darkTextField(controller: _elecCtl, hint: 'e.g., KEPCO (한국전력)'),
-      ],
-      const SizedBox(height: 12),
-      _toggleRow(label: 'Use gas bill features', value: widget.data.hasGasBill, onChanged: (v)=>setState(()=>widget.data.hasGasBill=v)),
-      if (widget.data.hasGasBill) ...[
-        const SizedBox(height: 8),
-        _label('Gas provider'),
-        _darkTextField(controller: _gasCtl, hint: 'e.g., City Gas ○○', onDone: _go),
-      ],
-      const SizedBox(height: 16),
-      _nextBtn('Next', _go),
-    ]));
+class _EnergyPlanStepState extends State<_EnergyPlanStep> {
+  final _elecCtl = TextEditingController();
+  final _gasCtl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _elecCtl.text = widget.data.electricProvider;
+    _gasCtl.text = widget.data.gasProvider;
   }
-  void _go(){
+
+  @override
+  void dispose() {
+    _elecCtl.dispose();
+    _gasCtl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _hint('Set up bill linking and points deduction preferences'),
+          const SizedBox(height: 10),
+          _toggleRow(
+            label: 'Use electricity bill features',
+            value: widget.data.hasElectricBill,
+            onChanged: (v) => setState(() => widget.data.hasElectricBill = v),
+          ),
+          if (widget.data.hasElectricBill) ...[
+            const SizedBox(height: 8),
+            _label('Electricity provider'),
+            _darkTextField(
+              controller: _elecCtl,
+              hint: 'e.g., KEPCO (한국전력)',
+            ),
+          ],
+          const SizedBox(height: 12),
+          _toggleRow(
+            label: 'Use gas bill features',
+            value: widget.data.hasGasBill,
+            onChanged: (v) => setState(() => widget.data.hasGasBill = v),
+          ),
+          if (widget.data.hasGasBill) ...[
+            const SizedBox(height: 8),
+            _label('Gas provider'),
+            _darkTextField(
+              controller: _gasCtl,
+              hint: 'e.g., City Gas ○○',
+              onDone: _go,
+            ),
+          ],
+          const SizedBox(height: 16),
+          _nextBtn('Next', _go),
+        ],
+      ),
+    );
+  }
+
+  void _go() {
     widget.data.electricProvider = _elecCtl.text.trim();
     widget.data.gasProvider = _gasCtl.text.trim();
     widget.onNext();
@@ -657,21 +931,37 @@ class _EnergyPlanStepState extends State<_EnergyPlanStep> {
 }
 
 class _QuizNotifyStep extends StatefulWidget {
-  final SurveyData data; final VoidCallback onNext;
+  final SurveyData data;
+  final VoidCallback onNext;
   const _QuizNotifyStep({required this.data, required this.onNext});
-  @override State<_QuizNotifyStep> createState() => _QuizNotifyStepState();
+  @override
+  State<_QuizNotifyStep> createState() => _QuizNotifyStepState();
 }
+
 class _QuizNotifyStepState extends State<_QuizNotifyStep> {
-  @override Widget build(BuildContext context){
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _hint('Earn points with quizzes and manage reminders'),
-      const SizedBox(height: 10),
-      _toggleRow(label: 'Join quizzes (earn points)', value: widget.data.wantsQuizzes, onChanged: (v)=>setState(()=>widget.data.wantsQuizzes=v)),
-      const SizedBox(height: 12),
-      _toggleRow(label: 'Receive notifications (bills/reminders)', value: widget.data.wantsNotifications, onChanged: (v)=>setState(()=>widget.data.wantsNotifications=v)),
-      const Spacer(),
-      _nextBtn('Next', widget.onNext),
-    ]);
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _hint('Earn points with quizzes and manage reminders'),
+        const SizedBox(height: 10),
+        _toggleRow(
+          label: 'Join quizzes (earn points)',
+          value: widget.data.wantsQuizzes,
+          onChanged: (v) => setState(() => widget.data.wantsQuizzes = v),
+        ),
+        const SizedBox(height: 12),
+        _toggleRow(
+          label: 'Receive notifications (bills/reminders)',
+          value: widget.data.wantsNotifications,
+          onChanged: (v) =>
+              setState(() => widget.data.wantsNotifications = v),
+        ),
+        const Spacer(),
+        _nextBtn('Next', widget.onNext),
+      ],
+    );
   }
 }
 
@@ -737,34 +1027,56 @@ class _FinishStep extends StatelessWidget {
 
 /* -------------------- DARK UI HELPERS -------------------- */
 
-Widget _nextBtn(String label, VoidCallback onTap)=>SizedBox(
+Widget _nextBtn(String label, VoidCallback onTap) => SizedBox(
   width: double.infinity,
   child: OutlinedButton(
     style: OutlinedButton.styleFrom(
       side: BorderSide(color: _fg.withOpacity(.9), width: 1.4),
       foregroundColor: _fg,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: const EdgeInsets.symmetric(vertical: 14),
     ),
     onPressed: onTap,
-    child: Text(label, style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: .2)),
+    child: Text(
+      label,
+      style: GoogleFonts.lato(
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+        letterSpacing: .2,
+      ),
+    ),
   ),
 );
 
-Widget _hint(String s)=>Text(
+Widget _hint(String s) => Text(
   s,
-  style: GoogleFonts.lato(color: _muted, fontSize: 13, fontWeight: FontWeight.w600, height: 1.35),
+  style: GoogleFonts.lato(
+    color: _muted,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    height: 1.35,
+  ),
 );
 
-Widget _label(String s)=>Padding(
+Widget _label(String s) => Padding(
   padding: const EdgeInsets.only(bottom: 6),
-  child: Text(s, style: GoogleFonts.lato(color: _fg, fontSize: 14, fontWeight: FontWeight.w900)),
+  child: Text(
+    s,
+    style: GoogleFonts.lato(
+      color: _fg,
+      fontSize: 14,
+      fontWeight: FontWeight.w900,
+    ),
+  ),
 );
 
-Widget _pill(String label, VoidCallback onTap)=>Padding(
+Widget _pill(String label, VoidCallback onTap) => Padding(
   padding: const EdgeInsets.only(bottom: 10),
   child: InkWell(
-    onTap: onTap, borderRadius: BorderRadius.circular(12),
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(12),
     child: Ink(
       decoration: BoxDecoration(
         color: _fieldBg,
@@ -772,12 +1084,26 @@ Widget _pill(String label, VoidCallback onTap)=>Padding(
         borderRadius: BorderRadius.circular(12),
       ),
       child: Container(
-        width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
           children: [
-            Icon(Icons.check_circle_outline, size: 18, color: _fg.withOpacity(.9)),
+            Icon(
+              Icons.check_circle_outline,
+              size: 18,
+              color: _fg.withOpacity(.9),
+            ),
             const SizedBox(width: 10),
-            Expanded(child: Text(label, style: GoogleFonts.lato(color: _fg, fontSize: 16, fontWeight: FontWeight.w700))),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.lato(
+                  color: _fg,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -785,8 +1111,9 @@ Widget _pill(String label, VoidCallback onTap)=>Padding(
   ),
 );
 
-Widget _chip(String label, bool isOn, VoidCallback onTap)=>InkWell(
-  onTap: onTap, borderRadius: BorderRadius.circular(20),
+Widget _chip(String label, bool isOn, VoidCallback onTap) => InkWell(
+  onTap: onTap,
+  borderRadius: BorderRadius.circular(20),
   child: Ink(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
     decoration: BoxDecoration(
@@ -794,7 +1121,14 @@ Widget _chip(String label, bool isOn, VoidCallback onTap)=>InkWell(
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: isOn ? _fg : _border),
     ),
-    child: Text(label, style: GoogleFonts.lato(color: _fg, fontSize: 14, fontWeight: FontWeight.w800)),
+    child: Text(
+      label,
+      style: GoogleFonts.lato(
+        color: _fg,
+        fontSize: 14,
+        fontWeight: FontWeight.w800,
+      ),
+    ),
   ),
 );
 
@@ -803,72 +1137,106 @@ Widget _darkTextField({
   required String hint,
   TextInputType? keyboardType,
   VoidCallback? onDone,
-}) => TextField(
-  controller: controller,
-  keyboardType: keyboardType,
-  textInputAction: onDone == null ? TextInputAction.next : TextInputAction.done,
-  onSubmitted: (_) => onDone?.call(),
-  style: GoogleFonts.lato(color: _fg, fontSize: 16, fontWeight: FontWeight.w700),
-  cursorColor: _fg,
-  decoration: InputDecoration(
-    hintText: hint,
-    hintStyle: GoogleFonts.lato(color: _muted, fontSize: 14),
-    filled: true,
-    fillColor: _fieldBg,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-    enabledBorder: OutlineInputBorder(
-      borderSide: const BorderSide(color: _border),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: _fg.withOpacity(.9), width: 1.6),
-      borderRadius: BorderRadius.circular(12),
-    ),
-  ),
-);
+}) =>
+    TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      textInputAction:
+          onDone == null ? TextInputAction.next : TextInputAction.done,
+      onSubmitted: (_) => onDone?.call(),
+      style: GoogleFonts.lato(
+        color: _fg,
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+      ),
+      cursorColor: _fg,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.lato(
+          color: _muted,
+          fontSize: 14,
+        ),
+        filled: true,
+        fillColor: _fieldBg,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: _border),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide:
+              BorderSide(color: _fg.withOpacity(.9), width: 1.6),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
 
 Widget _darkDropdown({
   required String? value,
   required List<String> items,
   required ValueChanged<String?> onChanged,
-}) => Container(
-  padding: const EdgeInsets.symmetric(horizontal: 12),
-  decoration: BoxDecoration(
-    color: _fieldBg,
-    borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: _border),
-  ),
-  child: DropdownButton<String>(
-    isExpanded: true,
-    value: value,
-    underline: const SizedBox.shrink(),
-    dropdownColor: const Color(0xFF0F2E28),
-    iconEnabledColor: _fg,
-    style: GoogleFonts.lato(color: _fg),
-    hint: Text('Select', style: GoogleFonts.lato(color: _muted)),
-    items: items.map((e)=>DropdownMenuItem(value: e, child: Text(e))).toList(),
-    onChanged: onChanged,
-  ),
-);
-
-Widget _toggleRow({required String label, required bool value, required ValueChanged<bool> onChanged})=>Container(
-  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-  decoration: BoxDecoration(
-    color: _fieldBg,
-    borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: _border),
-  ),
-  child: Row(
-    children: [
-      Expanded(child: Text(label, style: GoogleFonts.lato(color: _fg, fontSize: 14, fontWeight: FontWeight.w900))),
-      Switch(
-        value: value,
-        onChanged: onChanged,
-        activeColor: _ink,
-        activeTrackColor: _fg,
-        inactiveThumbColor: _fg.withOpacity(.7),
-        inactiveTrackColor: _fg.withOpacity(.3),
+}) =>
+    Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: _fieldBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _border),
       ),
-    ],
-  ),
-);
+      child: DropdownButton<String>(
+        isExpanded: true,
+        value: value,
+        underline: const SizedBox.shrink(),
+        dropdownColor: const Color(0xFF0F2E28),
+        iconEnabledColor: _fg,
+        style: GoogleFonts.lato(color: _fg),
+        hint: Text(
+          'Select',
+          style: GoogleFonts.lato(color: _muted),
+        ),
+        items: items
+            .map((e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(e),
+                ))
+            .toList(),
+        onChanged: onChanged,
+      ),
+    );
+
+Widget _toggleRow({
+  required String label,
+  required bool value,
+  required ValueChanged<bool> onChanged,
+}) =>
+    Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: _fieldBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _border),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.lato(
+                color: _fg,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: _ink,
+            activeTrackColor: _fg,
+            inactiveThumbColor: _fg.withOpacity(.7),
+            inactiveTrackColor: _fg.withOpacity(.3),
+          ),
+        ],
+      ),
+    );

@@ -347,7 +347,6 @@ class _RewardStat extends StatelessWidget {
   const _RewardStat({
     required this.icon,
     required this.text,
-    super.key,
   });
 
   @override

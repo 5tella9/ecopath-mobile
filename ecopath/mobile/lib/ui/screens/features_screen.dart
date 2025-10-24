@@ -57,7 +57,7 @@ class FeaturesScreen extends StatelessWidget {
                     title: 'Trash &\nRecycling',
                     subtitle: 'Scan, sort, and earn',
                     icon: Icons.restore_from_trash_rounded,
-                    iconBg: colorScheme.surfaceVariant,
+                    iconBg: colorScheme.surfaceContainerHighest,
                     onTap: () => _open(context, const _TrashRecyclingScreen()),
                   ),
                   _FeatureCard(
@@ -121,7 +121,7 @@ class _FeatureCard extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               cs.surface.withOpacity(.96),
-              cs.surfaceVariant.withOpacity(.35),
+              cs.surfaceContainerHighest.withOpacity(.35),
             ],
           ),
           boxShadow: [
