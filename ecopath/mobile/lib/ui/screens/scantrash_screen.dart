@@ -3,6 +3,10 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 
 class ScanTrashScreen extends StatefulWidget {
   const ScanTrashScreen({super.key});
@@ -56,7 +60,51 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
     super.dispose();
   }
 
-  void _finishScan() {
+  Future<void> _scanTrash() async {
+    final XFile? photo = await _controller?.takePicture();
+    if (photo == null) return;
+
+    const String apiUrl = "https://giveable-mikayla-hasteless.ngrok-free.dev/predict";
+
+    try {
+      // Read image bytes
+      final bytes = await photo.readAsBytes();
+
+      // Convert to base64
+      final base64Image = base64Encode(bytes);
+
+      // Make the request body
+      final Map<String, dynamic> body = {
+        "image_base64": "data:image/jpeg;base64,$base64Image",
+      };
+
+      // Send POST request
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(body),
+      );
+
+      // Handle the response
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        debugPrint("✅ Prediction:");
+        debugPrint(result.toString());
+        // Example: show results in UI
+        debugPrint("Klasse: ${result['klasse']}");
+        debugPrint("Confidence: ${result['confidence']}");
+        debugPrint("Bak: ${result['bak']}");
+        _finishScan(result);
+      } else {
+        debugPrint("❌ Error: ${response.statusCode}");
+        debugPrint(response.body);
+      }
+    } catch (e) {
+      debugPrint("⚠️ Exception: $e");
+    }
+  }
+
+  void _finishScan(Map<String, dynamic> result) {
     // Simulate detection + reward popup
     setState(() => pointsEarned += 15);
     showModalBottomSheet(
@@ -73,7 +121,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
             Text('Scan Complete!', style: GoogleFonts.lato(
               color: kInk, fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Text('Plastic bottle detected • +15 pts',
+            Text( 'you scanned ${result['klasse']}, this needs to be in the ${result['bak']} • +15 pts',
                 style: GoogleFonts.alike(color: kInk, fontSize: 14)),
             const SizedBox(height: 16),
             Container(
@@ -193,7 +241,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
                   const SizedBox(height: 14),
                   // Capture/Scan button
                   GestureDetector(
-                    onTap: _finishScan,
+                    onTap: _scanTrash,
                     child: Container(
                       width: 86,
                       height: 86,
