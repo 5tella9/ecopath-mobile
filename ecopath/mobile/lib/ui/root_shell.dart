@@ -19,7 +19,7 @@ class _RootShellState extends State<RootShell> {
   late int _index;
 
   final _pages = [
-    DashboardScreen(),
+    Dashboard(),
     FeaturesScreen(),
     GamesScreen(),
     NotificationsScreen(),
