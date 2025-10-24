@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'scantrash_screen.dart'; // <-- add this import
+import 'scantrash_screen.dart';
+import 'quiz_screen.dart'; 
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -20,10 +21,10 @@ class _GamesScreenState extends State<GamesScreen> {
   int xpToNext = 200;
 
   TextStyle get _title => GoogleFonts.lato(
-        color: kInk, fontSize: 28, fontWeight: FontWeight.w700);
+      color: kInk, fontSize: 28, fontWeight: FontWeight.w700);
 
-  TextStyle get _label => GoogleFonts.alike(
-        color: kInk, fontSize: 12, fontWeight: FontWeight.w400);
+  TextStyle get _label =>
+      GoogleFonts.alike(color: kInk, fontSize: 12, fontWeight: FontWeight.w400);
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +61,11 @@ class _GamesScreenState extends State<GamesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Level $level', style: GoogleFonts.lato(
-                      color: kInk, fontSize: 18, fontWeight: FontWeight.w700)),
+                    Text('Level $level',
+                        style: GoogleFonts.lato(
+                            color: kInk,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
@@ -82,11 +86,14 @@ class _GamesScreenState extends State<GamesScreen> {
 
               const SizedBox(height: 16),
 
-              Text('Daily Quests', style: GoogleFonts.lato(
-                color: kInk, fontSize: 16, fontWeight: FontWeight.w700)),
+              Text('Daily Quests',
+                  style: GoogleFonts.lato(
+                      color: kInk, fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               const Wrap(
-                spacing: 8, runSpacing: 8, children: [
+                spacing: 8,
+                runSpacing: 8,
+                children: [
                   _QuestChip(text: 'Finish a Quiz • +20'),
                   _QuestChip(text: 'Scan 3 items • +30'),
                   _QuestChip(text: 'Recycle once • +25'),
@@ -114,7 +121,7 @@ class _GamesScreenState extends State<GamesScreen> {
                       rewardText: '+15',
                       assetPath: 'assets/images/scantrash.png',
                       tileColor: const Color(0xFF71D8C6),
-                      onTap: _openScan, // <-- navigate to scanner
+                      onTap: _openScan,
                     ),
                     _GameTile(
                       title: 'Recycle',
@@ -130,6 +137,13 @@ class _GamesScreenState extends State<GamesScreen> {
                       tileColor: const Color(0xFFD8E6BF),
                       onTap: _openCommunity,
                     ),
+                    _GameTile(
+                      title: 'Eco Marketplace',
+                      rewardText: '+5',
+                      assetPath: 'assets/images/marketplace.png',
+                      tileColor: const Color(0xFFdedaf4),
+                      onTap: _openCommunity,
+                    ),
                   ],
                 ),
               ),
@@ -140,16 +154,20 @@ class _GamesScreenState extends State<GamesScreen> {
     );
   }
 
-  void _openQuiz() {
-    _gainPoints(10);
+  Future<void> _openQuiz() async {
+    // Navigate to the quiz, receive earned points, and add them to your game state.
+    final result = await Navigator.of(context).push<int>(
+      MaterialPageRoute(builder: (_) => const QuizScreen()),
+    );
+    if (result != null && result > 0) {
+      _gainPoints(result);
+    }
   }
 
   void _openScan() async {
-    // Push to ScanTrashScreen
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const ScanTrashScreen()),
     );
-    // (Optional) You could refresh points from a provider here.
   }
 
   void _openRecycle() {

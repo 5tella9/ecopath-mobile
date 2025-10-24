@@ -73,8 +73,8 @@ class _IntroScreenState extends State<IntroScreen>
     super.dispose();
   }
 
-  void _goToGames() {
-    Navigator.of(context).pushReplacementNamed('/root', arguments: 2);
+  void _goToSurvey() {
+    Navigator.of(context).pushReplacementNamed('/survey');
   }
 
   @override
@@ -111,7 +111,7 @@ class _IntroScreenState extends State<IntroScreen>
                 child: SlideTransition(
                   position: _subtitleSlide,
                   child: Text(
-                    'Let’s Reduce, Reuse, Recycle',
+                    'Let’s Reduce, Reuse, and Recycle',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.aBeeZee(
                       color: kSoftMint,
@@ -140,7 +140,7 @@ class _IntroScreenState extends State<IntroScreen>
                         ),
                         elevation: 0,
                       ),
-                      onPressed: _goToGames,
+                      onPressed: _goToSurvey, // ⬅️ changed to go to /survey
                       child: Text(
                         'Get Started',
                         style: GoogleFonts.aBeeZee(
