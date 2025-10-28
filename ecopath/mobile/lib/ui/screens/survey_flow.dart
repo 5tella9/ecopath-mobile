@@ -4,17 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_fonts/google_fonts.dart';
 
+// ⬅️ ADD THIS IMPORT so we can navigate to signup
+import 'package:ecopath/ui/screens/signup_screen.dart';
+
 /* -------------------- MODEL -------------------- */
 class SurveyData {
   String name = '';
-  int? age;
+  String dateOfBirth = ''; // yyyy/mm/dd
   String gender = '';
 
   // Korean-style address (English labels)
-  String sido = '';     // Province/Metro City
-  String sigungu = '';  // City/District
-  String dong = '';     // Neighborhood
-  String detail = '';   // Detailed address
+  String sido = ''; // Province/Metro City
+  String sigungu = ''; // City/District
+  String dong = ''; // Neighborhood
+  String detail = ''; // Detailed address
 
   String houseType = '';
   String livingWith = '';
@@ -30,23 +33,23 @@ class SurveyData {
 }
 
 /* -------------------- COLORS -------------------- */
-const _ink = Color(0xFF00221C);     // base green
-const _fg  = Color(0xFFF5F5F5);     // text color
-const _muted = Color(0xCCF5F5F5);   // hint / muted text
-const _fieldBg = Color(0x14FFFFFF); // input bg on dark
-const _border = Color(0x33FFFFFF);  // input border
+const _ink = Color(0xFF00221C); // base green accent (toggle thumb)
+const _fg = Color(0xFFF5F5F5); // main text color on gradient
+const _muted = Color(0xCCF5F5F5); // hint / helper text
+const _fieldBg = Color(0x14FFFFFF); // translucent input bg
+const _border = Color(0x33FFFFFF); // translucent border
 
 LinearGradient _bgGradient() => const LinearGradient(
-  begin: Alignment.topLeft,
-  end: Alignment.bottomRight,
-  colors: [
-    Color(0xFF00221C),
-    Color(0xFF0C3A2F),
-    Color(0xFF145243),
-  ],
-);
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF00221C),
+        Color(0xFF0C3A2F),
+        Color(0xFF145243),
+      ],
+    );
 
-/* -------------------- SCREEN -------------------- */
+/* -------------------- ROOT SURVEY FLOW SCREEN -------------------- */
 class SurveyFlow extends StatefulWidget {
   const SurveyFlow({super.key});
   @override
@@ -60,10 +63,10 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
 
   int index = 0;
 
-  // Flow order (with 3 interstitial pages):
-  // 0 WelcomeInterstitial
+  // Flow order:
+  // 0 Welcome
   // 1 Name
-  // 2 Age
+  // 2 DOB
   // 3 Gender
   // 4 Address
   // 5 InterstitialAddress
@@ -80,9 +83,9 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _steps = [
-      () => _WelcomePage(onNext: _next), // first page after Intro
+      () => _WelcomePage(onNext: _next),
       () => _NameStep(data: data, onNext: _next),
-      () => _AgeStep(data: data, onNext: _next),
+      () => _DobStep(data: data, onNext: _next), // <-- DOB step
       () => _GenderStep(data: data, onNext: _next),
       () => _AddressStep(
             data: data,
@@ -107,9 +110,17 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
       () => _QuizNotifyStep(data: data, onNext: _next),
       () => _FinishStep(
             data: data,
-            onFinish: () => Navigator.of(context).pushReplacementNamed('/root'),
+            onFinish: () {
+              // ⬇️ GO TO SIGN UP SCREEN INSTEAD OF /root
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (_) => const SignUpScreen(),
+                ),
+              );
+            },
           ),
     ];
+
     _loadAddressJson();
   }
 
@@ -125,24 +136,28 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
     }
   }
 
-  void _next() => setState(() => index = (index + 1).clamp(0, _steps.length - 1));
-  void _back() => setState(() => index = (index - 1).clamp(0, _steps.length - 1));
+  void _next() => setState(() {
+        index = (index + 1).clamp(0, _steps.length - 1);
+      });
+  void _back() => setState(() {
+        index = (index - 1).clamp(0, _steps.length - 1);
+      });
 
   bool get _isInterstitial => index == 0 || index == 5 || index == 9;
 
   @override
   Widget build(BuildContext context) {
     final titles = [
-      '', // 0 welcome (no title bar)
+      '', // 0 welcome (no header)
       'What is your name?',
-      'How old are you?',
+      'What is your date of birth?',
       'What is your gender?',
       'Enter your address',
-      '', // 5 interstitial (no title bar)
+      '', // 5 interstitial
       'What type of house do you live in?',
-      'How many people do you share the house with?',
+      'Who do you live with?',
       'Your eco goals',
-      '', // 9 interstitial (no title bar)
+      '', // 9 interstitial
       'Energy bills & providers',
       'Quizzes & notifications',
       'All set!',
@@ -156,7 +171,7 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
         body: SafeArea(
           child: Column(
             children: [
-              // Top bar with back and app name (skip for interstitials)
+              // Top bar + title (skip on interstitial pages)
               if (!_isInterstitial)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -173,7 +188,11 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: _fg.withOpacity(.6)),
                             ),
-                            child: Icon(Icons.arrow_back, color: _fg, size: 20),
+                            child: Icon(
+                              Icons.arrow_back,
+                              color: _fg,
+                              size: 20,
+                            ),
                           ),
                         )
                       else
@@ -191,6 +210,7 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                     ],
                   ),
                 ),
+
               if (!_isInterstitial)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 4, 24, 8),
@@ -207,7 +227,7 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                   ),
                 ),
 
-              // Content
+              // Body / page content
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 280),
@@ -218,7 +238,10 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                     ).animate(anim);
                     return FadeTransition(
                       opacity: anim,
-                      child: SlideTransition(position: slide, child: child),
+                      child: SlideTransition(
+                        position: slide,
+                        child: child,
+                      ),
                     );
                   },
                   child: Padding(
@@ -254,10 +277,10 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
 }
 
 /* -------------------- WELCOME INTERSTITIAL -------------------- */
-// Layout requirement:
-// - Two texts ABOVE the png; everything centered.
-// - Transition order: 1) PNG appears, 2) texts appear, 3) Next button appears.
-//   (We keep texts above in layout but delay their animation to come after the image.)
+// Animation order:
+//   1) image
+//   2) text
+//   3) next button
 class _WelcomePage extends StatefulWidget {
   final VoidCallback onNext;
   const _WelcomePage({required this.onNext});
@@ -283,7 +306,6 @@ class _WelcomePageState extends State<_WelcomePage>
       duration: const Duration(milliseconds: 1100),
     )..forward();
 
-    // 1) Image first
     _fadeImg = CurvedAnimation(
       parent: _ac,
       curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
@@ -298,7 +320,6 @@ class _WelcomePageState extends State<_WelcomePage>
       ),
     );
 
-    // 2) Texts second
     _fadeText = CurvedAnimation(
       parent: _ac,
       curve: const Interval(0.35, 0.8, curve: Curves.easeOut),
@@ -313,7 +334,6 @@ class _WelcomePageState extends State<_WelcomePage>
       ),
     );
 
-    // 3) Button last
     _fadeBtn = CurvedAnimation(
       parent: _ac,
       curve: const Interval(0.75, 1.0, curve: Curves.easeOut),
@@ -328,14 +348,13 @@ class _WelcomePageState extends State<_WelcomePage>
 
   @override
   Widget build(BuildContext context) {
-    // We keep texts above the image in layout, but their animation starts AFTER the image.
+    // Text appears above the image visually, but anim starts later.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
 
-          // Texts
           FadeTransition(
             opacity: _fadeText,
             child: SlideTransition(
@@ -369,13 +388,12 @@ class _WelcomePageState extends State<_WelcomePage>
 
           const SizedBox(height: 16),
 
-          // Image (FIXED PATH HERE)
           FadeTransition(
             opacity: _fadeImg,
             child: SlideTransition(
               position: _slideImg,
               child: Image.asset(
-                'assets/images/welcome.png', // <-- fixed (no leading '/')
+                'assets/images/welcome.png',
                 width: 280,
                 fit: BoxFit.contain,
               ),
@@ -384,7 +402,6 @@ class _WelcomePageState extends State<_WelcomePage>
 
           const Spacer(),
 
-          // Button
           FadeTransition(
             opacity: _fadeBtn,
             child: _nextBtn('Next', widget.onNext),
@@ -395,7 +412,7 @@ class _WelcomePageState extends State<_WelcomePage>
   }
 }
 
-/* -------------------- INTERSTITIAL PAGE (GENERIC) -------------------- */
+/* -------------------- GENERIC INTERSTITIAL PAGE -------------------- */
 class _InterstitialPage extends StatefulWidget {
   final String text;
   final String imageAsset;
@@ -474,6 +491,7 @@ class _InterstitialPageState extends State<_InterstitialPage>
       child: Column(
         children: [
           const Spacer(),
+
           FadeTransition(
             opacity: _fadeText,
             child: SlideTransition(
@@ -490,7 +508,9 @@ class _InterstitialPageState extends State<_InterstitialPage>
               ),
             ),
           ),
+
           const SizedBox(height: 16),
+
           FadeTransition(
             opacity: _fadeImg,
             child: SlideTransition(
@@ -502,7 +522,9 @@ class _InterstitialPageState extends State<_InterstitialPage>
               ),
             ),
           ),
+
           const Spacer(),
+
           FadeTransition(
             opacity: _fadeBtn,
             child: _nextBtn('Next', widget.onNext),
@@ -513,18 +535,20 @@ class _InterstitialPageState extends State<_InterstitialPage>
   }
 }
 
-/* -------------------- SURVEY STEPS -------------------- */
+/* -------------------- SURVEY STEP WIDGETS -------------------- */
 
 class _NameStep extends StatefulWidget {
   final SurveyData data;
   final VoidCallback onNext;
   const _NameStep({required this.data, required this.onNext});
+
   @override
   State<_NameStep> createState() => _NameStepState();
 }
 
 class _NameStepState extends State<_NameStep> {
   final _ctl = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -537,6 +561,11 @@ class _NameStepState extends State<_NameStep> {
     super.dispose();
   }
 
+  void _go() {
+    widget.data.name = _ctl.text.trim();
+    widget.onNext();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -546,7 +575,7 @@ class _NameStepState extends State<_NameStep> {
         const SizedBox(height: 10),
         _darkTextField(
           controller: _ctl,
-          hint: 'e.g., Minji Kim ',
+          hint: 'e.g., Minji Kim / EcoSnow',
           onDone: _go,
         ),
         const Spacer(),
@@ -554,33 +583,90 @@ class _NameStepState extends State<_NameStep> {
       ],
     );
   }
-
-  void _go() {
-    widget.data.name = _ctl.text.trim();
-    widget.onNext();
-  }
 }
 
-class _AgeStep extends StatefulWidget {
+/// Date of Birth step (replaces "age")
+class _DobStep extends StatefulWidget {
   final SurveyData data;
   final VoidCallback onNext;
-  const _AgeStep({required this.data, required this.onNext});
+  const _DobStep({required this.data, required this.onNext});
+
   @override
-  State<_AgeStep> createState() => _AgeStepState();
+  State<_DobStep> createState() => _DobStepState();
 }
 
-class _AgeStepState extends State<_AgeStep> {
-  final _ctl = TextEditingController();
+class _DobStepState extends State<_DobStep> {
+  final TextEditingController _dobCtl = TextEditingController();
+
   @override
   void initState() {
     super.initState();
-    _ctl.text = widget.data.age?.toString() ?? '';
+    _dobCtl.text = widget.data.dateOfBirth;
   }
 
   @override
   void dispose() {
-    _ctl.dispose();
+    _dobCtl.dispose();
     super.dispose();
+  }
+
+  // parse yyyy/mm/dd safely
+  DateTime? _parseDobOrNull(String dobText) {
+    final parts = dobText.split('/');
+    if (parts.length != 3) return null;
+    final y = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    final d = int.tryParse(parts[2]);
+    if (y == null || m == null || d == null) return null;
+    return DateTime(y, m, d);
+  }
+
+  // turn a DateTime into "yyyy/mm/dd"
+  String _formatDateYMD(DateTime dt) {
+    final y = dt.year.toString();
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    return '$y/$m/$d';
+  }
+
+  Future<void> _pickDate() async {
+    final initial = _parseDobOrNull(widget.data.dateOfBirth) ??
+        DateTime(DateTime.now().year - 20, 1, 1);
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(1900, 1, 1),
+      lastDate: DateTime.now(),
+      helpText: 'Select your date of birth',
+      builder: (context, child) {
+        // dark style picker to match survey aesthetic
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: _fg,
+              surface: const Color(0xFF0F2E28),
+              onSurface: _fg,
+              onPrimary: _ink,
+            ),
+            dialogBackgroundColor: const Color(0xFF0F2E28),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final formatted = _formatDateYMD(picked);
+      setState(() {
+        _dobCtl.text = formatted;
+      });
+    }
+  }
+
+  void _go() {
+    widget.data.dateOfBirth = _dobCtl.text.trim();
+    widget.onNext();
   }
 
   @override
@@ -588,23 +674,47 @@ class _AgeStepState extends State<_AgeStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _hint('Enter your age'),
+        _hint('Enter your date of birth (yyyy/mm/dd)\nOr pick from calendar'),
         const SizedBox(height: 10),
-        _darkTextField(
-          controller: _ctl,
-          hint: 'e.g., 24',
-          keyboardType: TextInputType.number,
-          onDone: _go,
+        Row(
+          children: [
+            Expanded(
+              child: _darkTextField(
+                controller: _dobCtl,
+                hint: '1999/07/21',
+                keyboardType: TextInputType.datetime,
+                onDone: _go,
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              height: 52,
+              width: 52,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: _fg.withOpacity(.9),
+                    width: 1.2,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+                onPressed: _pickDate,
+                child: Icon(
+                  Icons.calendar_today,
+                  color: _fg,
+                  size: 20,
+                ),
+              ),
+            ),
+          ],
         ),
         const Spacer(),
         _nextBtn('Next', _go),
       ],
     );
-  }
-
-  void _go() {
-    widget.data.age = int.tryParse(_ctl.text.trim());
-    widget.onNext();
   }
 }
 
@@ -612,6 +722,7 @@ class _GenderStep extends StatelessWidget {
   final SurveyData data;
   final VoidCallback onNext;
   const _GenderStep({required this.data, required this.onNext});
+
   @override
   Widget build(BuildContext context) {
     final options = [
@@ -620,6 +731,7 @@ class _GenderStep extends StatelessWidget {
       'Non-binary',
       'Prefer not to say'
     ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -648,6 +760,7 @@ class _AddressStep extends StatefulWidget {
     required this.getMap,
     required this.loading,
   });
+
   @override
   State<_AddressStep> createState() => _AddressStepState();
 }
@@ -674,13 +787,24 @@ class _AddressStepState extends State<_AddressStep> {
     super.dispose();
   }
 
+  void _go() {
+    widget.data.sido = _sido ?? '';
+    widget.data.sigungu = _sigungu ?? '';
+    widget.data.dong = _dongCtl.text.trim();
+    widget.data.detail = _detailCtl.text.trim();
+    widget.onNext();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.loading) {
       return const Center(
-        child: CircularProgressIndicator(color: _fg),
+        child: CircularProgressIndicator(
+          color: _fg,
+        ),
       );
     }
+
     final map = widget.getMap();
     final sidos = map.keys.toList()..sort();
     final sigungus = (_sido == null) ? <String>[] : (map[_sido] ?? []);
@@ -691,6 +815,7 @@ class _AddressStepState extends State<_AddressStep> {
         children: [
           _hint('Korean address format'),
           const SizedBox(height: 10),
+
           _label('Province / Metropolitan City (시/도)'),
           _darkDropdown(
             value: _sido,
@@ -702,7 +827,9 @@ class _AddressStepState extends State<_AddressStep> {
               });
             },
           ),
+
           const SizedBox(height: 12),
+
           _label('City / District (시/군/구)'),
           _darkDropdown(
             value: _sigungu,
@@ -713,32 +840,29 @@ class _AddressStepState extends State<_AddressStep> {
               });
             },
           ),
+
           const SizedBox(height: 12),
+
           _label('Neighborhood (동/읍/면)'),
           _darkTextField(
             controller: _dongCtl,
             hint: 'e.g., Yeoksam-dong',
           ),
+
           const SizedBox(height: 12),
+
           _label('Detailed address'),
           _darkTextField(
             controller: _detailCtl,
             hint: 'e.g., 123-45, #101',
             onDone: _go,
           ),
+
           const SizedBox(height: 16),
           _nextBtn('Next', _go),
         ],
       ),
     );
-  }
-
-  void _go() {
-    widget.data.sido = _sido ?? '';
-    widget.data.sigungu = _sigungu ?? '';
-    widget.data.dong = _dongCtl.text.trim();
-    widget.data.detail = _detailCtl.text.trim();
-    widget.onNext();
   }
 }
 
@@ -746,6 +870,7 @@ class _HouseTypeStep extends StatelessWidget {
   final SurveyData data;
   final VoidCallback onNext;
   const _HouseTypeStep({required this.data, required this.onNext});
+
   @override
   Widget build(BuildContext context) {
     final options = [
@@ -755,6 +880,7 @@ class _HouseTypeStep extends StatelessWidget {
       'Shared house',
       'Other'
     ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -776,6 +902,7 @@ class _LivingWithStep extends StatelessWidget {
   final SurveyData data;
   final VoidCallback onNext;
   const _LivingWithStep({required this.data, required this.onNext});
+
   @override
   Widget build(BuildContext context) {
     final options = [
@@ -786,6 +913,7 @@ class _LivingWithStep extends StatelessWidget {
       'Spouse/Partner',
       'Alone'
     ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -807,6 +935,7 @@ class _GoalsStep extends StatefulWidget {
   final SurveyData data;
   final VoidCallback onNext;
   const _GoalsStep({required this.data, required this.onNext});
+
   @override
   State<_GoalsStep> createState() => _GoalsStepState();
 }
@@ -817,7 +946,7 @@ class _GoalsStepState extends State<_GoalsStep> {
     'Reduce gas use',
     'Recycle more',
     'Cut food waste',
-    'Use public transit more'
+    'Use public transit more',
   ];
   final selected = <String>{};
 
@@ -858,6 +987,7 @@ class _EnergyPlanStep extends StatefulWidget {
   final SurveyData data;
   final VoidCallback onNext;
   const _EnergyPlanStep({required this.data, required this.onNext});
+
   @override
   State<_EnergyPlanStep> createState() => _EnergyPlanStepState();
 }
@@ -880,6 +1010,12 @@ class _EnergyPlanStepState extends State<_EnergyPlanStep> {
     super.dispose();
   }
 
+  void _go() {
+    widget.data.electricProvider = _elecCtl.text.trim();
+    widget.data.gasProvider = _gasCtl.text.trim();
+    widget.onNext();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -888,10 +1024,12 @@ class _EnergyPlanStepState extends State<_EnergyPlanStep> {
         children: [
           _hint('Set up bill linking and points deduction preferences'),
           const SizedBox(height: 10),
+
           _toggleRow(
             label: 'Use electricity bill features',
             value: widget.data.hasElectricBill,
-            onChanged: (v) => setState(() => widget.data.hasElectricBill = v),
+            onChanged: (v) =>
+                setState(() => widget.data.hasElectricBill = v),
           ),
           if (widget.data.hasElectricBill) ...[
             const SizedBox(height: 8),
@@ -901,11 +1039,14 @@ class _EnergyPlanStepState extends State<_EnergyPlanStep> {
               hint: 'e.g., KEPCO (한국전력)',
             ),
           ],
+
           const SizedBox(height: 12),
+
           _toggleRow(
             label: 'Use gas bill features',
             value: widget.data.hasGasBill,
-            onChanged: (v) => setState(() => widget.data.hasGasBill = v),
+            onChanged: (v) =>
+                setState(() => widget.data.hasGasBill = v),
           ),
           if (widget.data.hasGasBill) ...[
             const SizedBox(height: 8),
@@ -916,17 +1057,12 @@ class _EnergyPlanStepState extends State<_EnergyPlanStep> {
               onDone: _go,
             ),
           ],
+
           const SizedBox(height: 16),
           _nextBtn('Next', _go),
         ],
       ),
     );
-  }
-
-  void _go() {
-    widget.data.electricProvider = _elecCtl.text.trim();
-    widget.data.gasProvider = _gasCtl.text.trim();
-    widget.onNext();
   }
 }
 
@@ -934,6 +1070,7 @@ class _QuizNotifyStep extends StatefulWidget {
   final SurveyData data;
   final VoidCallback onNext;
   const _QuizNotifyStep({required this.data, required this.onNext});
+
   @override
   State<_QuizNotifyStep> createState() => _QuizNotifyStepState();
 }
@@ -946,18 +1083,23 @@ class _QuizNotifyStepState extends State<_QuizNotifyStep> {
       children: [
         _hint('Earn points with quizzes and manage reminders'),
         const SizedBox(height: 10),
+
         _toggleRow(
           label: 'Join quizzes (earn points)',
           value: widget.data.wantsQuizzes,
-          onChanged: (v) => setState(() => widget.data.wantsQuizzes = v),
+          onChanged: (v) =>
+              setState(() => widget.data.wantsQuizzes = v),
         ),
+
         const SizedBox(height: 12),
+
         _toggleRow(
           label: 'Receive notifications (bills/reminders)',
           value: widget.data.wantsNotifications,
           onChanged: (v) =>
               setState(() => widget.data.wantsNotifications = v),
         ),
+
         const Spacer(),
         _nextBtn('Next', widget.onNext),
       ],
@@ -968,7 +1110,6 @@ class _QuizNotifyStepState extends State<_QuizNotifyStep> {
 class _FinishStep extends StatelessWidget {
   final SurveyData data;
   final VoidCallback onFinish;
-
   const _FinishStep({
     required this.data,
     required this.onFinish,
@@ -980,7 +1121,6 @@ class _FinishStep extends StatelessWidget {
       children: [
         const SizedBox(height: 20),
 
-        // Title
         Text(
           'Congratulations!',
           textAlign: TextAlign.center,
@@ -993,7 +1133,6 @@ class _FinishStep extends StatelessWidget {
 
         const SizedBox(height: 10),
 
-        // Subtext
         Text(
           'Your setup is complete.\nReady to start your eco journey?',
           textAlign: TextAlign.center,
@@ -1007,7 +1146,7 @@ class _FinishStep extends StatelessWidget {
 
         const SizedBox(height: 24),
 
-        // PNG image (girl)
+        // Outro mascot / girl
         Center(
           child: Image.asset(
             'assets/images/outro.png',
@@ -1018,119 +1157,133 @@ class _FinishStep extends StatelessWidget {
 
         const Spacer(),
 
-        // Button
         _nextBtn('Start EcoPath', onFinish),
       ],
     );
   }
 }
 
-/* -------------------- DARK UI HELPERS -------------------- */
+/* -------------------- SHARED DARK UI HELPERS -------------------- */
 
 Widget _nextBtn(String label, VoidCallback onTap) => SizedBox(
-  width: double.infinity,
-  child: OutlinedButton(
-    style: OutlinedButton.styleFrom(
-      side: BorderSide(color: _fg.withOpacity(.9), width: 1.4),
-      foregroundColor: _fg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 14),
-    ),
-    onPressed: onTap,
-    child: Text(
-      label,
-      style: GoogleFonts.lato(
-        fontSize: 16,
-        fontWeight: FontWeight.w800,
-        letterSpacing: .2,
-      ),
-    ),
-  ),
-);
-
-Widget _hint(String s) => Text(
-  s,
-  style: GoogleFonts.lato(
-    color: _muted,
-    fontSize: 13,
-    fontWeight: FontWeight.w600,
-    height: 1.35,
-  ),
-);
-
-Widget _label(String s) => Padding(
-  padding: const EdgeInsets.only(bottom: 6),
-  child: Text(
-    s,
-    style: GoogleFonts.lato(
-      color: _fg,
-      fontSize: 14,
-      fontWeight: FontWeight.w900,
-    ),
-  ),
-);
-
-Widget _pill(String label, VoidCallback onTap) => Padding(
-  padding: const EdgeInsets.only(bottom: 10),
-  child: InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(12),
-    child: Ink(
-      decoration: BoxDecoration(
-        color: _fieldBg,
-        border: Border.all(color: _border),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        child: Row(
-          children: [
-            Icon(
-              Icons.check_circle_outline,
-              size: 18,
-              color: _fg.withOpacity(.9),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.lato(
-                  color: _fg,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
+      width: double.infinity,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: _fg.withOpacity(.9), width: 1.4),
+          foregroundColor: _fg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(
+            vertical: 14,
+          ),
+        ),
+        onPressed: onTap,
+        child: Text(
+          label,
+          style: GoogleFonts.lato(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            letterSpacing: .2,
+          ),
         ),
       ),
-    ),
-  ),
-);
+    );
 
-Widget _chip(String label, bool isOn, VoidCallback onTap) => InkWell(
-  onTap: onTap,
-  borderRadius: BorderRadius.circular(20),
-  child: Ink(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-    decoration: BoxDecoration(
-      color: isOn ? _fg.withOpacity(.12) : _fieldBg,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: isOn ? _fg : _border),
-    ),
-    child: Text(
-      label,
+Widget _hint(String s) => Text(
+      s,
       style: GoogleFonts.lato(
-        color: _fg,
-        fontSize: 14,
-        fontWeight: FontWeight.w800,
+        color: _muted,
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        height: 1.35,
       ),
-    ),
-  ),
-);
+    );
+
+Widget _label(String s) => Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        s,
+        style: GoogleFonts.lato(
+          color: _fg,
+          fontSize: 14,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+
+Widget _pill(String label, VoidCallback onTap) => Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: _fieldBg,
+            border: Border.all(color: _border),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 14,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  size: 18,
+                  color: _fg.withOpacity(.9),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: GoogleFonts.lato(
+                      color: _fg,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+Widget _chip(
+  String label,
+  bool isOn,
+  VoidCallback onTap,
+) =>
+    InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Ink(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 10,
+        ),
+        decoration: BoxDecoration(
+          color: isOn ? _fg.withOpacity(.12) : _fieldBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isOn ? _fg : _border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.lato(
+            color: _fg,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
 
 Widget _darkTextField({
   required TextEditingController controller,
@@ -1158,15 +1311,21 @@ Widget _darkTextField({
         ),
         filled: true,
         fillColor: _fieldBg,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: _border),
+          borderSide: const BorderSide(
+            color: _border,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide:
-              BorderSide(color: _fg.withOpacity(.9), width: 1.6),
+          borderSide: BorderSide(
+            color: _fg.withOpacity(.9),
+            width: 1.6,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
       ),
@@ -1178,7 +1337,9 @@ Widget _darkDropdown({
   required ValueChanged<String?> onChanged,
 }) =>
     Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+      ),
       decoration: BoxDecoration(
         color: _fieldBg,
         borderRadius: BorderRadius.circular(12),
@@ -1190,16 +1351,22 @@ Widget _darkDropdown({
         underline: const SizedBox.shrink(),
         dropdownColor: const Color(0xFF0F2E28),
         iconEnabledColor: _fg,
-        style: GoogleFonts.lato(color: _fg),
+        style: GoogleFonts.lato(
+          color: _fg,
+        ),
         hint: Text(
           'Select',
-          style: GoogleFonts.lato(color: _muted),
+          style: GoogleFonts.lato(
+            color: _muted,
+          ),
         ),
         items: items
-            .map((e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(e),
-                ))
+            .map(
+              (e) => DropdownMenuItem(
+                value: e,
+                child: Text(e),
+              ),
+            )
             .toList(),
         onChanged: onChanged,
       ),
@@ -1211,7 +1378,10 @@ Widget _toggleRow({
   required ValueChanged<bool> onChanged,
 }) =>
     Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
         color: _fieldBg,
         borderRadius: BorderRadius.circular(12),
@@ -1232,7 +1402,7 @@ Widget _toggleRow({
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: _ink,
+            activeColor: _ink,
             activeTrackColor: _fg,
             inactiveThumbColor: _fg.withOpacity(.7),
             inactiveTrackColor: _fg.withOpacity(.3),

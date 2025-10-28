@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'termsofservice_screen.dart';
 import 'privacypolicy_screen.dart';
 import 'feedback_screen.dart';
+import 'account_screen.dart'; // ← NEW IMPORT
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -27,20 +29,24 @@ class SettingsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 20, left: 16),
                   child: IconButton(
-                    onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+                    onPressed: () =>
+                        Navigator.of(context, rootNavigator: true).pop(),
                     icon: SvgPicture.asset(
                       'assets/icons/back.svg',
                       width: 28, height: 28,
-                      //colorFilter: const ColorFilter.mode(dark, BlendMode.srcIn),
                       semanticsLabel: 'Back',
                     ),
                   ),
                 ),
                 const Padding(
                   padding: EdgeInsets.only(left: 24, bottom: 20),
-                  child: Text('Settings',
+                  child: Text(
+                    'Settings',
                     style: TextStyle(
-                      color: dark, fontSize: 32, fontWeight: FontWeight.bold),
+                      color: dark,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
 
@@ -48,13 +54,35 @@ class SettingsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: _SettingsCard(children: [
-                    _RowItem(icon: 'assets/icons/account.svg', label: 'Account', onTap: () {}),
+                    _RowItem(
+                      icon: 'assets/icons/account.svg',
+                      label: 'Account',
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AccountScreen(),
+                          ),
+                        );
+                      },
+                    ),
                     const _RowDivider(),
-                    _RowItem(icon: 'assets/icons/settingnoti.svg', label: 'Notification', onTap: () {}),
+                    _RowItem(
+                      icon: 'assets/icons/settingnoti.svg',
+                      label: 'Notification',
+                      onTap: () {},
+                    ),
                     const _RowDivider(),
-                    _RowItem(icon: 'assets/icons/buyticket.svg', label: 'Buy Tickets', onTap: () {}),
+                    _RowItem(
+                      icon: 'assets/icons/buyticket.svg',
+                      label: 'Buy Tickets',
+                      onTap: () {},
+                    ),
                     const _RowDivider(),
-                    _RowItem(icon: 'assets/icons/mode.svg', label: 'Mode', onTap: () {}),
+                    _RowItem(
+                      icon: 'assets/icons/mode.svg',
+                      label: 'Mode',
+                      onTap: () {},
+                    ),
                   ]),
                 ),
 
@@ -62,9 +90,13 @@ class SettingsScreen extends StatelessWidget {
 
                 const Padding(
                   padding: EdgeInsets.only(left: 24, bottom: 14),
-                  child: Text('Help & Feedback',
+                  child: Text(
+                    'Help & Feedback',
                     style: TextStyle(
-                      color: dark, fontSize: 16, fontWeight: FontWeight.bold),
+                      color: dark,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
 
@@ -72,32 +104,44 @@ class SettingsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: _SettingsCard(children: [
-                    _RowItem(icon: 'assets/icons/helpcenter.svg', label: 'Help Center', onTap: () {}),
+                    _RowItem(
+                      icon: 'assets/icons/helpcenter.svg',
+                      label: 'Help Center',
+                      onTap: () {},
+                    ),
                     const _RowDivider(),
                     _RowItem(
-                      icon: 'assets/icons/settingfeedback.svg', 
-                      label: 'Feedback', 
+                      icon: 'assets/icons/settingfeedback.svg',
+                      label: 'Feedback',
                       onTap: () {
                         Navigator.of(context, rootNavigator: true).push(
-                          MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const FeedbackScreen(),
+                          ),
                         );
-                      }),
+                      },
+                    ),
                     const _RowDivider(),
                     _RowItem(
-                      icon: 'assets/icons/privacypolicy.svg', 
-                      label: 'Privacy Policy', 
+                      icon: 'assets/icons/privacypolicy.svg',
+                      label: 'Privacy Policy',
                       onTap: () {
                         Navigator.of(context, rootNavigator: true).push(
-                          MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const PrivacyPolicyScreen(),
+                          ),
                         );
-                      }),
+                      },
+                    ),
                     const _RowDivider(),
                     _RowItem(
                       icon: 'assets/icons/termofservice.svg',
                       label: 'Terms of Service',
                       onTap: () {
                         Navigator.of(context, rootNavigator: true).push(
-                          MaterialPageRoute(builder: (_) => const TermsOfServiceScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const TermsOfServiceScreen(),
+                          ),
                         );
                       },
                     ),
@@ -137,7 +181,11 @@ class _RowDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Divider(height: 1, thickness: 1, color: SettingsScreen.divider),
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: SettingsScreen.divider,
+      ),
     );
   }
 }
@@ -165,15 +213,28 @@ class _RowItem extends StatelessWidget {
             children: [
               SvgPicture.asset(
                 icon,
-                width: 24, height: 24,
-                colorFilter: const ColorFilter.mode(SettingsScreen.dark, BlendMode.srcIn),
+                width: 24,
+                height: 24,
+                colorFilter: const ColorFilter.mode(
+                  SettingsScreen.dark,
+                  BlendMode.srcIn,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(label,
-                  style: const TextStyle(color: SettingsScreen.dark, fontSize: 14)),
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: SettingsScreen.dark,
+                    fontSize: 14,
+                  ),
+                ),
               ),
-              const Icon(Icons.chevron_right, size: 20, color: SettingsScreen.dark),
+              const Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: SettingsScreen.dark,
+              ),
             ],
           ),
         ),

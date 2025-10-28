@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'scantrash_screen.dart';
-import 'quiz_screen.dart'; 
+import 'quiz_screen.dart';
+import 'todo_screen.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -15,16 +16,17 @@ class _GamesScreenState extends State<GamesScreen> {
   static const Color kBg = Color(0xFFF5F5F5);
   static const Color kCard = Colors.white;
 
-  int points = 480;
+  int points = 500; // shown in header
+  int energy = 25;  // shown in header
   int level = 3;
-  int xp = 120;
+  int xp = 140;
   int xpToNext = 200;
 
   TextStyle get _title => GoogleFonts.lato(
-      color: kInk, fontSize: 28, fontWeight: FontWeight.w700);
-
-  TextStyle get _label =>
-      GoogleFonts.alike(color: kInk, fontSize: 12, fontWeight: FontWeight.w400);
+        color: kInk,
+        fontSize: 28,
+        fontWeight: FontWeight.w700,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +40,23 @@ class _GamesScreenState extends State<GamesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [
-                Text('Play & Earn', style: _title),
-                const Spacer(),
-                _PointsPill(points: points),
-              ]),
+              // ---------- HEADER ROW ----------
+              Row(
+                children: [
+                  Text('Play & Earn', style: _title),
+                  const Spacer(),
+
+                  // Energy pill
+                  _EnergyPill(energy: energy),
+                  const SizedBox(width: 8),
+
+                  // Points pill
+                  _PointsPill(points: points),
+                ],
+              ),
               const SizedBox(height: 12),
 
+              // ---------- LEVEL CARD ----------
               Container(
                 decoration: BoxDecoration(
                   color: kCard,
@@ -61,11 +73,14 @@ class _GamesScreenState extends State<GamesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Level $level',
-                        style: GoogleFonts.lato(
-                            color: kInk,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700)),
+                    Text(
+                      'Level $level',
+                      style: GoogleFonts.lato(
+                        color: kInk,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
@@ -77,71 +92,81 @@ class _GamesScreenState extends State<GamesScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text('$xp / $xpToNext XP',
-                        style: GoogleFonts.alike(
-                            color: kInk.withOpacity(.8), fontSize: 12)),
+                    Text(
+                      '$xp / $xpToNext XP',
+                      style: GoogleFonts.alike(
+                        color: kInk.withOpacity(.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   ],
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              Text('Daily Quests',
-                  style: GoogleFonts.lato(
-                      color: kInk, fontSize: 16, fontWeight: FontWeight.w700)),
+              // ---------- DAILY QUESTS ----------
+              Text(
+                'Daily Quests',
+                style: GoogleFonts.lato(
+                  color: kInk,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 8),
               const Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _QuestChip(text: 'Finish a Quiz • +20'),
-                  _QuestChip(text: 'Scan 3 items • +30'),
-                  _QuestChip(text: 'Recycle once • +25'),
+                  _QuestChip(text: 'Finish a Quiz'),
+                  _QuestChip(text: 'Scan 3 items'),
+                  _QuestChip(text: 'Recycle once'),
                 ],
               ),
               const SizedBox(height: 16),
 
+              // ---------- GAME GRID ----------
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
-                  childAspectRatio: 1.15,
+                  // A little taller so no overflow
+                  childAspectRatio: 1.1,
                   padding: const EdgeInsets.only(bottom: 12),
                   children: [
                     _GameTile(
                       title: 'Quiz',
-                      rewardText: '+10',
-                      assetPath: 'assets/images/quizicon.png',
                       tileColor: const Color(0xFFA1D0D8),
+                      assetPath: 'assets/images/quizicon.png',
                       onTap: _openQuiz,
                     ),
                     _GameTile(
                       title: 'Scan Trash',
-                      rewardText: '+15',
-                      assetPath: 'assets/images/scantrash.png',
                       tileColor: const Color(0xFF71D8C6),
+                      assetPath: 'assets/images/scantrash.png',
                       onTap: _openScan,
                     ),
                     _GameTile(
                       title: 'Recycle',
-                      rewardText: '+20',
-                      assetPath: 'assets/images/recycletrash.png',
                       tileColor: const Color(0xFFEDDD62),
+                      assetPath: 'assets/images/recycletrash.png',
                       onTap: _openRecycle,
                     ),
                     _GameTile(
-                      title: 'Community',
-                      rewardText: '+5',
-                      assetPath: 'assets/images/star.png',
-                      tileColor: const Color(0xFFD8E6BF),
-                      onTap: _openCommunity,
+                      // remove the manual \n and let text wrap
+                      title: 'Daily Challenge',
+                      tileColor: const Color(0xFFC8D9A5),
+                      assetPath: 'assets/images/todolist.png',
+                      iconData: Icons.checklist, // fallback icon
+                      onTap: _openTodo,
                     ),
                     _GameTile(
-                      title: 'Eco Marketplace',
-                      rewardText: '+5',
-                      assetPath: 'assets/images/marketplace.png',
-                      tileColor: const Color(0xFFdedaf4),
+                      title: 'Community',
+                      tileColor: const Color(0xFFD8E6BF),
+                      assetPath: 'assets/images/star.png',
                       onTap: _openCommunity,
                     ),
                   ],
@@ -154,14 +179,13 @@ class _GamesScreenState extends State<GamesScreen> {
     );
   }
 
+  // ---------- NAVIGATION / STATE UPDATE LOGIC ----------
+
   Future<void> _openQuiz() async {
-    // Navigate to the quiz, receive earned points, and add them to your game state.
     final result = await Navigator.of(context).push<int>(
       MaterialPageRoute(builder: (_) => const QuizScreen()),
     );
-    if (result != null && result > 0) {
-      _gainPoints(result);
-    }
+    if (result != null && result > 0) _gainPoints(result);
   }
 
   void _openScan() async {
@@ -170,13 +194,15 @@ class _GamesScreenState extends State<GamesScreen> {
     );
   }
 
-  void _openRecycle() {
-    _gainPoints(20);
+  void _openRecycle() => _gainPoints(20);
+
+  void _openTodo() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const TodoScreen()),
+    );
   }
 
-  void _openCommunity() {
-    _gainPoints(5);
-  }
+  void _openCommunity() => _gainPoints(5);
 
   void _gainPoints(int add) {
     setState(() {
@@ -188,6 +214,44 @@ class _GamesScreenState extends State<GamesScreen> {
         xpToNext = (xpToNext * 1.2).round();
       }
     });
+  }
+}
+
+// -------------------------------------------------------
+// ------------------- HEADER PILLS ----------------------
+// -------------------------------------------------------
+
+class _EnergyPill extends StatelessWidget {
+  final int energy;
+  const _EnergyPill({required this.energy});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF00221C),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.bolt,
+            color: Color(0xFFF5F5F5),
+            size: 18,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '$energy',
+            style: GoogleFonts.lato(
+              color: const Color(0xFFF5F5F5),
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -221,6 +285,10 @@ class _PointsPill extends StatelessWidget {
   }
 }
 
+// -------------------------------------------------------
+// -------------------- QUEST CHIP ----------------------
+// -------------------------------------------------------
+
 class _QuestChip extends StatelessWidget {
   final String text;
   const _QuestChip({required this.text});
@@ -243,7 +311,7 @@ class _QuestChip extends StatelessWidget {
       child: Text(
         text,
         style: GoogleFonts.alike(
-          color: Color(0xFF00221C),
+          color: const Color(0xFF00221C),
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
@@ -252,19 +320,25 @@ class _QuestChip extends StatelessWidget {
   }
 }
 
+// -------------------------------------------------------
+// --------------------- GAME TILE ----------------------
+// -------------------------------------------------------
+
 class _GameTile extends StatefulWidget {
   final String title;
-  final String assetPath;
-  final String rewardText;
   final Color tileColor;
   final VoidCallback onTap;
 
+  // visual options:
+  final String? assetPath; // preferred image asset for this tile
+  final IconData? iconData; // fallback if asset fails
+
   const _GameTile({
     required this.title,
-    required this.assetPath,
-    required this.rewardText,
     required this.tileColor,
     required this.onTap,
+    this.assetPath,
+    this.iconData,
   });
 
   @override
@@ -273,8 +347,9 @@ class _GameTile extends StatefulWidget {
 
 class _GameTileState extends State<_GameTile> {
   double _scale = 1.0;
-
-  void _press(bool down) => setState(() => _scale = down ? 0.97 : 1.0);
+  void _press(bool down) => setState(() {
+        _scale = down ? 0.97 : 1.0;
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -300,67 +375,105 @@ class _GameTileState extends State<_GameTile> {
             ],
           ),
           padding: const EdgeInsets.all(16),
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(.9),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(20),
-                      bottomLeft: Radius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    widget.rewardText,
-                    style: GoogleFonts.lato(
-                        color: const Color(0xFF00221C),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12),
+              // ---------- ICON AREA (fixed height block) ----------
+              SizedBox(
+                height: 64,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: _GameVisual(
+                    assetPath: widget.assetPath,
+                    iconData: widget.iconData,
                   ),
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: Image.asset(
-                        widget.assetPath,
-                        width: 92,
-                        height: 92,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    widget.title,
-                    style: GoogleFonts.lato(
-                      color: const Color(0xFF00221C),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Tap to play',
-                    style: GoogleFonts.alike(
-                      color: const Color(0xFF00221C),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
+
+              const SizedBox(height: 6),
+
+              // ---------- TITLE ----------
+              Text(
+                widget.title,
+                maxLines: 2,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.lato(
+                  color: const Color(0xFF00221C),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+
+              const SizedBox(height: 2),
+
+              // ---------- SUBTITLE ----------
+              Text(
+                'Tap to play',
+                style: GoogleFonts.alike(
+                  color: const Color(0xFF00221C),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+// -------------------------------------------------------
+// ------------------- GAME VISUAL ----------------------
+// -------------------------------------------------------
+
+class _GameVisual extends StatelessWidget {
+  final String? assetPath;
+  final IconData? iconData;
+
+  const _GameVisual({this.assetPath, this.iconData});
+
+  @override
+  Widget build(BuildContext context) {
+    const double targetHeight = 56.0;
+    const Color ink = Color(0xFF00221C);
+
+    if (assetPath != null) {
+      return Image.asset(
+        assetPath!,
+        height: targetHeight,
+        fit: BoxFit.contain,
+        alignment: Alignment.topLeft,
+        errorBuilder: (context, error, stackTrace) {
+          if (iconData != null) {
+            return Icon(
+              iconData,
+              color: ink,
+              size: targetHeight,
+            );
+          }
+          return const Icon(
+            Icons.sports_esports,
+            color: ink,
+            size: targetHeight,
+          );
+        },
+      );
+    }
+
+    if (iconData != null) {
+      return Icon(
+        iconData,
+        color: ink,
+        size: targetHeight,
+      );
+    }
+
+    return const Icon(
+      Icons.sports_esports,
+      color: ink,
+      size: targetHeight,
     );
   }
 }

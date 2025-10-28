@@ -1,6 +1,9 @@
+// lib/ui/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:math';
 import 'setting_screen.dart';
+import 'edit_avatar_screen.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -10,21 +13,36 @@ class Profile extends StatefulWidget {
 
 class ProfileState extends State<Profile> {
   DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+  final Random _rand = Random();
 
-  // --- helpers for calendar ---
+  // Random mock data for recycle days
+  final Map<int, int> _recycleDays = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Create random recycle days
+    for (int i = 1; i <= 31; i++) {
+      if (_rand.nextBool()) {
+        _recycleDays[i] = _rand.nextInt(20) + 5; // 5–25 points
+      }
+    }
+  }
+
+  // Calendar helpers
   int _daysInMonth(DateTime d) {
     final firstNextMonth = DateTime(d.year, d.month + 1, 1);
     return firstNextMonth.subtract(const Duration(days: 1)).day;
   }
 
   int _firstWeekdayOfMonth(DateTime d) {
-    final w = DateTime(d.year, d.month, 1).weekday; // Mon=1
-    return w % 7; // Sun->0, Mon->1, ..., Sat->6
+    final w = DateTime(d.year, d.month, 1).weekday;
+    return w % 7; // Sun=0
   }
 
   String get _monthLabel {
     const months = [
-      'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sept','Oct','Nov','Dec'
+      'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
     ];
     return '${months[_focusedMonth.month - 1]} ${_focusedMonth.year}';
   }
@@ -39,6 +57,170 @@ class ProfileState extends State<Profile> {
     setState(() {
       _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
     });
+  }
+
+  // ---------------- Avatar Action Sheet ----------------
+  void _showAvatarActionSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      backgroundColor: const Color(0xFFF9F9F9),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFE0E0E0), width: 1),
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Change Avatar',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF000000),
+                    ),
+                  ),
+                ),
+              ),
+              _ActionSheetItem(text: 'Take Photo', onTap: () {}),
+              _ActionSheetItem(text: 'Choose from album', onTap: () {}),
+              _ActionSheetItem(
+                text: 'Choose from character',
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const EditAvatarScreen()),
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              _ActionSheetItem(
+                isCancel: true,
+                text: 'Cancel',
+                onTap: () => Navigator.pop(ctx),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ---------- New Info Alert for ? ----------
+  void _showRecycleInfo() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (ctx) => Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Track your eco journey! Each time you recycle and earn points, your activity appears here. Check your streaks and see how consistent your recycling habits are!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF00221C),
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 18),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00221C),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+                ),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("Got it!", style: TextStyle(color: Colors.white)),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------- Info Box for Recycle Icon ----------
+  void _showDayInfo(int day, int points) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.4),
+      builder: (ctx) => Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Oct $day, ${_focusedMonth.year}",
+                style: const TextStyle(
+                  color: Color(0xFF00221C),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "You earned $points points on this day!",
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Color(0xFF00221C), fontSize: 14),
+              ),
+              const SizedBox(height: 18),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00221C),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+                ),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("Got it!", style: TextStyle(color: Colors.white)),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -57,69 +239,76 @@ class ProfileState extends State<Profile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🌿 Top right icons: service.svg (left) + setting.svg (right)
+                // top right icons
                 Padding(
                   padding: const EdgeInsets.only(top: 64, right: 18, bottom: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _HeaderIcon(
-                        asset: 'assets/icons/service.svg', // left icon
-                        onTap: () {},
-                        allowOriginalColor: true, // 👈 show SVG as-is
-                      ),
+                      _HeaderIcon(asset: 'assets/icons/service.svg', onTap: () {}, allowOriginalColor: true),
                       const SizedBox(width: 8),
                       _HeaderIcon(
-                        asset: 'assets/icons/setting.svg', // right icon
+                        asset: 'assets/icons/setting.svg',
                         onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => const SettingsScreen()),
-                          );
+                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
                         },
                       ),
                     ],
                   ),
                 ),
 
-                // Title
                 const Padding(
                   padding: EdgeInsets.only(left: 29, bottom: 10),
-                  child: Text(
-                    'Profile',
-                    style: TextStyle(
-                      color: dark,
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: Text('Profile',
+                      style: TextStyle(color: dark, fontSize: 36, fontWeight: FontWeight.bold)),
                 ),
 
-                // Avatar
+                // avatar
                 const SizedBox(height: 8),
                 Center(
-                  child: ClipOval(
-                    child: Image.network(
-                      'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/a2h7Z2oc98/bekcjzgx_expires_30_days.png',
-                      width: 84,
-                      height: 84,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // Name
-                const Center(
-                  child: Text(
-                    'Stella',
-                    style: TextStyle(color: dark, fontSize: 18),
+                  child: Column(
+                    children: [
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          ClipOval(
+                            child: Image.network(
+                              'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/a2h7Z2oc98/bekcjzgx_expires_30_days.png',
+                              width: 84,
+                              height: 84,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            right: -4,
+                            top: -4,
+                            child: GestureDetector(
+                              onTap: _showAvatarActionSheet,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: const [
+                                    BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                                  ],
+                                ),
+                                child: const Text('...',
+                                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      const Text('Stella', style: TextStyle(color: dark, fontSize: 18)),
+                    ],
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // Points / Progress
+                // stats
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 36),
                   child: Row(
@@ -133,18 +322,26 @@ class ProfileState extends State<Profile> {
 
                 const SizedBox(height: 28),
 
-                // Recycle History header
+                // recycle history + ?
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const Text('Recycle History',
-                          style: TextStyle(color: dark, fontSize: 16)),
+                      const Text('Recycle History', style: TextStyle(color: dark, fontSize: 16)),
                       const SizedBox(width: 6),
-                      Image.network(
-                        'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/a2h7Z2oc98/j21ho3mf_expires_30_days.png',
-                        width: 20,
-                        height: 20,
+                      GestureDetector(
+                        onTap: _showRecycleInfo,
+                        child: Container(
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: dark.withOpacity(0.4)),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text('?', style: TextStyle(fontSize: 12, color: dark)),
+                        ),
                       ),
                     ],
                   ),
@@ -152,54 +349,27 @@ class ProfileState extends State<Profile> {
 
                 const SizedBox(height: 12),
 
-                // --- Calendar Card ---
+                // calendar
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: pale,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                    decoration: BoxDecoration(color: pale, borderRadius: BorderRadius.circular(14)),
                     padding: const EdgeInsets.fromLTRB(8, 10, 8, 14),
                     child: Column(
                       children: [
-                        // Month header with arrows
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                onPressed: _prevMonth,
-                                icon: const Icon(Icons.chevron_left,
-                                    size: 22, color: dark),
-                                splashRadius: 18,
-                              ),
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    _monthLabel,
+                        Row(
+                          children: [
+                            IconButton(onPressed: _prevMonth, icon: const Icon(Icons.chevron_left, color: dark)),
+                            Expanded(
+                              child: Center(
+                                child: Text(_monthLabel,
                                     style: const TextStyle(
-                                      color: dark,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.2,
-                                    ),
-                                  ),
-                                ),
+                                        color: dark, fontSize: 16, fontWeight: FontWeight.w600)),
                               ),
-                              IconButton(
-                                onPressed: _nextMonth,
-                                icon: const Icon(Icons.chevron_right,
-                                    size: 22, color: dark),
-                                splashRadius: 18,
-                              ),
-                            ],
-                          ),
+                            ),
+                            IconButton(onPressed: _nextMonth, icon: const Icon(Icons.chevron_right, color: dark)),
+                          ],
                         ),
-
-                        const SizedBox(height: 2),
-
-                        // Weekday header
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: const [
@@ -213,14 +383,11 @@ class ProfileState extends State<Profile> {
                           ],
                         ),
                         const SizedBox(height: 6),
-
-                        // Days grid
                         _buildDaysGrid(),
                       ],
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 24),
               ],
             ),
@@ -230,9 +397,9 @@ class ProfileState extends State<Profile> {
     );
   }
 
-  // --- Calendar builder ---
   Widget _buildDaysGrid() {
-    const dayStyle = TextStyle(color: Color(0xFF00221C), fontSize: 13);
+    const dark = Color(0xFF00221C);
+    const dayStyle = TextStyle(color: dark, fontSize: 13);
     final firstWeekday = _firstWeekdayOfMonth(_focusedMonth);
     final totalDays = _daysInMonth(_focusedMonth);
     final today = DateTime.now();
@@ -254,9 +421,18 @@ class ProfileState extends State<Profile> {
                 return const SizedBox(width: 32, height: 28);
               }
 
-              final isToday = (today.year == _focusedMonth.year) &&
-                  (today.month == _focusedMonth.month) &&
-                  (today.day == dayNum);
+              final isToday = today.year == _focusedMonth.year &&
+                  today.month == _focusedMonth.month &&
+                  today.day == dayNum;
+
+              final recyclePoints = _recycleDays[dayNum];
+
+              if (recyclePoints != null) {
+                return GestureDetector(
+                  onTap: () => _showDayInfo(dayNum, recyclePoints),
+                  child: Image.asset('assets/images/recycle.png', width: 22, height: 22),
+                );
+              }
 
               return Container(
                 width: 32,
@@ -265,8 +441,7 @@ class ProfileState extends State<Profile> {
                 decoration: isToday
                     ? BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                            color: const Color(0xFF00221C), width: 1),
+                        border: Border.all(color: dark, width: 1),
                       )
                     : null,
                 child: Text('$dayNum', style: dayStyle),
@@ -279,7 +454,8 @@ class ProfileState extends State<Profile> {
   }
 }
 
-// 🌿 Reusable header icon widget
+// ========== Helper Widgets ==========
+
 class _HeaderIcon extends StatelessWidget {
   final String asset;
   final VoidCallback onTap;
@@ -307,12 +483,9 @@ class _HeaderIcon extends StatelessWidget {
               asset,
               width: 20,
               height: 20,
-              // If SVG color filter breaks, show original fill colors
               colorFilter: allowOriginalColor
                   ? null
-                  : const ColorFilter.mode(
-                      Color(0xFF00221C), BlendMode.srcIn,
-                    ),
+                  : const ColorFilter.mode(Color(0xFF00221C), BlendMode.srcIn),
             ),
           ),
         ),
@@ -321,7 +494,42 @@ class _HeaderIcon extends StatelessWidget {
   }
 }
 
-// --- Stat block ---
+class _ActionSheetItem extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+  final bool isCancel;
+
+  const _ActionSheetItem({required this.text, required this.onTap, this.isCancel = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color textColor = isCancel ? const Color(0xFF007AFF) : Colors.black;
+
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: isCancel ? 16 : 14),
+          decoration: BoxDecoration(
+            border: Border(
+              top: isCancel ? BorderSide.none : const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+            ),
+          ),
+          child: Center(
+            child: Text(text,
+                style: TextStyle(
+                    fontSize: isCancel ? 18 : 17,
+                    fontWeight: isCancel ? FontWeight.w600 : FontWeight.normal,
+                    color: textColor)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _StatBlock extends StatelessWidget {
   final String value;
   final String label;
@@ -332,14 +540,8 @@ class _StatBlock extends StatelessWidget {
     const dark = Color(0xFF00221C);
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: dark,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text(value,
+            style: const TextStyle(color: dark, fontSize: 32, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(color: dark, fontSize: 14)),
       ],
@@ -347,23 +549,18 @@ class _StatBlock extends StatelessWidget {
   }
 }
 
-// --- Weekday header text ---
 class _Weekday extends StatelessWidget {
   final String text;
   const _Weekday(this.text);
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 32,
       child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Color(0xFF00221C),
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        child: Text(text,
+            style: const TextStyle(
+                color: Color(0xFF00221C), fontSize: 12, fontWeight: FontWeight.w600)),
       ),
     );
   }
