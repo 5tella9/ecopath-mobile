@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ecopath/ui/screens/shop_screen.dart';
+import 'package:ecopath/ui/screens/carbon_screen.dart';
 
 class FeaturesScreen extends StatelessWidget {
   const FeaturesScreen({super.key});
@@ -7,7 +8,6 @@ class FeaturesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F7FF), // soft game hub bg
@@ -15,6 +15,7 @@ class FeaturesScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFF9F7FF),
         elevation: 0,
         centerTitle: true,
+        automaticallyImplyLeading: false, // <-- hide back button here
         title: Text(
           'Features',
           style: theme.textTheme.titleLarge?.copyWith(
@@ -45,12 +46,10 @@ class FeaturesScreen extends StatelessWidget {
                 children: [
                   _FeatureCard(
                     title: 'Electricity',
-                    subtitle:
-                        'Track weekly / monthly / yearly usage',
+                    subtitle: 'Track weekly / monthly / yearly usage',
                     iconPath: 'assets/images/electricity.png',
                     iconBg: const Color(0xFFECE9FF),
-                    onTap: () =>
-                        _open(context, const _ElectricityUsageScreen()),
+                    onTap: () => _open(context, const _ElectricityUsageScreen()),
                   ),
                   _FeatureCard(
                     title: 'Gas',
@@ -60,12 +59,11 @@ class FeaturesScreen extends StatelessWidget {
                     onTap: () => _open(context, const _GasUsageScreen()),
                   ),
                   _FeatureCard(
-                    title: 'Carbon\nDashboard',
+                    title: 'Carbon\nFootprint',
                     subtitle: 'See your CO₂ footprint',
                     iconPath: 'assets/images/carbon.png',
                     iconBg: const Color(0xFFEFF5EA),
-                    onTap: () =>
-                        _open(context, const _CarbonDashboardScreen()),
+                    onTap: () => _open(context, const CarbonScreen()),
                   ),
                   _FeatureCard(
                     title: 'Trash &\nRecycling',
@@ -227,7 +225,7 @@ class _FeatureCard extends StatelessWidget {
 
 /// ----------------------
 /// Stub detail pages (except Shop)
-/// Now using the same PNG icons instead of emojis
+/// using PNG icons, with back button hidden too
 /// ----------------------
 
 class _ElectricityUsageScreen extends StatelessWidget {
@@ -237,7 +235,10 @@ class _ElectricityUsageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Electricity Usage')),
+      appBar: AppBar(
+        title: const Text('Electricity Usage'),
+        automaticallyImplyLeading: false, // <-- hide back here too?
+      ),
       body: _StubBody(
         iconPath: 'assets/images/electricity.png',
         iconBg: const Color(0xFFECE9FF),
@@ -260,7 +261,10 @@ class _GasUsageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Gas Usage')),
+      appBar: AppBar(
+        title: const Text('Gas Usage'),
+        automaticallyImplyLeading: false,
+      ),
       body: _StubBody(
         iconPath: 'assets/images/gas.png',
         iconBg: const Color(0xFFFFE8EC),
@@ -283,7 +287,10 @@ class _CarbonDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Carbon Footprint Dashboard')),
+      appBar: AppBar(
+        title: const Text('Carbon Footprint'),
+        automaticallyImplyLeading: false,
+      ),
       body: _StubBody(
         iconPath: 'assets/images/carbon.png',
         iconBg: const Color(0xFFEFF5EA),
@@ -306,7 +313,10 @@ class _TrashRecyclingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Trash & Recycling')),
+      appBar: AppBar(
+        title: const Text('Trash & Recycling'),
+        automaticallyImplyLeading: false,
+      ),
       body: _StubBody(
         iconPath: 'assets/images/tracker.png',
         iconBg: const Color(0xFFEFF0F5),
@@ -329,7 +339,10 @@ class _EducationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Education')),
+      appBar: AppBar(
+        title: const Text('Education'),
+        automaticallyImplyLeading: false,
+      ),
       body: _StubBody(
         iconPath: 'assets/images/education.png',
         iconBg: const Color(0xFFEFF0FF),

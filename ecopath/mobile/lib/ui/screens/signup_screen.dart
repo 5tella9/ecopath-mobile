@@ -1,412 +1,414 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'login_screen.dart'; // make sure this path is correct
 
-import 'login_screen.dart';
-
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
-  static const Color deepGreen = Color(0xFF00221C);
-  static const Color fbBlue = Color(0xFF2F6BFF);
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  // Controllers
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _pwController = TextEditingController();
+  final _confirmPwController = TextEditingController();
+
+  // Form key
+  final _formKey = GlobalKey<FormState>();
+
+  bool _obscurePw = true;
+  bool _obscureConfirmPw = true;
+
+  TextStyle _labelStyle(BuildContext context) {
+    return GoogleFonts.alike(
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      color: Colors.grey.shade800,
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    Widget? suffix,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: GoogleFonts.alike(
+        fontSize: 14,
+        color: Colors.grey.shade400,
+        fontWeight: FontWeight.w400,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: Colors.grey.shade300,
+          width: 1.2,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Color(0xFF5E9460),
+          width: 1.5,
+        ),
+      ),
+      suffixIcon: suffix,
+    );
+  }
+
+  void _onSignUpPressed() {
+    if (_formKey.currentState?.validate() ?? false) {
+      debugPrint('Sign up with:');
+      debugPrint('Name: ${_nameController.text}');
+      debugPrint('Email: ${_emailController.text}');
+      debugPrint('Password: ${_pwController.text}');
+      // TODO: call backend signup
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final w = media.size.width;
-
     return Scaffold(
-      backgroundColor: deepGreen,
-      body: Stack(
-        children: [
-          // main white curved sheet
-          Positioned.fill(
-            top: media.padding.top + 170,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(42)),
-              ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              /* ---------- TOP HERO SECTION ---------- */
+              SizedBox(
+                height: 260, // can shrink a bit now that gap is smaller
+                child: Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Sign Up Here!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 30,
-                        height: 1.2,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Create an account & be with EcoPath!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.teal.shade700.withOpacity(.75),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Facebook button (filled blue)
-                    _SolidSocialButton(
-                      label: 'Continue with Facebook',
-                      bg: fbBlue,
-                      fg: Colors.white,
-                      iconPath: 'assets/icons/fb.svg',
-                      onTap: () {
-                        // TODO: Facebook signup
-                      },
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Instagram button (gradient outline)
-                    _GradientOutlineButton(
-                      label: 'Continue with Instagram',
-                      iconPath: 'assets/icons/insta.svg',
-                      onTap: () {
-                        // TODO: Instagram signup
-                      },
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Google button (black outline)
-                    _OutlineButton(
-                      label: 'Continue with Google',
-                      iconPath: 'assets/icons/google.svg',
-                      onTap: () {
-                        // TODO: Google signup
-                      },
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Email button (filled dark green)
-                    _SolidSocialButton(
-                      label: 'Continue with Email',
-                      bg: deepGreen,
-                      fg: Colors.white,
-                      iconPath: 'assets/icons/mail.svg',
-                      onTap: () {
-                        // TODO: go to email flow (could reuse LoginScreen if same UI)
-                      },
+                    // dark green background bar
+                    Container(
+                      height: 180,
+                      width: double.infinity,
+                      color: const Color(0xFF00221C),
                     ),
 
-                    const SizedBox(height: 26),
-
-                    // bottom row: Already have an account? Log in!
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Already have an account?  ',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const LoginScreen(),
-                              ),
-                            );
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4),
+                    // GIRL + SPEECH BUBBLE (on green)
+                    Positioned(
+                      top: 24,
+                      left: 0,
+                      right: 60,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // speech bubble on LEFT of her head
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            margin: const EdgeInsets.only(
+                              right: 8, // bubble sits to her left
+                              top: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
                             child: Text(
-                              'Log in!',
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
+                              "Join us!",
+                              style: GoogleFonts.alike(
+                                fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black,
                               ),
                             ),
                           ),
-                        ),
-                      ],
+
+                          // girl image
+                          SizedBox(
+                            height: 110,
+                            child: Image.asset(
+                              'assets/images/signupgirl.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 16),
+
+                    // WHITE CONTAINER (card), stays visually where you liked it
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      top: 120,
+                      child: Container(
+                        // ↓↓↓ reduced top padding from 80 → 32
+                        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(28),
+                            topRight: Radius.circular(28),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Sign Up Here!",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.alike(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Create an account & be with EcoPath!",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.alike(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFF5E9460),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-          ),
 
-          // Girl + bubble on top dark area
-          Positioned(
-            top: media.padding.top + 20,
-            left: 0,
-            right: 0,
-            child: SizedBox(
-              width: w,
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  // girl waving
-                  Image.asset(
-                    'assets/images/signup_girl.png',
-                    height: 180,
-                    fit: BoxFit.contain,
-                  ),
+              // we pulled padding down, so we can also pull form up a bit
+              const SizedBox(height: 12),
 
-                  // speech bubble "Join us!"
-                  Positioned(
-                    left: 36,
-                    top: 6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
+              /* ---------- FORM SECTION ---------- */
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Full name
+                      Text("Full name", style: _labelStyle(context)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: _inputDecoration(hint: "Your name"),
+                        style: GoogleFonts.alike(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return "Please enter your name";
+                          }
+                          return null;
+                        },
                       ),
-                      decoration: ShapeDecoration(
-                        color: Colors.white,
-                        shape: _SpeechBubbleBorder(
-                          tailOffset: Offset(18, 18),
+                      const SizedBox(height: 16),
+
+                      // Email
+                      Text("Email", style: _labelStyle(context)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration:
+                            _inputDecoration(hint: "example@email.com"),
+                        style: GoogleFonts.alike(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return "Please enter your email";
+                          }
+                          if (!val.contains('@') || !val.contains('.')) {
+                            return "Enter a valid email";
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Password
+                      Text("Password", style: _labelStyle(context)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _pwController,
+                        obscureText: _obscurePw,
+                        decoration: _inputDecoration(
+                          hint: "Enter password",
+                          suffix: IconButton(
+                            icon: Icon(
+                              _obscurePw
+                                  ? Icons.visibility_off_rounded
+                                  : Icons.visibility_rounded,
+                              size: 20,
+                              color: Colors.grey.shade600,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePw = !_obscurePw;
+                              });
+                            },
+                          ),
+                        ),
+                        style: GoogleFonts.alike(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return "Please enter a password";
+                          }
+                          if (val.length < 6) {
+                            return "Password must be at least 6 characters";
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Confirm Password
+                      Text("Confirm password", style: _labelStyle(context)),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _confirmPwController,
+                        obscureText: _obscureConfirmPw,
+                        decoration: _inputDecoration(
+                          hint: "Re-enter password",
+                          suffix: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPw
+                                  ? Icons.visibility_off_rounded
+                                  : Icons.visibility_rounded,
+                              size: 20,
+                              color: Colors.grey.shade600,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscureConfirmPw = !_obscureConfirmPw;
+                              });
+                            },
+                          ),
+                        ),
+                        style: GoogleFonts.alike(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return "Please confirm your password";
+                          }
+                          if (val != _pwController.text) {
+                            return "Passwords do not match";
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Sign Up button
+                      SizedBox(
+                        height: 52,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF5E9460),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 2,
+                          ),
+                          onPressed: _onSignUpPressed,
+                          child: Text(
+                            "Sign Up",
+                            style: GoogleFonts.alike(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              height: 1.2,
+                            ),
+                          ),
                         ),
                       ),
-                      child: const Text(
-                        'Join us!',
-                        style: TextStyle(
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // divider
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Divider(
+                  thickness: 1,
+                  color: Colors.grey.shade300,
+                  height: 1,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // already have account? login
+              Padding(
+                padding: const EdgeInsets.only(bottom: 32),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Already have an account? ",
+                      style: GoogleFonts.alike(
+                        fontSize: 14,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const LoginScreen()),
+                        );
+                      },
+                      child: Text(
+                        "Log in!",
+                        style: GoogleFonts.alike(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF00221C),
+                          decoration: TextDecoration.underline,
+                          decorationColor: Color(0xFF00221C),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/* ------------------- BUTTON WIDGETS ------------------- */
-
-/// Filled button (Facebook / Email)
-class _SolidSocialButton extends StatelessWidget {
-  final String label;
-  final String iconPath;
-  final Color bg;
-  final Color fg;
-  final VoidCallback onTap;
-
-  const _SolidSocialButton({
-    required this.label,
-    required this.iconPath,
-    required this.bg,
-    required this.fg,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 64,
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: bg,
-          foregroundColor: fg,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
-          ),
-          elevation: 0,
-        ),
-        onPressed: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              iconPath,
-              width: 22,
-              height: 22,
-              // Facebook/email buttons are solid bg
-              // so we usually keep original icon color
-              // If you ever want white icon, pass colorFilter.
-            ),
-            const SizedBox(width: 14),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Black outline button (Google)
-class _OutlineButton extends StatelessWidget {
-  final String label;
-  final String iconPath;
-  final VoidCallback onTap;
-
-  const _OutlineButton({
-    required this.label,
-    required this.iconPath,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 64,
-      width: double.infinity,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.black, width: 1.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
-          ),
-          foregroundColor: Colors.black,
-        ),
-        onPressed: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              iconPath,
-              width: 22,
-              height: 22,
-            ),
-            const SizedBox(width: 14),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Gradient outline button (Instagram)
-class _GradientOutlineButton extends StatelessWidget {
-  final String label;
-  final String iconPath;
-  final VoidCallback onTap;
-
-  const _GradientOutlineButton({
-    required this.label,
-    required this.iconPath,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF5B6BFF), // bluish-purple
-            Color(0xFFFF3E6C), // pink/red
-            Color(0xFFFFA64D), // orange
-          ],
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.all(1.5),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.5),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20.5),
-            onTap: onTap,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    iconPath,
-                    width: 22,
-                    height: 22,
-                  ),
-                  const SizedBox(width: 14),
-                  Flexible(
-                    child: Text(
-                      label,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
-}
-
-/* ------------------- SPEECH BUBBLE SHAPE ------------------- */
-
-class _SpeechBubbleBorder extends ShapeBorder {
-  final Offset tailOffset;
-  const _SpeechBubbleBorder({required this.tailOffset});
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) =>
-      getOuterPath(rect);
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    // rounded bubble
-    final r = RRect.fromRectAndRadius(rect, const Radius.circular(14));
-    final p = Path()..addRRect(r);
-
-    // tiny tail
-    final tx = rect.left + tailOffset.dx;
-    final ty = rect.bottom - tailOffset.dy;
-    p.moveTo(tx, ty);
-    p.relativeLineTo(10, 8);
-    p.relativeLineTo(-16, 2);
-    p.close();
-
-    return p;
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect,
-      {TextDirection? textDirection}) {}
-
-  @override
-  ShapeBorder scale(double t) => this;
 }

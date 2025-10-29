@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:ecopath/ui/root_shell.dart';
-
-
+import 'package:ecopath/ui/root_shell.dart'; // you already navigate to /root so keeping import
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,7 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     const Color bgDark = Color(0xFF00221C); // deep green
     const Color fieldBg = Color(0xFFEFF6F3); // pale greenish field fill
-    const Color borderGray = Color(0xFFCCCCCC);
     const Color buttonDisabled = Color(0xFFB9BFB7); // gray/green button
 
     final double mascotSize = 120;
@@ -42,15 +38,15 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // dark background
+            // dark background base
             Container(color: bgDark),
 
             // white rounded sheet
             Positioned(
-              top: sheetTopOffset,
+              top: 100,
               left: 0,
               right: 0,
-              bottom: 0, // <-- important: fill all the way to bottom
+              bottom: 0,
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -122,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               ),
 
-                              // ===== BOTTOM content =====
+                              // ===== BOTTOM content (clean version) =====
                               Column(
                                 children: [
                                   const SizedBox(height: 24),
@@ -174,79 +170,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
 
-                                  const SizedBox(height: 24),
-
-                                  Row(
-                                    children: [
-                                      const Expanded(
-                                        child: Divider(
-                                          color: borderGray,
-                                          thickness: 1,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        'or log in with',
-                                        style: TextStyle(
-                                          color:
-                                              Colors.black.withOpacity(0.45),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Expanded(
-                                        child: Divider(
-                                          color: borderGray,
-                                          thickness: 1,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 24),
-
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      _SocialCircle(
-                                        filledColor:
-                                            const Color(0xFF1877F2), // fb blue
-                                        borderColor: null,
-                                        child: SvgPicture.asset(
-                                          'assets/icons/fb.svg',
-                                          width: 28,
-                                          height: 28,
-                                          colorFilter:
-                                              const ColorFilter.mode(
-                                            Colors.white,
-                                            BlendMode.srcIn,
-                                          ),
-                                        ),
-                                      ),
-                                      _SocialCircle(
-                                        filledColor: Colors.white,
-                                        borderColor: Colors.black
-                                            .withOpacity(0.8),
-                                        child: SvgPicture.asset(
-                                          'assets/icons/insta.svg',
-                                          width: 28,
-                                          height: 28,
-                                        ),
-                                      ),
-                                      _SocialCircle(
-                                        filledColor: Colors.white,
-                                        borderColor: Colors.black
-                                            .withOpacity(0.8),
-                                        child: SvgPicture.asset(
-                                          'assets/icons/google.svg',
-                                          width: 28,
-                                          height: 28,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  // ⬇ removed:
+                                  // - the "or log in with" divider Row
+                                  // - the 3 social icon buttons Row
                                 ],
                               ),
                             ],
@@ -261,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             // mascot sitting on top edge of white sheet
             Positioned(
-              top: sheetTopOffset - (mascotSize / 2),
+              top: 20,
               left: 0,
               right: 0,
               child: Center(
@@ -329,46 +255,6 @@ class _RoundedInput extends StatelessWidget {
           if (trailing != null) trailing!,
         ],
       ),
-    );
-  }
-}
-
-/* ---------- social icon circle ---------- */
-class _SocialCircle extends StatelessWidget {
-  final Widget child;
-  final Color? filledColor;
-  final Color? borderColor;
-
-  const _SocialCircle({
-    required this.child,
-    this.filledColor,
-    this.borderColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 62,
-      height: 62,
-      decoration: BoxDecoration(
-        color: filledColor ?? Colors.white,
-        shape: BoxShape.circle,
-        border: borderColor != null
-            ? Border.all(
-                color: borderColor!,
-                width: 1.2,
-              )
-            : null,
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-            color: Colors.black.withOpacity(0.05),
-          ),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: child,
     );
   }
 }

@@ -155,7 +155,7 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
       'Enter your address',
       '', // 5 interstitial
       'What type of house do you live in?',
-      'Who do you live with?',
+      'How many people do you live with?',
       'Your eco goals',
       '', // 9 interstitial
       'Energy bills & providers',
@@ -571,11 +571,11 @@ class _NameStepState extends State<_NameStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _hint('Enter your real name or nickname'),
+        _hint('Enter your name'),
         const SizedBox(height: 10),
         _darkTextField(
           controller: _ctl,
-          hint: 'e.g., Minji Kim / EcoSnow',
+          hint: 'e.g., Stella',
           onDone: _go,
         ),
         const Spacer(),
@@ -906,12 +906,11 @@ class _LivingWithStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final options = [
-      'Parents',
-      'Siblings',
-      'Friends',
-      'Relatives',
-      'Spouse/Partner',
-      'Alone'
+      '1 person (only me)',
+      '2 people',
+      '3 people',
+      '4+ people',
+      
     ];
 
     return Column(
@@ -944,6 +943,7 @@ class _GoalsStepState extends State<_GoalsStep> {
   final goals = [
     'Reduce electricity use',
     'Reduce gas use',
+    'Dispose trash properly', 
     'Recycle more',
     'Cut food waste',
     'Use public transit more',

@@ -106,23 +106,52 @@ class _Header extends StatelessWidget {
         color: Colors.white,
       ),
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          // Title
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Notifications',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: kPrimary,
-                height: 1.1,
+          // back button (top-left)
+          Align(
+            alignment: Alignment.topLeft,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context); // go back to Profile
+              },
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: kPrimary,
+                  size: 22,
+                ),
               ),
             ),
           ),
+
+          // Title (slightly pushed down so it doesn't clash visually with back button)
+          const Padding(
+            padding: EdgeInsets.only(top: 40),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Notifications',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: kPrimary,
+                  height: 1.1,
+                ),
+              ),
+            ),
+          ),
+
           // Right-side mascot image
-          Align(
-            alignment: Alignment.centerRight,
+          Positioned(
+            right: 0,
+            top: 0,
             child: SizedBox(
               height: 100,
               child: Image.asset(
@@ -170,12 +199,15 @@ class _NotificationTile extends StatelessWidget {
   String _timeAgo(DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
+
     if (diff.inSeconds < 60) return '${diff.inSeconds}s';
     if (diff.inMinutes < 60) return '${diff.inMinutes}m';
     if (diff.inHours < 24) return '${diff.inHours}h';
     if (diff.inDays < 7) return '${diff.inDays}d';
+
     final weeks = (diff.inDays / 7).floor();
     if (weeks < 5) return '${weeks}w';
+
     final months = (diff.inDays / 30).floor();
     return '${months}mo';
   }

@@ -1,9 +1,11 @@
 // lib/ui/screens/profile_screen.dart
+import 'package:ecopath/ui/screens/notifications_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math';
 import 'setting_screen.dart';
 import 'edit_avatar_screen.dart';
+import 'notifications_screen.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -223,6 +225,22 @@ class ProfileState extends State<Profile> {
     );
   }
 
+  // ---- navigate helpers (force rebuild after return) ----
+  Future<void> _openNotifications() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+    );
+    // when we come back, rebuild the header so icons show again
+    setState(() {});
+  }
+
+  Future<void> _openSettings() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const SettingsScreen()),
+    );
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     const dark = Color(0xFF00221C);
@@ -245,13 +263,16 @@ class ProfileState extends State<Profile> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _HeaderIcon(asset: 'assets/icons/service.svg', onTap: () {}, allowOriginalColor: true),
+                      _HeaderIcon(
+                        asset: 'assets/icons/bell.svg',
+                        onTap: _openNotifications,
+                        allowOriginalColor: false,
+                        isBold: true,
+                      ),
                       const SizedBox(width: 8),
                       _HeaderIcon(
                         asset: 'assets/icons/setting.svg',
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
-                        },
+                        onTap: _openSettings,
                       ),
                     ],
                   ),
@@ -259,8 +280,14 @@ class ProfileState extends State<Profile> {
 
                 const Padding(
                   padding: EdgeInsets.only(left: 29, bottom: 10),
-                  child: Text('Profile',
-                      style: TextStyle(color: dark, fontSize: 36, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'Profile',
+                    style: TextStyle(
+                      color: dark,
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
 
                 // avatar
@@ -285,23 +312,39 @@ class ProfileState extends State<Profile> {
                             child: GestureDetector(
                               onTap: _showAvatarActionSheet,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black,
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: const [
-                                    BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2)),
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
                                   ],
                                 ),
-                                child: const Text('...',
-                                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                                child: const Text(
+                                  '...',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 14),
-                      const Text('Stella', style: TextStyle(color: dark, fontSize: 18)),
+                      const Text(
+                        'Stella',
+                        style: TextStyle(color: dark, fontSize: 18),
+                      ),
                     ],
                   ),
                 ),
@@ -327,7 +370,10 @@ class ProfileState extends State<Profile> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const Text('Recycle History', style: TextStyle(color: dark, fontSize: 16)),
+                      const Text(
+                        'Recycle History',
+                        style: TextStyle(color: dark, fontSize: 16),
+                      ),
                       const SizedBox(width: 6),
                       GestureDetector(
                         onTap: _showRecycleInfo,
@@ -340,7 +386,10 @@ class ProfileState extends State<Profile> {
                             border: Border.all(color: dark.withOpacity(0.4)),
                           ),
                           alignment: Alignment.center,
-                          child: const Text('?', style: TextStyle(fontSize: 12, color: dark)),
+                          child: const Text(
+                            '?',
+                            style: TextStyle(fontSize: 12, color: dark),
+                          ),
                         ),
                       ),
                     ],
@@ -353,21 +402,35 @@ class ProfileState extends State<Profile> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Container(
-                    decoration: BoxDecoration(color: pale, borderRadius: BorderRadius.circular(14)),
+                    decoration: BoxDecoration(
+                      color: pale,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     padding: const EdgeInsets.fromLTRB(8, 10, 8, 14),
                     child: Column(
                       children: [
                         Row(
                           children: [
-                            IconButton(onPressed: _prevMonth, icon: const Icon(Icons.chevron_left, color: dark)),
+                            IconButton(
+                              onPressed: _prevMonth,
+                              icon: const Icon(Icons.chevron_left, color: dark),
+                            ),
                             Expanded(
                               child: Center(
-                                child: Text(_monthLabel,
-                                    style: const TextStyle(
-                                        color: dark, fontSize: 16, fontWeight: FontWeight.w600)),
+                                child: Text(
+                                  _monthLabel,
+                                  style: const TextStyle(
+                                    color: dark,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
                             ),
-                            IconButton(onPressed: _nextMonth, icon: const Icon(Icons.chevron_right, color: dark)),
+                            IconButton(
+                              onPressed: _nextMonth,
+                              icon: const Icon(Icons.chevron_right, color: dark),
+                            ),
                           ],
                         ),
                         Row(
@@ -430,7 +493,11 @@ class ProfileState extends State<Profile> {
               if (recyclePoints != null) {
                 return GestureDetector(
                   onTap: () => _showDayInfo(dayNum, recyclePoints),
-                  child: Image.asset('assets/images/recycle.png', width: 22, height: 22),
+                  child: Image.asset(
+                    'assets/images/recycle.png',
+                    width: 22,
+                    height: 22,
+                  ),
                 );
               }
 
@@ -460,15 +527,19 @@ class _HeaderIcon extends StatelessWidget {
   final String asset;
   final VoidCallback onTap;
   final bool allowOriginalColor;
+  final bool isBold;
 
   const _HeaderIcon({
     required this.asset,
     required this.onTap,
     this.allowOriginalColor = false,
+    this.isBold = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final baseColor = const Color(0xFF00221C);
+
     return Material(
       color: const Color(0xFFF5F5F5),
       borderRadius: BorderRadius.circular(12),
@@ -478,15 +549,27 @@ class _HeaderIcon extends StatelessWidget {
         child: SizedBox(
           width: 36,
           height: 36,
-          child: Center(
-            child: SvgPicture.asset(
-              asset,
-              width: 20,
-              height: 20,
-              colorFilter: allowOriginalColor
-                  ? null
-                  : const ColorFilter.mode(Color(0xFF00221C), BlendMode.srcIn),
-            ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (isBold)
+                // shadow layer for “thick” look
+                SvgPicture.asset(
+                  asset,
+                  width: 22,
+                  height: 22,
+                  colorFilter: ColorFilter.mode(
+                    baseColor.withOpacity(0.4),
+                    BlendMode.srcIn,
+                  ),
+                ),
+              SvgPicture.asset(
+                asset,
+                width: isBold ? 26 : 20,
+                height: isBold ? 26 : 20,
+                colorFilter: ColorFilter.mode(baseColor, BlendMode.srcIn),
+              ),
+            ],
           ),
         ),
       ),
@@ -494,12 +577,17 @@ class _HeaderIcon extends StatelessWidget {
   }
 }
 
+
 class _ActionSheetItem extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
   final bool isCancel;
 
-  const _ActionSheetItem({required this.text, required this.onTap, this.isCancel = false});
+  const _ActionSheetItem({
+    required this.text,
+    required this.onTap,
+    this.isCancel = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -511,18 +599,30 @@ class _ActionSheetItem extends StatelessWidget {
         onTap: onTap,
         child: Container(
           width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: isCancel ? 16 : 14),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: isCancel ? 16 : 14,
+          ),
           decoration: BoxDecoration(
             border: Border(
-              top: isCancel ? BorderSide.none : const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+              top: isCancel
+                  ? BorderSide.none
+                  : const BorderSide(
+                      color: Color(0xFFE0E0E0),
+                      width: 1,
+                    ),
             ),
           ),
           child: Center(
-            child: Text(text,
-                style: TextStyle(
-                    fontSize: isCancel ? 18 : 17,
-                    fontWeight: isCancel ? FontWeight.w600 : FontWeight.normal,
-                    color: textColor)),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: isCancel ? 18 : 17,
+                fontWeight:
+                    isCancel ? FontWeight.w600 : FontWeight.normal,
+                color: textColor,
+              ),
+            ),
           ),
         ),
       ),
@@ -540,10 +640,19 @@ class _StatBlock extends StatelessWidget {
     const dark = Color(0xFF00221C);
     return Column(
       children: [
-        Text(value,
-            style: const TextStyle(color: dark, fontSize: 32, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(
+            color: dark,
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: dark, fontSize: 14)),
+        Text(
+          label,
+          style: const TextStyle(color: dark, fontSize: 14),
+        ),
       ],
     );
   }
@@ -558,9 +667,14 @@ class _Weekday extends StatelessWidget {
     return SizedBox(
       width: 32,
       child: Center(
-        child: Text(text,
-            style: const TextStyle(
-                color: Color(0xFF00221C), fontSize: 12, fontWeight: FontWeight.w600)),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Color(0xFF00221C),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

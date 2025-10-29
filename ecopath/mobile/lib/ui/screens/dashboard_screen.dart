@@ -74,9 +74,8 @@ class DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     final (labels, values) = _buildSeries(_range);
-final int total = values.fold<int>(0, (a, b) => a + b);
-final double avg = values.isEmpty ? 0.0 : total / values.length;
-
+    final int total = values.fold<int>(0, (a, b) => a + b);
+    final double avg = values.isEmpty ? 0.0 : total / values.length;
 
     return Scaffold(
       body: SafeArea(
@@ -126,6 +125,69 @@ final double avg = values.isEmpty ? 0.0 : total / values.length;
                           ),
                         ],
                       ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // -------- Impact card (copy style) --------
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 227, 207, 239),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Your Impact This Week:',
+                      style: _ts(18, fw: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Electricity ↓12% ⚡
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Electricity ↓ 12%',
+                          style: _ts(16, fw: FontWeight.w500),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('⚡', style: _ts(20)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Gas ↑4% 🔥
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Gas ↑ 4%',
+                          style: _ts(16, fw: FontWeight.w500),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('🔥', style: _ts(20)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Overall Score: 78 🌱
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Overall Score: 78',
+                          style: _ts(16, fw: FontWeight.w500),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('🌱', style: _ts(20)),
+                      ],
                     ),
                   ],
                 ),
@@ -282,8 +344,10 @@ final double avg = values.isEmpty ? 0.0 : total / values.length;
                           const SizedBox(height: 8),
                           Text('and', style: _ts(12, color: Colors.white)),
                           const SizedBox(height: 8),
-                          Text('“Protect” the environment',
-                              style: _ts(14, fw: FontWeight.w600, color: Colors.white)),
+                          Text(
+                            '“Protect” the environment',
+                            style: _ts(14, fw: FontWeight.w600, color: Colors.white),
+                          ),
                         ],
                       ),
                       Positioned(
@@ -309,7 +373,7 @@ final double avg = values.isEmpty ? 0.0 : total / values.length;
                 onRangeChanged: (r) => setState(() => _range = r),
                 labels: labels,
                 values: values,
-                avg: avg, // ← now points to the renamed widget with avg param
+                avg: avg,
               ),
 
               const SizedBox(height: 24),
@@ -321,7 +385,7 @@ final double avg = values.isEmpty ? 0.0 : total / values.length;
   }
 }
 
-// ---------- Stats Section widget (RENAMED) ----------
+// ---------- Stats Section widget ----------
 class StatsSectionPoints extends StatelessWidget {
   final TimeRange range;
   final void Function(TimeRange) onRangeChanged;
@@ -442,10 +506,15 @@ class StatsSectionPoints extends StatelessWidget {
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
                         final idx = value.toInt();
-                        if (idx < 0 || idx >= labels.length) return const SizedBox.shrink();
+                        if (idx < 0 || idx >= labels.length) {
+                          return const SizedBox.shrink();
+                        }
                         return Padding(
                           padding: const EdgeInsets.only(top: 4),
-                          child: Text(labels[idx], style: ts(fontSize: 10, color: Colors.black54)),
+                          child: Text(
+                            labels[idx],
+                            style: ts(fontSize: 10, color: Colors.black54),
+                          ),
                         );
                       },
                     ),
@@ -493,14 +562,23 @@ class StatsSectionPoints extends StatelessWidget {
     }
   }
 
-  static String _fmtDate(DateTime d) =>
-      '${_monthShort[d.month]} ${d.day}, ${d.year}';
-  static String _fmtMonth(DateTime d) =>
-      '${_monthShort[d.month]} ${d.year}';
+  static String _fmtDate(DateTime d) => '${_monthShort[d.month]} ${d.day}, ${d.year}';
+  static String _fmtMonth(DateTime d) => '${_monthShort[d.month]} ${d.year}';
 
   static const _monthShort = [
-    '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
   ];
 }
 
@@ -550,7 +628,7 @@ class EducationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text('Education', style: GoogleFonts.alike())),
-        body:
-            Center(child: Text('Education content here.', style: GoogleFonts.alike(fontSize: 16))),
+        body: Center(
+            child: Text('Education content here.', style: GoogleFonts.alike(fontSize: 16))),
       );
 }
