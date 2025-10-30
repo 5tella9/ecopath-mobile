@@ -1,5 +1,9 @@
+// lib/ui/screens/carbon_screen.dart
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:http/http.dart' as http;
+import 'package:ecopath/core/api_config.dart'; // contains ApiConfig.baseUrl
 
 class CarbonScreen extends StatefulWidget {
   const CarbonScreen({super.key});
@@ -23,8 +27,20 @@ class _CarbonScreenState extends State<CarbonScreen> {
   // for chart
   CarbonRange _range = CarbonRange.oneMonth;
 
+  // -------- Server Carbon Footprint (optional) --------
+  bool _loadingServer = false;
+  String? _serverError;
+
+  double? _svElectricity;
+  double? _svGas;
+  double? _svWaste;
+  double? _svTotal;
+
+  // TODO: replace with the real, logged-in user id once you have it.
+  static const String _demoUserId = 'b2f84c7a-0d8c-4e41-b5e3-52ddf559fa66';
+
   // Dummy kg CO2 factors per level (replace with backend later)
-  final Map<String, double> _factor = {
+  final Map<String, double> _factor = const {
     'none': 0,
     'low': 1.2,
     'med': 3.0,
@@ -43,7 +59,68 @@ class _CarbonScreenState extends State<CarbonScreen> {
     return (total * 10).roundToDouble() / 10.0;
   }
 
-  // chart data builder
+  // Compute date range from UI toggle
+  (String from, String to) _datesForRange() {
+    final now = DateTime.now();
+    final to = DateTime(now.year, now.month, now.day);
+    DateTime from;
+    switch (_range) {
+      case CarbonRange.oneMonth:
+        from = DateTime(to.year, to.month, to.day).subtract(const Duration(days: 30));
+        break;
+      case CarbonRange.sixMonth:
+        from = DateTime(to.year, to.month - 6, to.day);
+        break;
+      case CarbonRange.oneYear:
+        from = DateTime(to.year - 1, to.month, to.day);
+        break;
+    }
+    String fmt(DateTime d) =>
+        '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    return (fmt(from), fmt(to));
+  }
+
+  // Call backend: GET /api/users/{userId}/carbon-footprint?from=...&to=...
+  Future<void> _fetchServerCarbon() async {
+    setState(() {
+      _loadingServer = true;
+      _serverError = null;
+    });
+
+    final (from, to) = _datesForRange();
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/api/users/$_demoUserId/carbon-footprint?from=$from&to=$to',
+    );
+
+    try {
+      final res = await http.get(uri, headers: {'Accept': 'application/json'});
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final data = jsonDecode(res.body) as Map<String, dynamic>;
+        final cf = (data['carbonFootprint'] as Map<String, dynamic>?);
+
+        setState(() {
+          _svElectricity = (cf?['electricityKgCO2e'] as num?)?.toDouble();
+          _svGas = (cf?['gasKgCO2e'] as num?)?.toDouble();
+          _svWaste = (cf?['wasteKgCO2e'] as num?)?.toDouble();
+          _svTotal = (cf?['totalKgCO2e'] as num?)?.toDouble();
+        });
+      } else {
+        setState(() {
+          _serverError = 'HTTP ${res.statusCode}: ${res.body}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _serverError = e.toString();
+      });
+    } finally {
+      setState(() {
+        _loadingServer = false;
+      });
+    }
+  }
+
+  // chart data builder (client-side dummy series)
   (List<String>, List<double>) _buildSeries(CarbonRange r) {
     switch (r) {
       case CarbonRange.oneMonth:
@@ -82,8 +159,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
           ),
         ),
         titlesData: FlTitlesData(
-          rightTitles: AxisTitles(),
-          topTitles: AxisTitles(),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -178,6 +255,19 @@ class _CarbonScreenState extends State<CarbonScreen> {
               children: [
                 // -------- Intro / Illustration --------
                 _IntroCard(textTheme: textTheme, cs: cs),
+
+                const SizedBox(height: 12),
+
+                // -------- Server data panel (optional) --------
+                _ServerPanel(
+                  loading: _loadingServer,
+                  error: _serverError,
+                  electricity: _svElectricity,
+                  gas: _svGas,
+                  waste: _svWaste,
+                  total: _svTotal,
+                  onFetchPressed: _fetchServerCarbon,
+                ),
 
                 const SizedBox(height: 20),
 
@@ -282,12 +372,21 @@ class _CarbonScreenState extends State<CarbonScreen> {
                 const SizedBox(height: 24),
 
                 // ---------- Trend section card -----------
-                Text(
-                  "Your Trend",
-                  style: textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF00221C),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Your Trend",
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF00221C),
+                      ),
+                    ),
+                    _RangeToggle(
+                      range: _range,
+                      onChanged: (r) => setState(() => _range = r),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
 
@@ -318,36 +417,11 @@ class _CarbonScreenState extends State<CarbonScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // header row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Carbon output (kg CO₂e)",
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF00221C),
-                            ),
-                          ),
-                          _RangeToggle(
-                            range: _range,
-                            onChanged: (r) {
-                              setState(() {
-                                _range = r;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
                       SizedBox(
                         height: 180,
                         child: _buildBarChart(context),
                       ),
-
                       const SizedBox(height: 12),
-
                       Text(
                         _range == CarbonRange.oneMonth
                             ? "Last 4 weeks"
@@ -355,8 +429,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                                 ? "Last 6 months"
                                 : "Last 12 months",
                         style: textTheme.bodySmall?.copyWith(
-                          color:
-                              const Color(0xFF00221C).withOpacity(.6),
+                          color: const Color(0xFF00221C).withOpacity(.6),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -368,12 +441,11 @@ class _CarbonScreenState extends State<CarbonScreen> {
               ],
             ),
 
-            // sticky bottom summary card
+            // sticky bottom summary card (client-side estimate from selections)
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                padding:
-                    const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF9F7FF),
                   boxShadow: [
@@ -398,11 +470,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.eco_rounded,
-                        color: cs.primary,
-                        size: 28,
-                      ),
+                      Icon(Icons.eco_rounded, color: cs.primary, size: 28),
                       const SizedBox(width: 12),
                       Expanded(
                         child: RichText(
@@ -417,7 +485,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                                 ),
                               ),
                               TextSpan(
-                                text: "$kg kg CO₂e",
+                                text: "${_estimateKgCO2()} kg CO₂e",
                                 style: textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w800,
                                   color: cs.primary,
@@ -444,6 +512,100 @@ class _CarbonScreenState extends State<CarbonScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Server panel to show backend carbon data (if available)
+class _ServerPanel extends StatelessWidget {
+  final bool loading;
+  final String? error;
+  final double? electricity;
+  final double? gas;
+  final double? waste;
+  final double? total;
+  final VoidCallback onFetchPressed;
+
+  const _ServerPanel({
+    required this.loading,
+    required this.error,
+    required this.electricity,
+    required this.gas,
+    required this.waste,
+    required this.total,
+    required this.onFetchPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final p = Theme.of(context).colorScheme.primary;
+
+    Widget _line(String label, double? v) {
+      return Row(
+        children: [
+          Expanded(child: Text(label, style: t.bodySmall?.copyWith(color: const Color(0xFF00221C)))),
+          Text(
+            v == null ? '—' : '${v.toStringAsFixed(1)} kg',
+            style: t.bodySmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF00221C),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE7E5F1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.04),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Server Carbon Footprint', style: t.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF00221C))),
+          const SizedBox(height: 8),
+          if (error != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text('Error: $error', style: t.bodySmall?.copyWith(color: Colors.red)),
+            ),
+          _line('Electricity', electricity),
+          const SizedBox(height: 4),
+          _line('Gas', gas),
+          const SizedBox(height: 4),
+          _line('Waste', waste),
+          const Divider(height: 18),
+          _line('Total', total),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: loading ? null : onFetchPressed,
+              icon: loading
+                  ? const SizedBox(
+                      width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.cloud_download_outlined, size: 18),
+              label: Text(loading ? 'Fetching…' : 'Fetch from server'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: p,
+                side: BorderSide(color: p),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -678,22 +840,10 @@ class _LevelPicker extends StatelessWidget {
             if (v != null) onChanged(v);
           },
           items: const [
-            DropdownMenuItem(
-              value: 'none',
-              child: Text('None'),
-            ),
-            DropdownMenuItem(
-              value: 'low',
-              child: Text('Low'),
-            ),
-            DropdownMenuItem(
-              value: 'med',
-              child: Text('Medium'),
-            ),
-            DropdownMenuItem(
-              value: 'high',
-              child: Text('High'),
-            ),
+            DropdownMenuItem(value: 'none', child: Text('None')),
+            DropdownMenuItem(value: 'low', child: Text('Low')),
+            DropdownMenuItem(value: 'med', child: Text('Medium')),
+            DropdownMenuItem(value: 'high', child: Text('High')),
           ],
         ),
       ),

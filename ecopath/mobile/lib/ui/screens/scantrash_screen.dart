@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+// ✅ Import your root shell that owns the BottomNavigationBar
+import 'package:ecopath/ui/root_shell.dart'; // EcoPathRoot should live here
 
 class ScanTrashScreen extends StatefulWidget {
   const ScanTrashScreen({super.key});
@@ -40,15 +44,22 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   }
 
   Future<void> _initCamera() async {
-    final cams = await availableCameras();
-    final back = cams.firstWhere(
-      (c) => c.lensDirection == CameraLensDirection.back,
-      orElse: () => cams.first,
-    );
-    final ctrl = CameraController(back, ResolutionPreset.medium,
-        enableAudio: false);
-    _initFuture = ctrl.initialize();
-    setState(() => _controller = ctrl);
+    try {
+      final cams = await availableCameras();
+      if (cams.isEmpty) {
+        debugPrint('⚠️ No cameras found on this device');
+        return;
+      }
+      final back = cams.firstWhere(
+        (c) => c.lensDirection == CameraLensDirection.back,
+        orElse: () => cams.first,
+      );
+      final ctrl = CameraController(back, ResolutionPreset.medium, enableAudio: false);
+      _initFuture = ctrl.initialize();
+      setState(() => _controller = ctrl);
+    } catch (e) {
+      debugPrint('⚠️ Camera init error: $e');
+    }
   }
 
   @override
@@ -65,33 +76,22 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
     const String apiUrl = "https://giveable-mikayla-hasteless.ngrok-free.dev/predict";
 
     try {
-      // Read image bytes
       final bytes = await photo.readAsBytes();
-
-      // Convert to base64
       final base64Image = base64Encode(bytes);
 
-      // Make the request body
       final Map<String, dynamic> body = {
         "image_base64": "data:image/jpeg;base64,$base64Image",
       };
 
-      // Send POST request
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(body),
       );
 
-      // Handle the response
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        debugPrint("✅ Prediction:");
-        debugPrint(result.toString());
-        // Example: show results in UI
-        debugPrint("Klasse: ${result['klasse']}");
-        debugPrint("Confidence: ${result['confidence']}");
-        debugPrint("Bak: ${result['bak']}");
+        debugPrint("✅ Prediction: $result");
         _finishScan(result);
       } else {
         debugPrint("❌ Error: ${response.statusCode}");
@@ -103,7 +103,6 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   }
 
   void _finishScan(Map<String, dynamic> result) {
-    // Simulate detection + reward popup
     setState(() => pointsEarned += 15);
     showModalBottomSheet(
       context: context,
@@ -116,10 +115,12 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Scan Complete!', style: GoogleFonts.lato(
-              color: kInk, fontSize: 20, fontWeight: FontWeight.w700)),
+            Text('Scan Complete!',
+                style: GoogleFonts.lato(
+                    color: kInk, fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Text( 'you scanned ${result['klasse']}, this needs to be in the ${result['bak']} • +15 pts',
+            Text(
+                'you scanned ${result['klasse']}, this needs to be in the ${result['bak']} • +15 pts',
                 style: GoogleFonts.alike(color: kInk, fontSize: 14)),
             const SizedBox(height: 16),
             Container(
@@ -148,125 +149,149 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
     );
   }
 
+  /// ✅ Return to the tab root with Games tab selected; keeps the 5-icon bottom bar.
+  Future<void> _goToGamesTab() async {
+    try {
+      await _controller?.dispose();
+    } catch (_) {}
+    _controller = null;
+
+    if (!mounted) return;
+
+    // ⬇️ Remove `const` and pass your tab index prop
+    // If your prop is named differently (e.g., selectedIndex/startIndex), rename it here.
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => RootShell(
+          initialIndex: 3, // 👈 index of the Games tab in your BottomNav
+        ),
+      ),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final init = _initFuture;
-    return Scaffold(
-      backgroundColor: kBg,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Camera preview
-            if (_controller != null && init != null)
-              FutureBuilder(
-                future: init,
-                builder: (context, snap) {
-                  if (snap.connectionState != ConnectionState.done) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return CameraPreview(_controller!);
-                },
-              )
-            else
-              const Center(child: CircularProgressIndicator()),
+    return WillPopScope(
+      onWillPop: () async {
+        await _goToGamesTab();
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: kBg,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              if (_controller != null && init != null)
+                FutureBuilder(
+                  future: init,
+                  builder: (context, snap) {
+                    if (snap.connectionState != ConnectionState.done) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return CameraPreview(_controller!);
+                  },
+                )
+              else
+                const Center(child: CircularProgressIndicator()),
 
-            // Dark overlay with cutout + scan line
-            _ScannerOverlay(lineAnim: _lineAnim),
+              _ScannerOverlay(lineAnim: _lineAnim),
 
-            // Top bar (Back + title + points pill)
-            Positioned(
-              left: 16,
-              right: 16,
-              top: 12,
-              child: Row(
-                children: [
-                  // back.svg inside dark box (00221C) with white icon (F5F5F5)
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF00221C),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x33000000),
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: SvgPicture.asset(
-                        'assets/icons/back.svg',
-                        width: 20,
-                        height: 20,
-                        //colorFilter: const ColorFilter.mode(
-                          //Color(0xFFF5F5F5), BlendMode.srcIn),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text('Scan Trash', style: GoogleFonts.lato(
-                    color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
-                  const Spacer(),
-                  _PointsPill(points: pointsEarned),
-                ],
-              ),
-            ),
-
-            // Bottom actions
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 28,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Daily quest chip-style hint
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.92),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text('Daily Quest: Scan 3 items • +30',
-                        style: GoogleFonts.alike(
-                            color: kInk, fontSize: 12, fontWeight: FontWeight.w400)),
-                  ),
-                  const SizedBox(height: 14),
-                  // Capture/Scan button
-                  GestureDetector(
-                    onTap: _scanTrash,
-                    child: Container(
-                      width: 86,
-                      height: 86,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x33000000),
-                            blurRadius: 18,
-                            offset: Offset(0, 6),
-                          ),
-                        ],
-                      ),
+              Positioned(
+                left: 16,
+                right: 16,
+                top: 12,
+                child: Row(
+                  children: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: _goToGamesTab,
                       child: Container(
-                        margin: const EdgeInsets.all(8),
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: kInk, width: 4),
+                          color: const Color(0xFF00221C),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x33000000),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: SvgPicture.asset(
+                          'assets/icons/back.svg',
+                          width: 20,
+                          height: 20,
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Text('Scan Trash',
+                        style: GoogleFonts.lato(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700)),
+                    const Spacer(),
+                    _PointsPill(points: pointsEarned),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 28,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(.92),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text('Daily Quest: Scan 3 items • +30',
+                          style: GoogleFonts.alike(
+                              color: kInk,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400)),
+                    ),
+                    const SizedBox(height: 14),
+                    GestureDetector(
+                      onTap: _scanTrash,
+                      child: Container(
+                        width: 86,
+                        height: 86,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x33000000),
+                              blurRadius: 18,
+                              offset: Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: kInk, width: 4),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -302,8 +327,6 @@ class _PointsPill extends StatelessWidget {
   }
 }
 
-/// Overlay that dims the camera except a rounded-rect "scan window" and
-/// animates a scanning line up/down.
 class _ScannerOverlay extends StatelessWidget {
   final Animation<double> lineAnim;
   const _ScannerOverlay({required this.lineAnim});
@@ -320,14 +343,11 @@ class _ScannerOverlay extends StatelessWidget {
       );
 
       return Stack(children: [
-        // Dim the whole screen
         Container(color: Colors.black.withOpacity(0.35)),
-        // Clear the scanRect area using BlendMode
         CustomPaint(
           size: Size(c.maxWidth, c.maxHeight),
           painter: _CutoutPainter(scanRect: scanRect, radius: 18),
         ),
-        // Stroke around scanRect
         Positioned.fromRect(
           rect: scanRect,
           child: IgnorePointer(
@@ -339,7 +359,6 @@ class _ScannerOverlay extends StatelessWidget {
             ),
           ),
         ),
-        // Moving scan line
         AnimatedBuilder(
           animation: lineAnim,
           builder: (_, __) {
@@ -350,11 +369,11 @@ class _ScannerOverlay extends StatelessWidget {
               top: y,
               child: Container(
                 height: 2,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      const Color(0xFF71D8C6),
+                      Color(0xFF71D8C6),
                       Colors.transparent,
                     ],
                   ),
@@ -381,6 +400,7 @@ class _CutoutPainter extends CustomPainter {
     final paint = Paint()
       ..color = Colors.black.withOpacity(0.35)
       ..blendMode = BlendMode.dstOut;
+
     canvas.saveLayer(Offset.zero & size, Paint());
     canvas.drawPath(overlay, Paint()..color = Colors.black.withOpacity(0.35));
     canvas.drawPath(cutout, paint);

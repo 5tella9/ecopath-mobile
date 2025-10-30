@@ -183,8 +183,8 @@ class _ShopScreenState extends State<ShopScreen> {
     //     "Seongnam-si Bundang-gu", "Seongnam-si Sujeong-gu", "Seongnam-si Jungwon-gu",
     //     "Hanam-si",
     //     "Pyeongtaek-si"
-    final isSeongnamArea = region == "Gyeonggi-do" &&
-        (district.contains("Seongnam-si "));
+    final isSeongnamArea =
+        region == "Gyeonggi-do" && (district.contains("Seongnam-si "));
     final isHanam = region == "Gyeonggi-do" && district == "Hanam-si";
     final isPyeongtaek = district == "Pyeongtaek-si"; // region should be Gyeonggi-do in your file
 
@@ -195,16 +195,14 @@ class _ShopScreenState extends State<ShopScreen> {
     // ----- BLUE BAG -----
     // Blue bag general waste: Gwangju Seo-gu
     // Blue bag food waste: Seoul Seocho-gu
-    final isGwangjuSeogu =
-        (region == "Gwangju" && district == "Seo-gu");
+    final isGwangjuSeogu = (region == "Gwangju" && district == "Seo-gu");
     if (isGwangjuSeogu) {
       // general waste blue
       result.add(blueGeneral);
       // This area also uses white bag, we'll allow white later by not blocking.
     }
 
-    final isSeoulSeocho =
-        (region == "Seoul" && district == "Seocho-gu");
+    final isSeoulSeocho = (region == "Seoul" && district == "Seocho-gu");
     if (isSeoulSeocho) {
       // food waste blue
       result.add(blueFood);
@@ -216,17 +214,14 @@ class _ShopScreenState extends State<ShopScreen> {
     //
     // In kr_address.json:
     //   Gwangju: "Gwangsan-gu"
-    final isGwangjuGwangsan =
-        (region == "Gwangju" && district == "Gwangsan-gu");
+    final isGwangjuGwangsan = (region == "Gwangju" && district == "Gwangsan-gu");
     if (isGwangjuGwangsan) {
       result.add(pinkGeneral);
     }
 
     //   Cheonan-si in json is split:
     //     "Cheonan-si Dongnam-gu", "Cheonan-si Seobuk-gu"
-    final isCheonan =
-        region == "Chungcheongnam-do" &&
-        (district.startsWith("Cheonan-si "));
+    final isCheonan = region == "Chungcheongnam-do" && (district.startsWith("Cheonan-si "));
     if (isCheonan) {
       // Pink bag = Food Waste (Cheonan-si)
       result.add(pinkFood);
@@ -238,23 +233,19 @@ class _ShopScreenState extends State<ShopScreen> {
     //   - Seongnam-si Bundang-gu
     //   - Asan-si
     //   - most Seoul area uses as food waste
-    //
-    final isGwangjuNamgu =
-        (region == "Gwangju" && district == "Nam-gu");
+    final isGwangjuNamgu = (region == "Gwangju" && district == "Nam-gu");
     if (isGwangjuNamgu) {
       result.add(yellowGeneral);
     }
 
     // Seongnam-si Bundang-gu specifically:
-    final isSeongnamBundang = region == "Gyeonggi-do" &&
-        district == "Seongnam-si Bundang-gu";
+    final isSeongnamBundang = region == "Gyeonggi-do" && district == "Seongnam-si Bundang-gu";
     if (isSeongnamBundang) {
       result.add(yellowFood);
     }
 
     // Asan-si (Chungcheongnam-do list includes "Asan-si")
-    final isAsan =
-        region == "Chungcheongnam-do" && district == "Asan-si";
+    final isAsan = region == "Chungcheongnam-do" && district == "Asan-si";
     if (isAsan) {
       result.add(yellowFood);
     }
@@ -264,9 +255,7 @@ class _ShopScreenState extends State<ShopScreen> {
     //  - Seocho-gu (blueFood already defined)
     //  - Gwangjin-gu (purpleFood below)
     final isSeoul = region == "Seoul";
-    if (isSeoul &&
-        district != "Seocho-gu" &&
-        district != "Gwangjin-gu") {
+    if (isSeoul && district != "Seocho-gu" && district != "Gwangjin-gu") {
       result.add(yellowFood);
     }
 
@@ -275,14 +264,12 @@ class _ShopScreenState extends State<ShopScreen> {
     // Purple bag food waste:
     //   - Seoul Gwangjin-gu
     //   - Cheonan-si (again)
-    final isGwangjuDonggu =
-        (region == "Gwangju" && district == "Dong-gu");
+    final isGwangjuDonggu = (region == "Gwangju" && district == "Dong-gu");
     if (isGwangjuDonggu) {
       result.add(purpleGeneral);
     }
 
-    final isSeoulGwangjin =
-        (region == "Seoul" && district == "Gwangjin-gu");
+    final isSeoulGwangjin = (region == "Seoul" && district == "Gwangjin-gu");
     if (isSeoulGwangjin) {
       result.add(purpleFood);
     }
@@ -294,8 +281,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
     // ----- ORANGE BAG -----
     // Orange bag food waste: Pyeongtaek-si
-    final isPyeongtaekOrange =
-        region == "Gyeonggi-do" && district == "Pyeongtaek-si";
+    final isPyeongtaekOrange = region == "Gyeonggi-do" && district == "Pyeongtaek-si";
     if (isPyeongtaekOrange) {
       result.add(orangeFood);
     }
@@ -311,22 +297,25 @@ class _ShopScreenState extends State<ShopScreen> {
     //  - Gwangju Dong-gu
     //
     // We'll allow white unless this district hits an exclusion case.
-
     final allowWhite = _shouldAllowWhiteBag(region, district);
-
     if (allowWhite) {
-      final alreadyHasWhite = result.any(
-        (b) => b.colorName == "White Bag",
-      );
+      final alreadyHasWhite = result.any((b) => b.colorName == "White Bag");
       if (!alreadyHasWhite) {
         result.add(whiteGeneral);
       }
     }
-
-    // If result is still empty and allowWhite is true, still add whiteGeneral.
     if (result.isEmpty && allowWhite) {
       result.add(whiteGeneral);
     }
+
+    // ====== NEW: DEFAULT FOOD-WASTE MAPPING ======
+    // If no food-waste bag was assigned by the rules above,
+    // auto-assign Yellow Food Waste as a fallback.
+    final hasFoodWaste = result.any((b) => b.wasteType == "Food Waste");
+    if (!hasFoodWaste) {
+      result.add(yellowFood);
+    }
+    // ====== END DEFAULT ======
 
     return result;
   }
@@ -337,7 +326,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
     // 1. Gyeonggi-do Seongnam-si (any gu of Seongnam-si)
     if (region == "Gyeonggi-do" && district.contains("Seongnam-si ")) {
-        return false;
+      return false;
     }
 
     // 2. Gyeonggi-do Hanam-si
@@ -662,7 +651,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   '  • Gwangsan-gu (Gwangju)\n'
                   '  • Nam-gu (Gwangju)\n'
                   '  • Dong-gu (Gwangju)\n\n'
-                  'Some areas also have special food-waste colors (yellow, blue, purple, orange).',
+                  'If no food-waste color is defined for your district, we default to Yellow Food Waste.',
                   style: GoogleFonts.lato(
                     color: Colors.white,
                     fontSize: 12,

@@ -1,3 +1,4 @@
+import 'package:ecopath/core/api_test.dart';
 import 'package:flutter/material.dart';
 import 'quiz_screen.dart'; // keep this import
 import 'package:google_fonts/google_fonts.dart';
@@ -69,6 +70,24 @@ class DashboardState extends State<Dashboard> {
       ),
     );
     if (res == true) onYes();
+  }
+
+  // ---- Test backend helper (uses ApiTest.testSaveUser) ----
+  Future<void> _testBackend() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Sending test request to backend…')),
+      );
+      await ApiTest.testSaveUser();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Done. Check Run console for status/body.')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Request failed: $e')),
+      );
+    }
   }
 
   @override
@@ -381,6 +400,13 @@ class DashboardState extends State<Dashboard> {
           ),
         ),
       ),
+
+      // ---- Floating action button to test backend ----
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _testBackend,
+        label: const Text('Test Backend'),
+        icon: const Icon(Icons.play_arrow),
+      ),
     );
   }
 }
@@ -567,18 +593,8 @@ class StatsSectionPoints extends StatelessWidget {
 
   static const _monthShort = [
     '',
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec'
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 }
 

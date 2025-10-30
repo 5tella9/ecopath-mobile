@@ -140,7 +140,7 @@ class _GamesScreenState extends State<GamesScreen> {
                     _GameTile(
                       title: 'Quiz',
                       tileColor: const Color(0xFFA1D0D8),
-                      assetPath: 'assets/images/quizicon.png',
+                      assetPath: 'assets/images/quiz.png',
                       onTap: _openQuiz,
                     ),
                     _GameTile(

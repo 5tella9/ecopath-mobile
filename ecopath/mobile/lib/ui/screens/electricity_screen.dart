@@ -1,4 +1,6 @@
 // lib/ui/screens/electricity_screen.dart
+import 'package:ecopath/core/meters_api.dart';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -26,7 +28,49 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
   ElecRange _range = ElecRange.month;
   bool _showCost = false; // toggle kWh <-> ₩
 
-  // Demo data; replace with real user data later.
+  // ===== Backend average (demo fetch) =====
+  bool _loadingAvg = false;
+  double? _avgKwh;           // e.g., 4.1
+  String _avgUnit = 'kWh';   // backend unit label
+
+  // TODO: replace with the user’s real smart meter ID (you used this earlier)
+  static const String _demoSmartMeterId = 'a40adadb-ace4-4d16-bf82-f53cca939163';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAverageForJanuary2025(); // demo call; safe & one-time
+  }
+
+  Future<void> _loadAverageForJanuary2025() async {
+    setState(() => _loadingAvg = true);
+    try {
+      final result = await MetersApi.fetchAverageReading(
+        smartMeterId: _demoSmartMeterId,
+        from: '2025-01-01',
+        to: '2025-01-31',
+      );
+      // Expect keys: smartMeterId, type, from, to, unit, average
+      final avg = (result['average'] as num?)?.toDouble();
+      final unit = (result['unit'] as String?) ?? 'kWh';
+
+      setState(() {
+        _avgKwh = avg;
+        _avgUnit = (unit == 'kilowatt_hour') ? 'kWh' : unit;
+      });
+    } catch (e) {
+      // Show a non-blocking toast/snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load backend average: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loadingAvg = false);
+    }
+  }
+
+  // ===== Demo series data (replace with real) =====
   (List<String>, List<double>) _series(ElecRange r) {
     switch (r) {
       case ElecRange.week:
@@ -43,7 +87,7 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
     }
   }
 
-  // Simple progressive estimate (demo only).
+  // ===== Simple progressive estimate (demo only) =====
   double _estimateWon(double kwh) {
     if (kwh <= 200) return 910 + kwh * 120;
     if (kwh <= 400) return 1600 + kwh * 214;
@@ -181,6 +225,55 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                         style: _ts(13, color: kPrimary),
                       ),
                     ],
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // ====== BACKEND AVERAGE CARD (Jan 2025, demo) ======
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: kCard),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.bolt, color: kAccent),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _loadingAvg
+                          ? Text('Fetching backend average for Jan 2025…',
+                              style: _ts(13, color: kPrimary))
+                          : (_avgKwh == null)
+                              ? Text('No backend average available (Jan 2025).',
+                                  style: _ts(13, color: kPrimary))
+                              : Text(
+                                  'Backend Avg (Jan 2025): ${_avgKwh!.toStringAsFixed(2)} $_avgUnit',
+                                  style: _ts(14, fw: FontWeight.w700, color: kPrimary),
+                                ),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      onPressed: _loadingAvg ? null : _loadAverageForJanuary2025,
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Refresh'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: kPrimary,
+                        side: const BorderSide(color: kPrimary),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      ),
+                    ),
                   ],
                 ),
               ),
