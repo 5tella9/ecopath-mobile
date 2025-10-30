@@ -1,6 +1,9 @@
+// lib/ui/screens/features_screen.dart
 import 'package:flutter/material.dart';
 import 'package:ecopath/ui/screens/shop_screen.dart';
 import 'package:ecopath/ui/screens/carbon_screen.dart';
+import 'package:ecopath/ui/screens/electricity_screen.dart';
+import 'package:ecopath/ui/screens/gas_screen.dart';
 
 class FeaturesScreen extends StatelessWidget {
   const FeaturesScreen({super.key});
@@ -15,7 +18,7 @@ class FeaturesScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFF9F7FF),
         elevation: 0,
         centerTitle: true,
-        automaticallyImplyLeading: false, // <-- hide back button here
+        automaticallyImplyLeading: false, // <-- hide back button on Features hub
         title: Text(
           'Features',
           style: theme.textTheme.titleLarge?.copyWith(
@@ -49,14 +52,15 @@ class FeaturesScreen extends StatelessWidget {
                     subtitle: 'Track weekly / monthly / yearly usage',
                     iconPath: 'assets/images/electricity.png',
                     iconBg: const Color(0xFFECE9FF),
-                    onTap: () => _open(context, const _ElectricityUsageScreen()),
+                    onTap: () => _open(context, const ElectricityScreen()),
                   ),
                   _FeatureCard(
                     title: 'Gas',
                     subtitle: 'Monitor and set save goals',
                     iconPath: 'assets/images/gas.png',
                     iconBg: const Color(0xFFFFE8EC),
-                    onTap: () => _open(context, const _GasUsageScreen()),
+                    // 🔗 now opens your real GasScreen
+                    onTap: () => _open(context, const GasScreen()),
                   ),
                   _FeatureCard(
                     title: 'Carbon\nFootprint',
@@ -70,8 +74,7 @@ class FeaturesScreen extends StatelessWidget {
                     subtitle: 'Scan, sort, and track',
                     iconPath: 'assets/images/tracker.png',
                     iconBg: const Color(0xFFEFF0F5),
-                    onTap: () =>
-                        _open(context, const _TrashRecyclingScreen()),
+                    onTap: () => _open(context, const _TrashRecyclingScreen()),
                   ),
                   _FeatureCard(
                     title: 'Shop',
@@ -224,87 +227,8 @@ class _FeatureCard extends StatelessWidget {
 }
 
 /// ----------------------
-/// Stub detail pages (except Shop)
-/// using PNG icons, with back button hidden too
+/// Simple stub pages (Trash & Recycling, Education)
 /// ----------------------
-
-class _ElectricityUsageScreen extends StatelessWidget {
-  const _ElectricityUsageScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Electricity Usage'),
-        automaticallyImplyLeading: false, // <-- hide back here too?
-      ),
-      body: _StubBody(
-        iconPath: 'assets/images/electricity.png',
-        iconBg: const Color(0xFFECE9FF),
-        title: 'Electricity Usage',
-        lines: const [
-          '• View weekly / monthly / yearly kWh',
-          '• Compare against your average',
-          '• Earn XP for saving streaks',
-        ],
-        textTheme: t.textTheme,
-      ),
-    );
-  }
-}
-
-class _GasUsageScreen extends StatelessWidget {
-  const _GasUsageScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gas Usage'),
-        automaticallyImplyLeading: false,
-      ),
-      body: _StubBody(
-        iconPath: 'assets/images/gas.png',
-        iconBg: const Color(0xFFFFE8EC),
-        title: 'Gas Usage',
-        lines: const [
-          '• Track m³ or billing cycles',
-          '• Weekly / monthly / yearly charts',
-          '• Targets & badges',
-        ],
-        textTheme: t.textTheme,
-      ),
-    );
-  }
-}
-
-class _CarbonDashboardScreen extends StatelessWidget {
-  const _CarbonDashboardScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Carbon Footprint'),
-        automaticallyImplyLeading: false,
-      ),
-      body: _StubBody(
-        iconPath: 'assets/images/carbon.png',
-        iconBg: const Color(0xFFEFF5EA),
-        title: 'Carbon Footprint',
-        lines: const [
-          '• Combined CO₂ estimate from energy & habits',
-          '• Trend vs. last period',
-          '• Tips to reduce & earn XP',
-        ],
-        textTheme: t.textTheme,
-      ),
-    );
-  }
-}
 
 class _TrashRecyclingScreen extends StatelessWidget {
   const _TrashRecyclingScreen();
@@ -312,10 +236,10 @@ class _TrashRecyclingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
+    final cs = t.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trash & Recycling'),
-        automaticallyImplyLeading: false,
+        title: const Text('Trash & Recycling'), // shows default back arrow
       ),
       body: _StubBody(
         iconPath: 'assets/images/tracker.png',
@@ -327,6 +251,7 @@ class _TrashRecyclingScreen extends StatelessWidget {
           '• Leaderboard boosts',
         ],
         textTheme: t.textTheme,
+        accent: cs.primary,
       ),
     );
   }
@@ -338,10 +263,10 @@ class _EducationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
+    final cs = t.colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Education'),
-        automaticallyImplyLeading: false,
+        title: const Text('Education'), // shows default back arrow
       ),
       body: _StubBody(
         iconPath: 'assets/images/education.png',
@@ -353,6 +278,7 @@ class _EducationScreen extends StatelessWidget {
           '• Tips tailored to your data',
         ],
         textTheme: t.textTheme,
+        accent: cs.primary,
       ),
     );
   }
@@ -364,6 +290,7 @@ class _StubBody extends StatelessWidget {
   final String title;
   final List<String> lines;
   final TextTheme textTheme;
+  final Color accent;
 
   const _StubBody({
     required this.iconPath,
@@ -371,11 +298,11 @@ class _StubBody extends StatelessWidget {
     required this.title,
     required this.lines,
     required this.textTheme,
+    required this.accent,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       child: Column(
@@ -422,7 +349,7 @@ class _StubBody extends StatelessWidget {
                   Icon(
                     Icons.check_circle_rounded,
                     size: 20,
-                    color: cs.primary,
+                    color: accent,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -442,20 +369,20 @@ class _StubBody extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: cs.primary.withOpacity(.08),
+              color: accent.withOpacity(.08),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: cs.primary.withOpacity(.25)),
+              border: Border.all(color: accent.withOpacity(.25)),
             ),
             child: Row(
               children: [
-                Icon(Icons.stars_rounded, color: cs.primary),
+                Icon(Icons.stars_rounded, color: accent),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'Complete actions here to earn EcoPath points & badges.',
                     style: textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: cs.primary,
+                      color: accent,
                     ),
                   ),
                 ),

@@ -188,7 +188,7 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: _fg.withOpacity(.6)),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.arrow_back,
                               color: _fg,
                               size: 20,
@@ -198,14 +198,12 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                       else
                         const SizedBox(width: 40, height: 40),
                       const Spacer(),
-                      Text(
-                        'EcoPath',
-                        style: GoogleFonts.lato(
-                          fontSize: 16,
-                          color: _fg,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: .5,
-                        ),
+                      // 🔁 REPLACED TEXT WITH LOGO IMAGE
+                      // Make sure assets/images/ecopath.png is listed in pubspec.yaml
+                      Image.asset(
+                        'assets/images/ecopath.png',
+                        height: 60,
+                        fit: BoxFit.contain,
                       ),
                     ],
                   ),
@@ -643,13 +641,13 @@ class _DobStepState extends State<_DobStep> {
         // dark style picker to match survey aesthetic
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
+            colorScheme: const ColorScheme.dark(
               primary: _fg,
-              surface: const Color(0xFF0F2E28),
+              surface: Color(0xFF0F2E28),
               onSurface: _fg,
               onPrimary: _ink,
             ),
-            dialogBackgroundColor: const Color(0xFF0F2E28),
+            dialogBackgroundColor: Color(0xFF0F2E28),
           ),
           child: child!,
         );
@@ -702,7 +700,7 @@ class _DobStepState extends State<_DobStep> {
                   padding: EdgeInsets.zero,
                 ),
                 onPressed: _pickDate,
-                child: Icon(
+                child: const Icon(
                   Icons.calendar_today,
                   color: _fg,
                   size: 20,
