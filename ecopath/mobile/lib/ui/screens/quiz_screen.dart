@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import '../../util/survey_storage.dart';
+/// QuizScreen now dynamically fetches quiz JSON from your API
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
 
@@ -16,40 +19,26 @@ class _QuizScreenState extends State<QuizScreen> {
   int _currentIndex = 0;
 
   // ===== Pre-start 3-2-1 overlay =====
-  static const int _preStartBegin = 3; // shows 3,2,1
+  static const int _preStartBegin = 3;
   int _preCount = _preStartBegin;
   bool _isPreCounting = true;
   Timer? _preTimer;
 
   // ===== Quiz-wide timer =====
-  static const int _totalTimeSeconds = 60; // change if you want longer/shorter quiz
+  static const int _totalTimeSeconds = 60;
   late int _timeLeft = _totalTimeSeconds;
   Timer? _timer;
   bool _endDialogShown = false;
 
-  // Dummy data
-  final List<Map<String, dynamic>> _questions = const [
-    {
-      'q': 'Which action reduces household waste the most?',
-      'answers': [
-        'Use paper plates',
-        'Compost food scraps',
-        'Double-bag trash',
-        'Buy more plastic'
-      ],
-      'correct': 1,
-    },
-    {
-      'q': 'Best time to run washing machine for energy savings?',
-      'answers': ['Peak hours', 'Anytime', 'Off-peak hours', 'Midday only'],
-      'correct': 2,
-    },
-  ];
+  // ===== Dynamic quiz data =====
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _questions = [];
+  String? _quizTitle;
 
   @override
   void initState() {
     super.initState();
-    _startPreCountdown(); // show 3-2-1 immediately when entering screen
+    _fetchQuiz(); // Fetch quiz from backend on start
   }
 
   @override
@@ -59,13 +48,91 @@ class _QuizScreenState extends State<QuizScreen> {
     super.dispose();
   }
 
+  // ---------- Fetch quiz from backend ----------
+  Future<void> _fetchQuiz() async {
+    const apiUrl = 'https://floor-tribunal-joseph-asus.trycloudflare.com/quiz'; // your FastAPI endpoint
+
+    final surveyData = await SurveyStorage.load();
+
+    final payload = {
+      "userId": "b2f84c7a-0d8c-4e41-b5e3-52ddf559fa66",
+      "from_date": "2025-01-01",
+      "to_date": "2025-01-31",
+      "carbonFootprint": {
+        "electricityKgCO2e": 14.2,
+        "gasKgCO2e": 53.9,
+        "wasteKgCO2e": 2.8,
+        "totalKgCO2e": 70.9
+      },
+      "household": surveyData?.livingWith,
+      "houseType": surveyData?.houseType,
+      "ecoGoal": surveyData?.ecoGoals.toList(),
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List<dynamic> rawQ = data['questions'];
+
+        setState(() {
+          _quizTitle = data['title'];
+          _questions = rawQ.map((q) {
+            final opts = (q['options'] as List)
+                .map((o) => o['text'].toString())
+                .toList();
+            return {
+              'q': q['text'],
+              'answers': opts,
+              'correct': opts.indexWhere((t) =>
+              t == (q['options']
+                  .firstWhere((o) =>
+              o['id'] == q['correctOptionId'])['text'])),
+              'explanation': q['explanation']
+            };
+          }).toList();
+          _isLoading = false;
+        });
+
+        _startPreCountdown();
+      } else {
+        throw Exception('HTTP ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Quiz fetch failed: $e");
+      // fallback example
+      setState(() {
+        _isLoading = false;
+        _questions = const [
+          {
+            'q': 'Which action reduces household waste the most?',
+            'answers': [
+              'Use paper plates',
+              'Compost food scraps',
+              'Double-bag trash',
+              'Buy more plastic'
+            ],
+            'correct': 1,
+            'explanation': 'Composting food waste prevents methane emissions.'
+          }
+        ];
+      });
+      _startPreCountdown();
+    }
+  }
+
   // ---------- Pre-start countdown logic ----------
   void _startPreCountdown() {
     _preTimer?.cancel();
     setState(() {
       _isPreCounting = true;
       _preCount = _preStartBegin;
-      _timeLeft = _totalTimeSeconds; // reset display; main timer starts after pre-count
+      _timeLeft = _totalTimeSeconds;
       _endDialogShown = false;
     });
 
@@ -73,14 +140,10 @@ class _QuizScreenState extends State<QuizScreen> {
       if (!mounted) return;
       if (_preCount <= 1) {
         t.cancel();
-        setState(() {
-          _isPreCounting = false;
-        });
+        setState(() => _isPreCounting = false);
         _startMainTimer();
       } else {
-        setState(() {
-          _preCount -= 1;
-        });
+        setState(() => _preCount -= 1);
       }
     });
   }
@@ -94,9 +157,7 @@ class _QuizScreenState extends State<QuizScreen> {
         t.cancel();
         _onTimeUp();
       } else {
-        setState(() {
-          _timeLeft -= 1;
-        });
+        setState(() => _timeLeft -= 1);
       }
     });
   }
@@ -109,19 +170,22 @@ class _QuizScreenState extends State<QuizScreen> {
 
   // ---------- Quiz logic ----------
   void _answer(int index) {
-    if (_isPreCounting || _timeLeft <= 0) return; // block taps during pre-count or after time
+    if (_isPreCounting || _timeLeft <= 0) return;
 
     final correct = _questions[_currentIndex]['correct'] as int;
+    final explanation = _questions[_currentIndex]['explanation'] as String?;
     if (index == correct) {
       setState(() {
         _score += 10;
         _streak += 1;
       });
+      _showSnack('✅ Correct! ${explanation ?? ''}');
     } else {
       setState(() {
         _streak = 0;
         _lives = (_lives > 0) ? _lives - 1 : 0;
       });
+      _showSnack('❌ Wrong! ${explanation ?? ''}');
     }
 
     if (_lives <= 0 || _currentIndex >= _questions.length - 1) {
@@ -132,11 +196,16 @@ class _QuizScreenState extends State<QuizScreen> {
     setState(() => _currentIndex += 1);
   }
 
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg), duration: const Duration(seconds: 2)));
+  }
+
   void _showEndDialog({String? reason}) {
     if (_endDialogShown) return;
     _endDialogShown = true;
 
-    final bool survived = _lives > 0 && _timeLeft > 0;
+    final survived = _lives > 0 && _timeLeft > 0;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -165,17 +234,23 @@ class _QuizScreenState extends State<QuizScreen> {
       _score = 0;
       _currentIndex = 0;
     });
-    _startPreCountdown(); // show 3-2-1 again, then start timer
+    _startPreCountdown();
   }
 
-  String _formatTime(int seconds) {
-    final m = (seconds ~/ 60).toString().padLeft(2, '0');
-    final s = (seconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
+  String _formatTime(int s) {
+    final m = (s ~/ 60).toString().padLeft(2, '0');
+    final sec = (s % 60).toString().padLeft(2, '0');
+    return '$m:$sec';
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final q = _questions[_currentIndex];
     final answers = (q['answers'] as List<String>);
 
@@ -185,24 +260,22 @@ class _QuizScreenState extends State<QuizScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EcoPath Quiz'),
+        title: Text(_quizTitle ?? 'EcoPath Quiz'),
         centerTitle: true,
       ),
       body: Stack(
         children: [
-          // ===== Main content =====
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Top timer (starts only after 3-2-1 finishes)
+                // Timer
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.outlineVariant,
-                    ),
+                        color: Theme.of(context).colorScheme.outlineVariant),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -222,21 +295,18 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Gamified header stats
+                // Stats
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _RewardStat(
-                      icon: Icons.local_fire_department,
-                      text: 'Streak: $_streak×',
-                    ),
+                    _RewardStat(icon: Icons.local_fire_department, text: 'Streak: $_streak×'),
                     _RewardStat(icon: Icons.favorite, text: 'Lives: $_lives'),
                     _RewardStat(icon: Icons.star, text: 'Score: $_score'),
                   ],
                 ),
                 const SizedBox(height: 16),
 
-                // Question card
+                // Question
                 Card(
                   elevation: 2,
                   shape: RoundedRectangleBorder(
@@ -246,10 +316,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        Text(
-                          'Question ${_currentIndex + 1}/${_questions.length}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
+                        Text('Question ${_currentIndex + 1}/${_questions.length}',
+                            style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 10),
                         Text(
                           q['q'] as String,
@@ -276,8 +344,9 @@ class _QuizScreenState extends State<QuizScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      onPressed:
-                          (_isPreCounting || _timeLeft <= 0) ? null : () => _answer(i),
+                      onPressed: (_isPreCounting || _timeLeft <= 0)
+                          ? null
+                          : () => _answer(i),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -295,7 +364,7 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
           ),
 
-          // ===== Pre-start overlay (3-2-1) =====
+          // Pre-start overlay (3-2-1)
           if (_isPreCounting)
             Container(
               color: Colors.black.withOpacity(0.35),
@@ -339,15 +408,10 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 }
 
-/// Small reusable stat widget for gamified header
 class _RewardStat extends StatelessWidget {
   final IconData icon;
   final String text;
-
-  const _RewardStat({
-    required this.icon,
-    required this.text,
-  });
+  const _RewardStat({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -355,19 +419,14 @@ class _RewardStat extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 18),
           const SizedBox(width: 6),
-          Text(
-            text,
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
+          Text(text, style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),
     );

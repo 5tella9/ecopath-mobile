@@ -6,9 +6,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 // ⬅️ ADD THIS IMPORT so we can navigate to signup
 import 'package:ecopath/ui/screens/signup_screen.dart';
-
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import '../../util/survey_storage.dart';
 /* -------------------- MODEL -------------------- */
 class SurveyData {
+  SurveyData();
+
   String name = '';
   String dateOfBirth = ''; // yyyy/mm/dd
   String gender = '';
@@ -30,6 +34,47 @@ class SurveyData {
   String gasProvider = '';
   bool wantsQuizzes = true;
   bool wantsNotifications = true;
+
+  String toJson() => json.encode({
+    'name': name,
+    'dateOfBirth': dateOfBirth,
+    'gender': gender,
+    'sido': sido,
+    'sigungu': sigungu,
+    'dong': dong,
+    'detail': detail,
+    'houseType': houseType,
+    'livingWith': livingWith,
+    'ecoGoals': ecoGoals,
+    'hasElectricBill': hasElectricBill,
+    'hasGasBill': hasGasBill,
+    'electricProvider': electricProvider,
+    'gasProvider': gasProvider,
+    'wantsQuizzes': wantsQuizzes,
+    'wantsNotifications': wantsNotifications,
+  });
+
+  factory SurveyData.fromJson(String source) {
+    final map = json.decode(source);
+    final data = SurveyData();
+    data.name = map['name'] ?? '';
+    data.dateOfBirth = map['dateOfBirth'] ?? '';
+    data.gender = map['gender'] ?? '';
+    data.sido = map['sido'] ?? '';
+    data.sigungu = map['sigungu'] ?? '';
+    data.dong = map['dong'] ?? '';
+    data.detail = map['detail'] ?? '';
+    data.houseType = map['houseType'] ?? '';
+    data.livingWith = map['livingWith'] ?? '';
+    data.ecoGoals = List<String>.from(map['ecoGoals'] ?? []);
+    data.hasElectricBill = map['hasElectricBill'] ?? true;
+    data.hasGasBill = map['hasGasBill'] ?? true;
+    data.electricProvider = map['electricProvider'] ?? '';
+    data.gasProvider = map['gasProvider'] ?? '';
+    data.wantsQuizzes = map['wantsQuizzes'] ?? true;
+    data.wantsNotifications = map['wantsNotifications'] ?? true;
+    return data;
+  }
 }
 
 /* -------------------- COLORS -------------------- */
@@ -110,7 +155,8 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
       () => _QuizNotifyStep(data: data, onNext: _next),
       () => _FinishStep(
             data: data,
-            onFinish: () {
+            onFinish: () async {
+              await SurveyStorage.save(data);
               // ⬇️ GO TO SIGN UP SCREEN INSTEAD OF /root
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(

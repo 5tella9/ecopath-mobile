@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,6 +29,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   late final Animation<double> _lineAnim;
 
   int pointsEarned = 0;
+  bool _isScanning = false;
 
   @override
   void initState() {
@@ -70,17 +71,20 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   }
 
   Future<void> _scanTrash() async {
+    if (_isScanning || _controller == null || !_controller!.value.isInitialized) return;
+
+    setState(() => _isScanning = true);
     final XFile? photo = await _controller?.takePicture();
     if (photo == null) return;
 
-    const String apiUrl = "https://giveable-mikayla-hasteless.ngrok-free.dev/predict";
+    const String apiUrl = "https://floor-tribunal-joseph-asus.trycloudflare.com/predict";
 
     try {
       final bytes = await photo.readAsBytes();
       final base64Image = base64Encode(bytes);
 
       final Map<String, dynamic> body = {
-        "image_base64": "data:image/jpeg;base64,$base64Image",
+        "image_b64": base64Image,
       };
 
       final response = await http.post(
@@ -97,8 +101,10 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
         debugPrint("❌ Error: ${response.statusCode}");
         debugPrint(response.body);
       }
+      setState(() => _isScanning = false);
     } catch (e) {
       debugPrint("⚠️ Exception: $e");
+      setState(() => _isScanning = false);
     }
   }
 
@@ -120,7 +126,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
                     color: kInk, fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Text(
-                'you scanned ${result['klasse']}, this needs to be in the ${result['bak']} • +15 pts',
+                'you scanned ${result['item']}, this needs to be in the ${result['bin_korea']} • +15 pts',
                 style: GoogleFonts.alike(color: kInk, fontSize: 14)),
             const SizedBox(height: 16),
             Container(
@@ -290,6 +296,20 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
                   ],
                 ),
               ),
+              // ✅ Show loading overlay when scanning
+              if (_isScanning)
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: Container(
+                      color: Colors.black.withOpacity(0.2),
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
