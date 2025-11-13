@@ -1,3 +1,4 @@
+// lib/ui/screens/todo_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -53,13 +54,9 @@ class _TodoScreenState extends State<TodoScreen> {
 
   // ----- HELPERS -----
 
-  int _completedCount() {
-    return _challenges.where((c) => c.completed).length;
-  }
+  int _completedCount() => _challenges.where((c) => c.completed).length;
 
-  bool _allDone() {
-    return _completedCount() == _challenges.length;
-  }
+  bool _allDone() => _completedCount() == _challenges.length;
 
   void _acceptChallenge(int index) {
     setState(() {
@@ -99,6 +96,11 @@ class _TodoScreenState extends State<TodoScreen> {
   // later you connect this to notification_screen.dart state
   void _pushNotification({required String title, required String body}) {
     debugPrint('[NOTIFICATION] $title :: $body');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$title\n$body')),
+      );
+    }
   }
 
   @override
@@ -113,7 +115,6 @@ class _TodoScreenState extends State<TodoScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // <-- safer image widget
             const _SafeAssetIcon(
               assetPath: 'assets/images/todo.png',
               size: 28,
@@ -467,7 +468,9 @@ class _ChallengeCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: buttonColor,
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -600,10 +603,11 @@ class _BonusCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: canClaim ? onClaim : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    canClaim ? kInk : const Color(0xFFE6ECEA),
+                backgroundColor: canClaim ? kInk : const Color(0xFFE6ECEA),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -616,9 +620,7 @@ class _BonusCard extends StatelessWidget {
                         ? 'Claim'
                         : 'Locked',
                 style: GoogleFonts.lato(
-                  color: canClaim
-                      ? Colors.white
-                      : kInk.withOpacity(.6),
+                  color: canClaim ? Colors.white : kInk.withOpacity(.6),
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),

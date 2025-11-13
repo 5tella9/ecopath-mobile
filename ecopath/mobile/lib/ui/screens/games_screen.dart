@@ -1,8 +1,10 @@
+// lib/ui/screens/games_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'scantrash_screen.dart';
 import 'quiz_screen.dart';
 import 'todo_screen.dart';
+import 'community_screen.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -12,28 +14,20 @@ class GamesScreen extends StatefulWidget {
 }
 
 class _GamesScreenState extends State<GamesScreen> {
-  static const Color kInk = Color(0xFF00221C);
-  static const Color kBg = Color(0xFFF5F5F5);
-  static const Color kCard = Colors.white;
-
-  int points = 500; // shown in header
-  int energy = 25;  // shown in header
+  int points = 500;
+  int energy = 25;
   int level = 3;
   int xp = 140;
   int xpToNext = 200;
 
-  TextStyle get _title => GoogleFonts.lato(
-        color: kInk,
-        fontSize: 28,
-        fontWeight: FontWeight.w700,
-      );
-
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    final cs = t.colorScheme;
     final progress = (xp / xpToNext).clamp(0.0, 1.0);
 
     return Scaffold(
-      backgroundColor: kBg,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -43,14 +37,17 @@ class _GamesScreenState extends State<GamesScreen> {
               // ---------- HEADER ROW ----------
               Row(
                 children: [
-                  Text('Play & Earn', style: _title),
+                  Text(
+                    'Play & Earn',
+                    style: GoogleFonts.lato(
+                      color: cs.onSurface,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const Spacer(),
-
-                  // Energy pill
                   _EnergyPill(energy: energy),
                   const SizedBox(width: 8),
-
-                  // Points pill
                   _PointsPill(points: points),
                 ],
               ),
@@ -59,13 +56,13 @@ class _GamesScreenState extends State<GamesScreen> {
               // ---------- LEVEL CARD ----------
               Container(
                 decoration: BoxDecoration(
-                  color: kCard,
+                  color: cs.surfaceContainerLowest,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x14000000),
+                      color: cs.shadow.withOpacity(0.08),
                       blurRadius: 12,
-                      offset: Offset(0, 6),
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -76,7 +73,7 @@ class _GamesScreenState extends State<GamesScreen> {
                     Text(
                       'Level $level',
                       style: GoogleFonts.lato(
-                        color: kInk,
+                        color: cs.onSurface,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
@@ -87,15 +84,15 @@ class _GamesScreenState extends State<GamesScreen> {
                       child: LinearProgressIndicator(
                         value: progress,
                         minHeight: 10,
-                        backgroundColor: const Color(0xFFE6ECEA),
-                        color: const Color(0xFF71D8C6),
+                        backgroundColor: cs.surfaceContainerHighest,
+                        color: cs.primary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       '$xp / $xpToNext XP',
                       style: GoogleFonts.alike(
-                        color: kInk.withOpacity(.8),
+                        color: cs.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                       ),
@@ -103,14 +100,13 @@ class _GamesScreenState extends State<GamesScreen> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
 
               // ---------- DAILY QUESTS ----------
               Text(
                 'Daily Quests',
                 style: GoogleFonts.lato(
-                  color: kInk,
+                  color: cs.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -133,39 +129,37 @@ class _GamesScreenState extends State<GamesScreen> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
-                  // A little taller so no overflow
                   childAspectRatio: 1.1,
                   padding: const EdgeInsets.only(bottom: 12),
                   children: [
                     _GameTile(
                       title: 'Quiz',
-                      tileColor: const Color(0xFFA1D0D8),
+                      tileColor: cs.primaryContainer,
                       assetPath: 'assets/images/quiz.png',
                       onTap: _openQuiz,
                     ),
                     _GameTile(
                       title: 'Scan Trash',
-                      tileColor: const Color(0xFF71D8C6),
+                      tileColor: cs.tertiaryContainer,
                       assetPath: 'assets/images/scantrash.png',
                       onTap: _openScan,
                     ),
                     _GameTile(
                       title: 'Recycle',
-                      tileColor: const Color(0xFFEDDD62),
+                      tileColor: cs.secondaryContainer,
                       assetPath: 'assets/images/recycletrash.png',
                       onTap: _openRecycle,
                     ),
                     _GameTile(
-                      // remove the manual \n and let text wrap
                       title: 'Daily Challenge',
-                      tileColor: const Color(0xFFC8D9A5),
+                      tileColor: cs.surfaceTint.withOpacity(.25),
                       assetPath: 'assets/images/todolist.png',
-                      iconData: Icons.checklist, // fallback icon
+                      iconData: Icons.checklist,
                       onTap: _openTodo,
                     ),
                     _GameTile(
                       title: 'Community',
-                      tileColor: const Color(0xFFD8E6BF),
+                      tileColor: cs.primary.withOpacity(.15),
                       assetPath: 'assets/images/star.png',
                       onTap: _openCommunity,
                     ),
@@ -179,8 +173,7 @@ class _GamesScreenState extends State<GamesScreen> {
     );
   }
 
-  // ---------- NAVIGATION / STATE UPDATE LOGIC ----------
-
+  // ---------- NAVIGATION / XP LOGIC ----------
   Future<void> _openQuiz() async {
     final result = await Navigator.of(context).push<int>(
       MaterialPageRoute(builder: (_) => const QuizScreen()),
@@ -188,7 +181,7 @@ class _GamesScreenState extends State<GamesScreen> {
     if (result != null && result > 0) _gainPoints(result);
   }
 
-  void _openScan() async {
+  Future<void> _openScan() async {
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const ScanTrashScreen()),
     );
@@ -196,13 +189,18 @@ class _GamesScreenState extends State<GamesScreen> {
 
   void _openRecycle() => _gainPoints(20);
 
-  void _openTodo() async {
+  Future<void> _openTodo() async {
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const TodoScreen()),
     );
   }
 
-  void _openCommunity() => _gainPoints(5);
+  Future<void> _openCommunity() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const CommunityScreen()),
+    );
+    _gainPoints(5);
+  }
 
   void _gainPoints(int add) {
     setState(() {
@@ -227,24 +225,21 @@ class _EnergyPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF00221C),
+        color: cs.primary,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.bolt,
-            color: Color(0xFFF5F5F5),
-            size: 18,
-          ),
+          Icon(Icons.bolt, color: cs.onPrimary, size: 18),
           const SizedBox(width: 6),
           Text(
             '$energy',
             style: GoogleFonts.lato(
-              color: const Color(0xFFF5F5F5),
+              color: cs.onPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -261,20 +256,21 @@ class _PointsPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF00221C),
+        color: cs.primary,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         children: [
-          const Icon(Icons.stars, color: Color(0xFFF5F5F5), size: 18),
+          Icon(Icons.stars, color: cs.onPrimary, size: 18),
           const SizedBox(width: 6),
           Text(
             '$points pts',
             style: GoogleFonts.lato(
-              color: const Color(0xFFF5F5F5),
+              color: cs.onPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -295,23 +291,24 @@ class _QuestChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(999),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x11000000),
+            color: cs.shadow.withOpacity(0.06),
             blurRadius: 8,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Text(
         text,
         style: GoogleFonts.alike(
-          color: const Color(0xFF00221C),
+          color: cs.onSurface,
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
@@ -328,10 +325,8 @@ class _GameTile extends StatefulWidget {
   final String title;
   final Color tileColor;
   final VoidCallback onTap;
-
-  // visual options:
-  final String? assetPath; // preferred image asset for this tile
-  final IconData? iconData; // fallback if asset fails
+  final String? assetPath;
+  final IconData? iconData;
 
   const _GameTile({
     required this.title,
@@ -347,12 +342,12 @@ class _GameTile extends StatefulWidget {
 
 class _GameTileState extends State<_GameTile> {
   double _scale = 1.0;
-  void _press(bool down) => setState(() {
-        _scale = down ? 0.97 : 1.0;
-      });
+  void _press(bool down) => setState(() => _scale = down ? 0.97 : 1.0);
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return AnimatedScale(
       scale: _scale,
       duration: const Duration(milliseconds: 120),
@@ -366,11 +361,11 @@ class _GameTileState extends State<_GameTile> {
           decoration: BoxDecoration(
             color: widget.tileColor,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x33000000),
+                color: cs.shadow.withOpacity(0.15),
                 blurRadius: 10,
-                offset: Offset(0, 6),
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -378,7 +373,6 @@ class _GameTileState extends State<_GameTile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ---------- ICON AREA (fixed height block) ----------
               SizedBox(
                 height: 64,
                 child: Align(
@@ -389,29 +383,23 @@ class _GameTileState extends State<_GameTile> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 6),
-
-              // ---------- TITLE ----------
               Text(
                 widget.title,
                 maxLines: 2,
                 softWrap: true,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.lato(
-                  color: const Color(0xFF00221C),
+                  color: cs.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-
               const SizedBox(height: 2),
-
-              // ---------- SUBTITLE ----------
               Text(
                 'Tap to play',
                 style: GoogleFonts.alike(
-                  color: const Color(0xFF00221C),
+                  color: cs.onSurfaceVariant,
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                 ),
@@ -437,7 +425,7 @@ class _GameVisual extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double targetHeight = 56.0;
-    const Color ink = Color(0xFF00221C);
+    final cs = Theme.of(context).colorScheme;
 
     if (assetPath != null) {
       return Image.asset(
@@ -446,34 +434,12 @@ class _GameVisual extends StatelessWidget {
         fit: BoxFit.contain,
         alignment: Alignment.topLeft,
         errorBuilder: (context, error, stackTrace) {
-          if (iconData != null) {
-            return Icon(
-              iconData,
-              color: ink,
-              size: targetHeight,
-            );
-          }
-          return const Icon(
-            Icons.sports_esports,
-            color: ink,
-            size: targetHeight,
-          );
+          return Icon(iconData ?? Icons.sports_esports,
+              color: cs.onSurface, size: targetHeight);
         },
       );
     }
-
-    if (iconData != null) {
-      return Icon(
-        iconData,
-        color: ink,
-        size: targetHeight,
-      );
-    }
-
-    return const Icon(
-      Icons.sports_esports,
-      color: ink,
-      size: targetHeight,
-    );
+    return Icon(iconData ?? Icons.sports_esports,
+        color: cs.onSurface, size: targetHeight);
   }
 }

@@ -10,90 +10,102 @@ class FeaturesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final t = Theme.of(context);
+    final cs = t.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F7FF), // soft game hub bg
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F7FF),
+        backgroundColor: cs.surface,
         elevation: 0,
         centerTitle: true,
-        automaticallyImplyLeading: false, // <-- hide back button on Features hub
+        automaticallyImplyLeading: false,
         title: Text(
           'Features',
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: t.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF00221C),
+            color: cs.onSurface,
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Choose your eco-mission",
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF00221C),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              cs.surface,
+              cs.surfaceContainerHighest,
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Choose your eco-mission",
+                style: t.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: .92,
-                children: [
-                  _FeatureCard(
-                    title: 'Electricity',
-                    subtitle: 'Track weekly / monthly / yearly usage',
-                    iconPath: 'assets/images/electricity.png',
-                    iconBg: const Color(0xFFECE9FF),
-                    onTap: () => _open(context, const ElectricityScreen()),
-                  ),
-                  _FeatureCard(
-                    title: 'Gas',
-                    subtitle: 'Monitor and set save goals',
-                    iconPath: 'assets/images/gas.png',
-                    iconBg: const Color(0xFFFFE8EC),
-                    // 🔗 now opens your real GasScreen
-                    onTap: () => _open(context, const GasScreen()),
-                  ),
-                  _FeatureCard(
-                    title: 'Carbon\nFootprint',
-                    subtitle: 'See your CO₂ footprint',
-                    iconPath: 'assets/images/carbon.png',
-                    iconBg: const Color(0xFFEFF5EA),
-                    onTap: () => _open(context, const CarbonScreen()),
-                  ),
-                  _FeatureCard(
-                    title: 'Trash &\nRecycling',
-                    subtitle: 'Scan, sort, and track',
-                    iconPath: 'assets/images/tracker.png',
-                    iconBg: const Color(0xFFEFF0F5),
-                    onTap: () => _open(context, const _TrashRecyclingScreen()),
-                  ),
-                  _FeatureCard(
-                    title: 'Shop',
-                    subtitle: 'Exchange points for goods',
-                    iconPath: 'assets/images/shop.png',
-                    iconBg: const Color(0xFFEDEBFF),
-                    onTap: () => _open(context, const ShopScreen()),
-                  ),
-                  _FeatureCard(
-                    title: 'Education',
-                    subtitle: 'Quick eco lessons & quizzes',
-                    iconPath: 'assets/images/education.png',
-                    iconBg: const Color(0xFFEFF0FF),
-                    onTap: () => _open(context, const _EducationScreen()),
-                  ),
-                ],
+              const SizedBox(height: 16),
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: .92,
+                  children: [
+                    _FeatureCard(
+                      title: 'Electricity',
+                      subtitle: 'Track weekly / monthly / yearly usage',
+                      iconPath: 'assets/images/electricity.png',
+                      bubbleTone: _Tone.primary,
+                      onTap: () => _open(context, const ElectricityScreen()),
+                    ),
+                    _FeatureCard(
+                      title: 'Gas',
+                      subtitle: 'Monitor and set save goals',
+                      iconPath: 'assets/images/gas.png',
+                      bubbleTone: _Tone.error,
+                      onTap: () => _open(context, const GasScreen()),
+                    ),
+                    _FeatureCard(
+                      title: 'Carbon\nFootprint',
+                      subtitle: 'See your CO₂ footprint',
+                      iconPath: 'assets/images/carbon.png',
+                      bubbleTone: _Tone.tertiary,
+                      onTap: () => _open(context, const CarbonScreen()),
+                    ),
+                    _FeatureCard(
+                      title: 'Trash &\nRecycling',
+                      subtitle: 'Scan, sort, and track',
+                      iconPath: 'assets/images/tracker.png',
+                      bubbleTone: _Tone.secondary,
+                      onTap: () => _open(context, const _TrashRecyclingScreen()),
+                    ),
+                    _FeatureCard(
+                      title: 'Shop',
+                      subtitle: 'Exchange points for goods',
+                      iconPath: 'assets/images/shop.png',
+                      bubbleTone: _Tone.inverse,
+                      onTap: () => _open(context, const ShopScreen()),
+                    ),
+                    _FeatureCard(
+                      title: 'Education',
+                      subtitle: 'Quick eco lessons & quizzes',
+                      iconPath: 'assets/images/education.png',
+                      bubbleTone: _Tone.primarySoft,
+                      onTap: () => _open(context, const _EducationScreen()),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -106,25 +118,44 @@ class FeaturesScreen extends StatelessWidget {
   }
 }
 
+enum _Tone { primary, secondary, tertiary, error, inverse, primarySoft }
+
 class _FeatureCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String iconPath;
-  final Color iconBg;
+  final _Tone bubbleTone;
   final VoidCallback onTap;
 
   const _FeatureCard({
     required this.title,
     required this.subtitle,
     required this.iconPath,
+    required this.bubbleTone,
     required this.onTap,
-    required this.iconBg,
   });
+
+  Color _bubbleColor(ColorScheme cs) {
+    switch (bubbleTone) {
+      case _Tone.primary:
+        return cs.primaryContainer;
+      case _Tone.secondary:
+        return cs.secondaryContainer;
+      case _Tone.tertiary:
+        return cs.tertiaryContainer;
+      case _Tone.error:
+        return cs.errorContainer;
+      case _Tone.inverse:
+        return cs.inversePrimary.withOpacity(.18);
+      case _Tone.primarySoft:
+        return cs.primary.withOpacity(.12);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final t = Theme.of(context);
+    final cs = t.colorScheme;
 
     return InkWell(
       onTap: onTap,
@@ -132,23 +163,23 @@ class _FeatureCard extends StatelessWidget {
       child: Ink(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFFFFFFFF),
-              Color(0xFFF3F1FF),
+              cs.surface,
+              cs.surfaceContainerHighest,
             ],
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: cs.shadow.withOpacity(0.06),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
           ],
           border: Border.all(
-            color: cs.outlineVariant.withOpacity(.3),
+            color: cs.outlineVariant.withOpacity(.35),
             width: 1,
           ),
         ),
@@ -159,7 +190,7 @@ class _FeatureCard extends StatelessWidget {
             // icon bubble
             Container(
               decoration: BoxDecoration(
-                color: iconBg,
+                color: _bubbleColor(cs),
                 borderRadius: BorderRadius.circular(16),
               ),
               width: 56,
@@ -180,9 +211,9 @@ class _FeatureCard extends StatelessWidget {
               title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
+              style: t.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF00221C),
+                color: cs.onSurface,
                 height: 1.2,
               ),
             ),
@@ -192,8 +223,8 @@ class _FeatureCard extends StatelessWidget {
             Expanded(
               child: Text(
                 subtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF00221C).withOpacity(.7),
+                style: t.textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
                   height: 1.4,
                   fontWeight: FontWeight.w400,
                 ),
@@ -206,16 +237,16 @@ class _FeatureCard extends StatelessWidget {
               children: [
                 Text(
                   'Open',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: const Color(0xFF00221C),
+                  style: t.textTheme.labelLarge?.copyWith(
+                    color: cs.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(
+                Icon(
                   Icons.arrow_right_alt_rounded,
                   size: 20,
-                  color: Color(0xFF00221C),
+                  color: cs.primary,
                 ),
               ],
             ),
@@ -238,20 +269,20 @@ class _TrashRecyclingScreen extends StatelessWidget {
     final t = Theme.of(context);
     final cs = t.colorScheme;
     return Scaffold(
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        title: const Text('Trash & Recycling'), // shows default back arrow
+        backgroundColor: cs.surface,
+        title: Text('Trash & Recycling', style: t.textTheme.titleMedium),
       ),
       body: _StubBody(
         iconPath: 'assets/images/tracker.png',
-        iconBg: const Color(0xFFEFF0F5),
+        bubbleTone: _Tone.secondary,
         title: 'Trash & Recycling',
         lines: const [
           '• Scan items & sort correctly',
           '• Track recycling streaks',
           '• Leaderboard boosts',
         ],
-        textTheme: t.textTheme,
-        accent: cs.primary,
       ),
     );
   }
@@ -265,20 +296,20 @@ class _EducationScreen extends StatelessWidget {
     final t = Theme.of(context);
     final cs = t.colorScheme;
     return Scaffold(
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        title: const Text('Education'), // shows default back arrow
+        backgroundColor: cs.surface,
+        title: Text('Education', style: t.textTheme.titleMedium),
       ),
       body: _StubBody(
         iconPath: 'assets/images/education.png',
-        iconBg: const Color(0xFFEFF0FF),
+        bubbleTone: _Tone.primarySoft,
         title: 'Eco Education',
         lines: const [
           '• Micro-lessons on recycling & eco-living',
           '• Quizzes to earn XP',
           '• Tips tailored to your data',
         ],
-        textTheme: t.textTheme,
-        accent: cs.primary,
       ),
     );
   }
@@ -286,36 +317,52 @@ class _EducationScreen extends StatelessWidget {
 
 class _StubBody extends StatelessWidget {
   final String iconPath;
-  final Color iconBg;
+  final _Tone bubbleTone;
   final String title;
   final List<String> lines;
-  final TextTheme textTheme;
-  final Color accent;
 
   const _StubBody({
     required this.iconPath,
-    required this.iconBg,
+    required this.bubbleTone,
     required this.title,
     required this.lines,
-    required this.textTheme,
-    required this.accent,
   });
 
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    final cs = t.colorScheme;
+
+    Color bubble(_Tone tone) {
+      switch (tone) {
+        case _Tone.primary:
+          return cs.primaryContainer;
+        case _Tone.secondary:
+          return cs.secondaryContainer;
+        case _Tone.tertiary:
+          return cs.tertiaryContainer;
+        case _Tone.error:
+          return cs.errorContainer;
+        case _Tone.inverse:
+          return cs.inversePrimary.withOpacity(.18);
+        case _Tone.primarySoft:
+          return cs.primary.withOpacity(.12);
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // header row with same style icon bubble
+          // header row with themed icon bubble
           Row(
             children: [
               Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: iconBg,
+                  color: bubble(bubbleTone),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Center(
@@ -331,8 +378,9 @@ class _StubBody extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: textTheme.titleLarge?.copyWith(
+                  style: t.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
+                    color: cs.onSurface,
                   ),
                 ),
               ),
@@ -346,18 +394,9 @@ class _StubBody extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    size: 20,
-                    color: accent,
-                  ),
+                  Icon(Icons.check_circle_rounded, size: 20, color: cs.primary),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      l,
-                      style: textTheme.bodyMedium,
-                    ),
-                  ),
+                  Expanded(child: Text(l, style: t.textTheme.bodyMedium)),
                 ],
               ),
             ),
@@ -369,20 +408,20 @@ class _StubBody extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: accent.withOpacity(.08),
+              color: cs.primary.withOpacity(.08),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: accent.withOpacity(.25)),
+              border: Border.all(color: cs.primary.withOpacity(.25)),
             ),
             child: Row(
               children: [
-                Icon(Icons.stars_rounded, color: accent),
+                Icon(Icons.stars_rounded, color: cs.primary),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'Complete actions here to earn EcoPath points & badges.',
-                    style: textTheme.bodyMedium?.copyWith(
+                    style: t.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: accent,
+                      color: cs.primary,
                     ),
                   ),
                 ),

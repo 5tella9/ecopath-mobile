@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'theme/app_theme.dart';
+import 'theme/theme_controller.dart';
+
 import 'ui/root_shell.dart';
 import 'ui/screens/intro_screen.dart';
-import 'ui/screens/survey_flow.dart'; 
+import 'ui/screens/survey_flow.dart';
 
-void main() {
-  runApp(const EcoPathRoot());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final themeController = ThemeController();
+  await themeController.load(); // restore saved theme before building
+
+  runApp(
+    ChangeNotifierProvider.value(
+      value: themeController,
+      child: const EcoPathRoot(),
+    ),
+  );
 }
 
 class EcoPathRoot extends StatelessWidget {
@@ -12,10 +27,12 @@ class EcoPathRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ctrl = context.watch<ThemeController>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'EcoPath',
-      theme: ThemeData(useMaterial3: true),
+      theme: AppTheme.themeOf(ctrl.themeId, dark: ctrl.isDark),
       // Start on the Intro screen
       home: const IntroScreen(),
       // Route into RootShell or Survey

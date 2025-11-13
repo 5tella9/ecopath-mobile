@@ -4,13 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
-  static const dark = Color(0xFF00221C);
-  static const lightBg = Color(0xFFF5F5F5);
-  static const cardBg = Color(0x33E2CECE); // same tone as Settings
-  static const rowBg = Color(0xFFF1EDED);
-  static const divider = Color(0xFFD9D9D9);
-  static const danger = Color(0xFFE53935);
-
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
@@ -18,30 +11,20 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   bool _isEditing = false;
 
-  // -------------------------
-  // User data (example initial data)
-  // Later you can inject from survey/sign-up provider.
-  // -------------------------
   String _username = 'eco_snow';
   String _dob = '2003/07/15';
   String _fullAddress =
-      'Sejong Univ Dorm 204, Gunja-dong, Gwangjin-gu, Seoul'; // coupang-style single line
+      'Sejong Univ Dorm 204, Gunja-dong, Gwangjin-gu, Seoul';
 
-  // sign-in info
-  String _authProvider =
-      'google'; // "google", "facebook", "instagram", "email"
+  String _authProvider = 'google';
   String _authAccount = 'snow@gmail.com';
 
-  // -------------------------
-  // Controllers for edit mode
-  // -------------------------
   final _usernameCtrl = TextEditingController();
   final _dobCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
 
-  // username validation state
-  String? _usernameStatusText; // null = not checked yet
-  bool? _usernameIsValid; // null = not checked yet / unknown
+  String? _usernameStatusText;
+  bool? _usernameIsValid;
 
   @override
   void initState() {
@@ -63,9 +46,6 @@ class _AccountScreenState extends State<AccountScreen> {
     super.dispose();
   }
 
-  // -------------------------
-  // Edit toggle handlers
-  // -------------------------
   void _onTapEdit() {
     setState(() {
       _isEditing = true;
@@ -76,7 +56,9 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _onTapDone() async {
-    // Ask "Are you sure you want to save?"
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     final confirm = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -87,29 +69,22 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           title: Text(
             "Are you sure you want to save?",
-            style: TextStyle(
-              fontSize: 16,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AccountScreen.dark,
+              color: cs.onSurface,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: Text(
-                "Cancel",
-                style: TextStyle(
-                  color: AccountScreen.dark,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text("Cancel", style: TextStyle(color: cs.primary)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(
                 "Done",
                 style: TextStyle(
-                  color: AccountScreen.dark,
+                  color: cs.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -119,12 +94,8 @@ class _AccountScreenState extends State<AccountScreen> {
       },
     );
 
-    if (confirm != true) {
-      // user hit cancel → stay editing
-      return;
-    }
+    if (confirm != true) return;
 
-    // Save to state
     setState(() {
       _username = _usernameCtrl.text.trim();
       _dob = _dobCtrl.text.trim();
@@ -132,7 +103,6 @@ class _AccountScreenState extends State<AccountScreen> {
       _isEditing = false;
     });
 
-    // Show success alert
     await showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -143,10 +113,9 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           title: Text(
             "Successfully Saved!",
-            style: TextStyle(
-              fontSize: 16,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: AccountScreen.dark,
+              color: cs.onSurface,
             ),
           ),
           actions: [
@@ -155,7 +124,7 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Text(
                 "OK",
                 style: TextStyle(
-                  color: AccountScreen.dark,
+                  color: cs.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -167,6 +136,9 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _onTapDeleteAccount() async {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     final confirmDelete = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -190,9 +162,8 @@ class _AccountScreenState extends State<AccountScreen> {
               Expanded(
                 child: Text(
                   "Do you want to delete your account?\nIt will disappear permanently.",
-                  style: TextStyle(
-                    color: AccountScreen.dark,
-                    fontSize: 15,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -202,20 +173,14 @@ class _AccountScreenState extends State<AccountScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: Text(
-                "No",
-                style: TextStyle(
-                  color: AccountScreen.dark,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: Text("No", style: TextStyle(color: cs.primary)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(
                 "Yes",
                 style: TextStyle(
-                  color: AccountScreen.danger,
+                  color: theme.colorScheme.error,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -230,9 +195,6 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  // -------------------------
-  // DOB picker
-  // -------------------------
   Future<void> _openDatePicker() async {
     final now = DateTime.now();
     final initial = _parseDobOrNow(_dobCtrl.text, now);
@@ -246,7 +208,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
 
     if (picked != null) {
-      // format yyyy/mm/dd
       final y = picked.year.toString().padLeft(4, '0');
       final m = picked.month.toString().padLeft(2, '0');
       final d = picked.day.toString().padLeft(2, '0');
@@ -257,7 +218,6 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   DateTime _parseDobOrNow(String txt, DateTime fallback) {
-    // Expect yyyy/mm/dd
     try {
       final parts = txt.split('/');
       if (parts.length == 3) {
@@ -272,17 +232,8 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  // -------------------------
-  // Username uniqueness check
-  // -------------------------
   void _checkUsernameUnique(String value) {
-    // Example "taken list". Replace with backend check later.
-    const takenUsernames = [
-      'eco_snow',
-      'ecopath_user',
-      'admin',
-    ];
-
+    const takenUsernames = ['eco_snow', 'ecopath_user', 'admin'];
     final cleaned = value.trim().toLowerCase();
 
     if (cleaned.isEmpty) {
@@ -305,77 +256,58 @@ class _AccountScreenState extends State<AccountScreen> {
     });
   }
 
-  // -------------------------
-  // UI helpers
-  // -------------------------
-
   Widget _buildHeaderBar(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textColor = cs.onSurface;
+
     return Padding(
       padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
       child: Row(
         children: [
-          // back → profile_screen.dart (previous page)
           IconButton(
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop();
-            },
+            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
             icon: SvgPicture.asset(
               'assets/icons/back.svg',
               width: 28,
               height: 28,
-              semanticsLabel: 'Back',
+              colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn),
             ),
           ),
-
           const SizedBox(width: 4),
-
           Expanded(
             child: Text(
               'Account Setting',
               style: TextStyle(
-                color: AccountScreen.dark,
-                fontSize: 22, // smaller font size
+                color: textColor,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-
-          if (!_isEditing)
-            TextButton(
-              onPressed: _onTapEdit,
-              child: Text(
-                "Edit",
-                style: TextStyle(
-                  color: AccountScreen.dark,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: _onTapDone,
-              child: Text(
-                "Done",
-                style: TextStyle(
-                  color: AccountScreen.dark,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+          TextButton(
+            onPressed: _isEditing ? _onTapDone : _onTapEdit,
+            child: Text(
+              _isEditing ? "Done" : "Edit",
+              style: TextStyle(
+                color: cs.primary,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
+          ),
         ],
       ),
     );
   }
 
   Widget _sectionTitle(String title) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(left: 24, top: 24, bottom: 12),
       child: Text(
         title,
         style: TextStyle(
-          color: AccountScreen.dark,
+          color: cs.onSurface,
           fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
@@ -383,17 +315,15 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // Username row (with unique check message in edit mode)
   Widget _infoRowUsername() {
-    final labelStyle = TextStyle(
-      color: AccountScreen.dark,
-      fontSize: 12,
-      fontWeight: FontWeight.w400,
-    );
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
-    final valueStyle = TextStyle(
-      color: AccountScreen.dark,
-      fontSize: 14,
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(
+      color: cs.onSurfaceVariant,
+    );
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: cs.onSurface,
       fontWeight: FontWeight.w500,
     );
 
@@ -426,7 +356,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         ? Colors.green
                         : (_usernameIsValid == false
                             ? Colors.red
-                            : AccountScreen.dark),
+                            : cs.onSurface),
                   ),
                 ),
               ),
@@ -447,19 +377,11 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  // Date of Birth row (with text field + calendar in edit mode)
   Widget _infoRowDob() {
-    final labelStyle = TextStyle(
-      color: AccountScreen.dark,
-      fontSize: 12,
-      fontWeight: FontWeight.w400,
-    );
-
-    final valueStyle = TextStyle(
-      color: AccountScreen.dark,
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-    );
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
 
     if (_isEditing) {
       return _LinedRow(
@@ -477,7 +399,6 @@ class _AccountScreenState extends State<AccountScreen> {
                     decoration: const InputDecoration(
                       hintText: "yyyy/mm/dd",
                       isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 6),
                       border: InputBorder.none,
                     ),
                   ),
@@ -485,11 +406,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  icon: Icon(
-                    Icons.calendar_today_outlined,
-                    size: 20,
-                    color: AccountScreen.dark,
-                  ),
+                  icon: Icon(Icons.calendar_today_outlined, size: 20, color: cs.primary),
                   onPressed: _openDatePicker,
                 ),
               ],
@@ -511,22 +428,13 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  // Address row (single full address string)
   Widget _infoRowAddress() {
-    final labelStyle = TextStyle(
-      color: AccountScreen.dark,
-      fontSize: 12,
-      fontWeight: FontWeight.w400,
-    );
-
-    final valueStyle = TextStyle(
-      color: AccountScreen.dark,
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-    );
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
 
     if (_isEditing) {
-      // Coupang-style editable address: just multi-line text field
       return _LinedRow(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,7 +448,6 @@ class _AccountScreenState extends State<AccountScreen> {
               decoration: const InputDecoration(
                 hintText: "Edit your delivery address",
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 6),
                 border: InputBorder.none,
               ),
             ),
@@ -554,20 +461,18 @@ class _AccountScreenState extends State<AccountScreen> {
           children: [
             Text("Address", style: labelStyle),
             const SizedBox(height: 4),
-            Text(
-              _fullAddress,
-              style: valueStyle,
-            ),
+            Text(_fullAddress, style: valueStyle),
           ],
         ),
       );
     }
   }
 
-  // Sign-in method row (icon + provider + account email/id)
   Widget _signInMethodRow() {
+    final cs = Theme.of(context).colorScheme;
     String label;
     String assetPath;
+
     switch (_authProvider) {
       case 'google':
         label = 'Google';
@@ -581,7 +486,6 @@ class _AccountScreenState extends State<AccountScreen> {
         label = 'Instagram';
         assetPath = 'assets/icons/insta.svg';
         break;
-      case 'email':
       default:
         label = 'Email';
         assetPath = 'assets/icons/mailb.svg';
@@ -592,32 +496,16 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Sign-in Method",
-            style: TextStyle(
-              color: AccountScreen.dark,
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
+          Text("Sign-in Method", style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12)),
           const SizedBox(height: 8),
           Row(
             children: [
-              SvgPicture.asset(
-                assetPath,
-                width: 20,
-                height: 20,
-                // keep provider brand color (no colorFilter)
-              ),
+              SvgPicture.asset(assetPath, width: 20, height: 20),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
                   "$label  ($_authAccount)",
-                  style: TextStyle(
-                    color: AccountScreen.dark,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(color: cs.onSurface, fontSize: 14, fontWeight: FontWeight.w500),
                 ),
               ),
             ],
@@ -628,31 +516,22 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Widget _buildMainCard() {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AccountScreen.cardBg,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           children: [
-            // Username
             _infoRowUsername(),
-
             const _InnerDivider(),
-
-            // DOB
             _infoRowDob(),
-
             const _InnerDivider(),
-
-            // Address (full string)
             _infoRowAddress(),
-
             const _InnerDivider(),
-
-            // Sign-in method (read only)
             _signInMethodRow(),
           ],
         ),
@@ -661,6 +540,7 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Widget _buildDeleteButton() {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: GestureDetector(
@@ -668,19 +548,15 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: AccountScreen.danger, width: 1),
+            color: cs.surface,
+            border: Border.all(color: cs.error, width: 1),
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Center(
             child: Text(
               "Delete Account",
-              style: TextStyle(
-                color: AccountScreen.danger,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: cs.error, fontSize: 14, fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -688,25 +564,19 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // -------------------------
-  // build
-  // -------------------------
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AccountScreen.lightBg,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start, // align section left
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeaderBar(context),
-
               _sectionTitle("Your Info"),
-
               _buildMainCard(),
-
               _buildDeleteButton(),
             ],
           ),
@@ -723,12 +593,12 @@ class _InnerDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Divider(
         height: 1,
         thickness: 1,
-        color: AccountScreen.divider,
+        color: Theme.of(context).dividerColor,
       ),
     );
   }
@@ -741,7 +611,7 @@ class _LinedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AccountScreen.rowBg,
+      color: Theme.of(context).cardColor,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: child,

@@ -14,6 +14,19 @@ class CarbonScreen extends StatefulWidget {
 
 enum CarbonRange { oneMonth, sixMonth, oneYear }
 
+/// Simple tuple-like classes (avoid Dart records for wider SDK support)
+class _DateRange {
+  final String from;
+  final String to;
+  const _DateRange(this.from, this.to);
+}
+
+class _Series {
+  final List<String> labels;
+  final List<double> values;
+  const _Series(this.labels, this.values);
+}
+
 class _CarbonScreenState extends State<CarbonScreen> {
   // Each waste type selection: "none", "low", "med", "high"
   String _glass = 'none';
@@ -59,14 +72,15 @@ class _CarbonScreenState extends State<CarbonScreen> {
     return (total * 10).roundToDouble() / 10.0;
   }
 
-  // Compute date range from UI toggle
-  (String from, String to) _datesForRange() {
+  // Compute date range from UI toggle (returns simple class instead of records)
+  _DateRange _datesForRange() {
     final now = DateTime.now();
     final to = DateTime(now.year, now.month, now.day);
     DateTime from;
     switch (_range) {
       case CarbonRange.oneMonth:
-        from = DateTime(to.year, to.month, to.day).subtract(const Duration(days: 30));
+        from = DateTime(to.year, to.month, to.day)
+            .subtract(const Duration(days: 30));
         break;
       case CarbonRange.sixMonth:
         from = DateTime(to.year, to.month - 6, to.day);
@@ -77,7 +91,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
     }
     String fmt(DateTime d) =>
         '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-    return (fmt(from), fmt(to));
+    return _DateRange(fmt(from), fmt(to));
   }
 
   // Call backend: GET /api/users/{userId}/carbon-footprint?from=...&to=...
@@ -87,9 +101,9 @@ class _CarbonScreenState extends State<CarbonScreen> {
       _serverError = null;
     });
 
-    final (from, to) = _datesForRange();
+    final dr = _datesForRange();
     final uri = Uri.parse(
-      '${ApiConfig.baseUrl}/api/users/$_demoUserId/carbon-footprint?from=$from&to=$to',
+      '${ApiConfig.baseUrl}/api/users/$_demoUserId/carbon-footprint?from=${dr.from}&to=${dr.to}',
     );
 
     try {
@@ -121,30 +135,42 @@ class _CarbonScreenState extends State<CarbonScreen> {
   }
 
   // chart data builder (client-side dummy series)
-  (List<String>, List<double>) _buildSeries(CarbonRange r) {
+  _Series _buildSeries(CarbonRange r) {
     switch (r) {
       case CarbonRange.oneMonth:
         // pretend weekly values
-        return (
+        return const _Series(
           ['W1', 'W2', 'W3', 'W4'],
-          [2.5, 3.2, 2.9, 3.8]
+          [2.5, 3.2, 2.9, 3.8],
         );
       case CarbonRange.sixMonth:
-        return (
+        return const _Series(
           ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
-          [12.0, 11.5, 10.8, 10.2, 9.8, 9.5]
+          [12.0, 11.5, 10.8, 10.2, 9.8, 9.5],
         );
       case CarbonRange.oneYear:
-        return (
+        return const _Series(
           ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
-          [13, 12, 12, 11, 11, 10, 10, 9.8, 9.5, 9.2, 9.0, 8.8]
+          [13, 12, 12, 11, 11, 10, 10, 9.8, 9.5, 9.2, 9.0, 8.8],
         );
     }
   }
 
   Widget _buildBarChart(BuildContext context) {
-    final (labels, values) = _buildSeries(_range);
-    final maxY = (values.reduce((a, b) => a > b ? a : b) * 1.25);
+    final cs = Theme.of(context).colorScheme;
+    final series = _buildSeries(_range);
+    final labels = series.labels;
+    final values = series.values;
+
+    final maxVal = values.reduce((a, b) => a > b ? a : b);
+    final maxY = (maxVal * 1.25);
+    final gridColor = cs.outlineVariant.withOpacity(0.35);
+    final barColor = cs.primary;
+    final backRod = cs.primary.withOpacity(.10);
+    final axisText = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.copyWith(color: cs.onSurfaceVariant, fontSize: 11);
 
     return BarChart(
       BarChartData(
@@ -153,28 +179,20 @@ class _CarbonScreenState extends State<CarbonScreen> {
           show: true,
           drawVerticalLine: false,
           horizontalInterval: maxY / 4,
-          getDrawingHorizontalLine: (v) => FlLine(
-            color: Colors.black.withOpacity(0.05),
-            strokeWidth: 1,
-          ),
+          getDrawingHorizontalLine: (v) =>
+              FlLine(color: gridColor, strokeWidth: 1),
         ),
         titlesData: FlTitlesData(
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 30,
-              getTitlesWidget: (val, meta) {
-                return Text(
-                  val.toStringAsFixed(0),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF00221C).withOpacity(.5),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 11,
-                      ),
-                );
-              },
+              getTitlesWidget: (val, meta) =>
+                  Text(val.toStringAsFixed(0), style: axisText),
             ),
           ),
           bottomTitles: AxisTitles(
@@ -187,14 +205,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                 }
                 return Padding(
                   padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    labels[idx],
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF00221C),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11,
-                        ),
-                  ),
+                  child: Text(labels[idx], style: axisText),
                 );
               },
             ),
@@ -209,11 +220,11 @@ class _CarbonScreenState extends State<CarbonScreen> {
                 toY: v,
                 borderRadius: BorderRadius.circular(8),
                 width: 14,
-                color: const Color(0xFF00221C).withOpacity(.8),
+                color: barColor,
                 backDrawRodData: BackgroundBarChartRodData(
                   show: true,
                   toY: maxY,
-                  color: const Color(0xFF00221C).withOpacity(.08),
+                  color: backRod,
                 ),
               ),
             ],
@@ -233,16 +244,16 @@ class _CarbonScreenState extends State<CarbonScreen> {
     final kg = _estimateKgCO2();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F7FF),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9F7FF),
-        elevation: 0,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? cs.surface,
+        elevation: theme.appBarTheme.elevation ?? 0,
         centerTitle: true,
         title: Text(
           'Carbon Footprint',
           style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF00221C),
+            color: theme.appBarTheme.foregroundColor ?? cs.onSurface,
           ),
         ),
       ),
@@ -275,14 +286,14 @@ class _CarbonScreenState extends State<CarbonScreen> {
                   "Your monthly trash",
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF00221C),
+                    color: cs.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "Tell us how much you threw away this month.\nWe’ll turn that into CO₂.",
                   style: textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF00221C).withOpacity(.7),
+                    color: cs.onSurfaceVariant,
                     height: 1.4,
                   ),
                 ),
@@ -379,7 +390,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                       "Your Trend",
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF00221C),
+                        color: cs.onSurface,
                       ),
                     ),
                     _RangeToggle(
@@ -394,12 +405,12 @@ class _CarbonScreenState extends State<CarbonScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFFFFFFFF),
-                        Color(0xFFF3F1FF),
+                        cs.surface,
+                        cs.surfaceVariant.withOpacity(.7),
                       ],
                     ),
                     border: Border.all(
@@ -429,7 +440,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                                 ? "Last 6 months"
                                 : "Last 12 months",
                         style: textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF00221C).withOpacity(.6),
+                          color: cs.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -447,7 +458,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
               child: Container(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9F7FF),
+                  color: theme.scaffoldBackgroundColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(.07),
@@ -485,7 +496,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                                 ),
                               ),
                               TextSpan(
-                                text: "${_estimateKgCO2()} kg CO₂e",
+                                text: "$kg kg CO₂e",
                                 style: textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w800,
                                   color: cs.primary,
@@ -540,17 +551,22 @@ class _ServerPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
-    final p = Theme.of(context).colorScheme.primary;
+    final cs = Theme.of(context).colorScheme;
 
     Widget _line(String label, double? v) {
       return Row(
         children: [
-          Expanded(child: Text(label, style: t.bodySmall?.copyWith(color: const Color(0xFF00221C)))),
+          Expanded(
+            child: Text(
+              label,
+              style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ),
           Text(
             v == null ? '—' : '${v.toStringAsFixed(1)} kg',
             style: t.bodySmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF00221C),
+              color: cs.onSurface,
             ),
           ),
         ],
@@ -560,9 +576,9 @@ class _ServerPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE7E5F1)),
+        border: Border.all(color: cs.outlineVariant.withOpacity(.4)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(.04),
@@ -574,12 +590,15 @@ class _ServerPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Server Carbon Footprint', style: t.titleSmall?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF00221C))),
+          Text('Server Carbon Footprint',
+              style: t.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800, color: cs.onSurface)),
           const SizedBox(height: 8),
           if (error != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text('Error: $error', style: t.bodySmall?.copyWith(color: Colors.red)),
+              child: Text('Error: $error',
+                  style: t.bodySmall?.copyWith(color: cs.error)),
             ),
           _line('Electricity', electricity),
           const SizedBox(height: 4),
@@ -595,13 +614,16 @@ class _ServerPanel extends StatelessWidget {
               onPressed: loading ? null : onFetchPressed,
               icon: loading
                   ? const SizedBox(
-                      width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.cloud_download_outlined, size: 18),
               label: Text(loading ? 'Fetching…' : 'Fetch from server'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: p,
-                side: BorderSide(color: p),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                foregroundColor: cs.primary,
+                side: BorderSide(color: cs.primary),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
             ),
           ),
@@ -627,12 +649,12 @@ class _IntroCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFEFF5EA), // light green tint like carbon card
+            cs.surface,
+            cs.surfaceVariant.withOpacity(.8), // themed tint
           ],
         ),
         boxShadow: [
@@ -648,6 +670,7 @@ class _IntroCard extends StatelessWidget {
         ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // text
           Expanded(
@@ -658,7 +681,7 @@ class _IntroCard extends StatelessWidget {
                   "Monthly footprint check",
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF00221C),
+                    color: cs.onSurface,
                     height: 1.2,
                   ),
                 ),
@@ -670,7 +693,7 @@ class _IntroCard extends StatelessWidget {
                   "• Medium = 10L / 20L\n"
                   "• High = 30L+",
                   style: textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF00221C).withOpacity(.75),
+                    color: cs.onSurfaceVariant,
                     height: 1.4,
                     fontWeight: FontWeight.w400,
                   ),
@@ -685,7 +708,7 @@ class _IntroCard extends StatelessWidget {
             width: 88,
             height: 88,
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFFFF),
+              color: cs.surface,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: cs.outlineVariant.withOpacity(.2),
@@ -726,20 +749,19 @@ class _WasteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = highlightPlastic
-        ? const Color(0xFF5E9460)
-        : cs.outlineVariant.withOpacity(.3);
+    final borderColor =
+        highlightPlastic ? cs.primary : cs.outlineVariant.withOpacity(.3);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFF3F1FF),
+            cs.surface,
+            cs.surfaceVariant.withOpacity(.7),
           ],
         ),
         boxShadow: [
@@ -766,15 +788,16 @@ class _WasteCard extends StatelessWidget {
                   label,
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF00221C),
+                    color: cs.onSurface,
                     height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   desc,
+                  softWrap: true,
                   style: textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF00221C).withOpacity(.7),
+                    color: cs.onSurfaceVariant,
                     height: 1.4,
                   ),
                 ),
@@ -783,12 +806,15 @@ class _WasteCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
 
-          // right dropdown
-          _LevelPicker(
-            value: value,
-            onChanged: onChanged,
-            cs: cs,
-            textTheme: textTheme,
+          // right dropdown with fixed width so Row never overflows
+          SizedBox(
+            width: 110,
+            child: _LevelPicker(
+              value: value,
+              onChanged: onChanged,
+              cs: cs,
+              textTheme: textTheme,
+            ),
           ),
         ],
       ),
@@ -813,7 +839,7 @@ class _LevelPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 110,
+      // width now comes from parent SizedBox
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: cs.primary.withOpacity(.05),
@@ -826,15 +852,17 @@ class _LevelPicker extends StatelessWidget {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          icon: const Icon(
+          isDense: true,
+          isExpanded: true,
+          icon: Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: Color(0xFF00221C),
+            color: cs.onSurface,
           ),
           style: textTheme.bodyMedium?.copyWith(
-            color: const Color(0xFF00221C),
+            color: cs.onSurface,
             fontWeight: FontWeight.w600,
           ),
-          dropdownColor: Colors.white,
+          dropdownColor: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           onChanged: (v) {
             if (v != null) onChanged(v);
@@ -863,8 +891,9 @@ class _RangeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = const Color(0xFF00221C);
-    final inactiveColor = const Color(0xFF00221C).withOpacity(.5);
+    final cs = Theme.of(context).colorScheme;
+    final activeBg = cs.primary;
+    final inactive = cs.onSurfaceVariant;
 
     Widget _btn(String label, CarbonRange r) {
       final bool isActive = (range == r);
@@ -874,13 +903,13 @@ class _RangeToggle extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: isActive ? activeColor : Colors.transparent,
+            color: isActive ? activeBg : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isActive ? Colors.white : inactiveColor,
+                  color: isActive ? cs.onPrimary : inactive,
                   fontWeight: FontWeight.w700,
                 ),
           ),
@@ -891,10 +920,10 @@ class _RangeToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.6),
+        color: Theme.of(context).cardColor.withOpacity(.7),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF00221C).withOpacity(.2),
+          color: cs.outlineVariant.withOpacity(.4),
           width: 1,
         ),
       ),

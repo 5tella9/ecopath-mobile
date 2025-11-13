@@ -1,10 +1,5 @@
+// lib/ui/screens/notification_screen.dart
 import 'package:flutter/material.dart';
-
-/// ====== STYLE ======
-const kPrimary = Color(0xFF00221C);
-const kAccent = Color(0xFF5E9460);
-const kCard = Color(0xFFF6F4F3);
-const kSoft = Color(0xFF9AA8A4);
 
 enum NotificationKind { game, shop, community, reminder }
 
@@ -30,7 +25,7 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  // TODO: Replace with your repository/service later.
+  // TODO: Replace with repository/service later.
   final List<AppNotification> _items = [
     AppNotification(
       kind: NotificationKind.game,
@@ -67,22 +62,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   Widget build(BuildContext context) {
     final paddingTop = MediaQuery.of(context).padding.top;
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: cs.surface,
       body: SafeArea(
         top: false,
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: _Header(paddingTop: paddingTop),
-            ),
+            SliverToBoxAdapter(child: _Header(paddingTop: paddingTop)),
             SliverList.separated(
               itemCount: _items.length,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final n = _items[index];
-                return _NotificationTile(item: n);
-              },
+              itemBuilder: (context, index) => _NotificationTile(item: _items[index]),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
@@ -92,63 +84,57 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 }
 
-/// ====== WIDGETS ======
-
+/// ====== HEADER ======
 class _Header extends StatelessWidget {
   const _Header({required this.paddingTop});
   final double paddingTop;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Container(
       padding: EdgeInsets.fromLTRB(20, paddingTop + 20, 20, 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-      ),
+      color: cs.surface,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // back button (top-left)
+          // back button
           Align(
             alignment: Alignment.topLeft,
             child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context); // go back to Profile
-              },
+              onTap: () => Navigator.pop(context),
               child: Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.arrow_back_rounded,
-                  color: kPrimary,
-                  size: 22,
-                ),
+                child: Icon(Icons.arrow_back_rounded, color: cs.onSurface, size: 22),
               ),
             ),
           ),
 
-          // Title (slightly pushed down so it doesn't clash visually with back button)
-          const Padding(
-            padding: EdgeInsets.only(top: 40),
+          // title
+          Padding(
+            padding: const EdgeInsets.only(top: 40),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Notifications',
-                style: TextStyle(
+                style: tt.displaySmall?.copyWith(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: kPrimary,
                   height: 1.1,
+                  color: cs.onSurface,
                 ),
               ),
             ),
           ),
 
-          // Right-side mascot image
+          // mascot image
           Positioned(
             right: 0,
             top: 0,
@@ -166,6 +152,7 @@ class _Header extends StatelessWidget {
   }
 }
 
+/// ====== TILE ======
 class _NotificationTile extends StatelessWidget {
   const _NotificationTile({required this.item});
   final AppNotification item;
@@ -183,16 +170,18 @@ class _NotificationTile extends StatelessWidget {
     }
   }
 
-  Color _iconBgFor(NotificationKind kind) {
+  // Use themed containers for subtle, accessible backgrounds.
+  // Also return an icon color that contrasts correctly.
+  (Color bg, Color fg) _iconColors(ColorScheme cs, NotificationKind kind) {
     switch (kind) {
       case NotificationKind.game:
-        return const Color(0xFFE9F7EE); // light green
+        return (cs.tertiaryContainer, cs.onTertiaryContainer);
       case NotificationKind.shop:
-        return const Color(0xFFEFF4FF); // light blue-ish
+        return (cs.primaryContainer, cs.onPrimaryContainer);
       case NotificationKind.community:
-        return const Color(0xFFFFF4EC); // light orange
+        return (cs.secondaryContainer, cs.onSecondaryContainer);
       case NotificationKind.reminder:
-        return const Color(0xFFFFF2F2); // light red
+        return (cs.errorContainer, cs.onErrorContainer);
     }
   }
 
@@ -204,23 +193,32 @@ class _NotificationTile extends StatelessWidget {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m';
     if (diff.inHours < 24) return '${diff.inHours}h';
     if (diff.inDays < 7) return '${diff.inDays}d';
-
     final weeks = (diff.inDays / 7).floor();
     if (weeks < 5) return '${weeks}w';
-
     final months = (diff.inDays / 30).floor();
     return '${months}mo';
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final (bg, fg) = _iconColors(cs, item.kind);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: kCard,
+          color: cs.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: cs.shadow.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -228,10 +226,10 @@ class _NotificationTile extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: _iconBgFor(item.kind),
+                color: bg,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(_iconFor(item.kind), color: kPrimary),
+              child: Icon(_iconFor(item.kind), color: fg),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -242,8 +240,8 @@ class _NotificationTile extends StatelessWidget {
                     item.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: kPrimary,
+                    style: tt.titleSmall?.copyWith(
+                      color: cs.onSurface,
                       fontWeight: FontWeight.w700,
                       fontSize: 15.5,
                     ),
@@ -253,8 +251,8 @@ class _NotificationTile extends StatelessWidget {
                     item.message,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: kSoft,
+                    style: tt.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                       fontSize: 13,
                     ),
@@ -265,8 +263,8 @@ class _NotificationTile extends StatelessWidget {
             const SizedBox(width: 12),
             Text(
               _timeAgo(item.createdAt),
-              style: const TextStyle(
-                color: kSoft,
+              style: tt.labelSmall?.copyWith(
+                color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),

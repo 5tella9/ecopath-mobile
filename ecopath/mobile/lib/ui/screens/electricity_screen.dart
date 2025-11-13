@@ -1,19 +1,19 @@
 // lib/ui/screens/electricity_screen.dart
 import 'package:ecopath/core/meters_api.dart';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-/// ====== COLOR & STYLE (kept consistent with your app) ======
-const kPrimary = Color(0xFF00221C);
-const kAccent = Color(0xFF5E9460);
-const kCard = Color(0xFFF6F4F3);
-const kSoft = Color(0xFF9AA8A4);
-
-TextStyle _ts(double size,
-        {FontWeight? fw, Color color = Colors.black, double? height}) =>
-    GoogleFonts.alike(fontSize: size, fontWeight: fw, color: color, height: height);
+TextStyle _ts(BuildContext context, double size,
+    {FontWeight? fw, Color? color, double? height}) {
+  final cs = Theme.of(context).colorScheme;
+  return GoogleFonts.alike(
+    fontSize: size,
+    fontWeight: fw,
+    color: color ?? cs.onSurface,
+    height: height,
+  );
+}
 
 enum ElecRange { week, month, year }
 
@@ -26,20 +26,18 @@ class ElectricityScreen extends StatefulWidget {
 
 class _ElectricityScreenState extends State<ElectricityScreen> {
   ElecRange _range = ElecRange.month;
-  bool _showCost = false; // toggle kWh <-> ₩
+  bool _showCost = false;
 
-  // ===== Backend average (demo fetch) =====
   bool _loadingAvg = false;
-  double? _avgKwh;           // e.g., 4.1
-  String _avgUnit = 'kWh';   // backend unit label
+  double? _avgKwh;
+  String _avgUnit = 'kWh';
 
-  // TODO: replace with the user’s real smart meter ID (you used this earlier)
-  static const String _demoSmartMeterId = 'a40adadb-ace4-4d16-bf82-f53cca939163';
+  static const String _demoSmartMeterId = '80c22b98-7799-41c6-abfc-59047915ca3c';
 
   @override
   void initState() {
     super.initState();
-    _loadAverageForJanuary2025(); // demo call; safe & one-time
+    _loadAverageForJanuary2025();
   }
 
   Future<void> _loadAverageForJanuary2025() async {
@@ -50,44 +48,92 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
         from: '2025-01-01',
         to: '2025-01-31',
       );
-      // Expect keys: smartMeterId, type, from, to, unit, average
       final avg = (result['average'] as num?)?.toDouble();
       final unit = (result['unit'] as String?) ?? 'kWh';
-
       setState(() {
         _avgKwh = avg;
         _avgUnit = (unit == 'kilowatt_hour') ? 'kWh' : unit;
       });
     } catch (e) {
-      // Show a non-blocking toast/snackbar
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load backend average: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to load average: $e')));
       }
     } finally {
       if (mounted) setState(() => _loadingAvg = false);
     }
   }
 
-  // ===== Demo series data (replace with real) =====
   (List<String>, List<double>) _series(ElecRange r) {
     switch (r) {
       case ElecRange.week:
-        return (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], [9, 8, 10, 7, 11, 13, 12]);
+        return (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            [9, 8, 10, 7, 11, 13, 12]);
       case ElecRange.month:
         return ([
-          '1','3','5','7','9','11','13','15','17','19','21','23','25','27','29'
+          '1',
+          '3',
+          '5',
+          '7',
+          '9',
+          '11',
+          '13',
+          '15',
+          '17',
+          '19',
+          '21',
+          '23',
+          '25',
+          '27',
+          '29'
         ], [
-          8, 9, 7.5, 10, 8.5, 9.8, 10.2, 11.7, 9.1, 8.4, 9.7, 12.3, 11.4, 10.9, 9.6
+          8,
+          9,
+          7.5,
+          10,
+          8.5,
+          9.8,
+          10.2,
+          11.7,
+          9.1,
+          8.4,
+          9.7,
+          12.3,
+          11.4,
+          10.9,
+          9.6
         ]);
       case ElecRange.year:
-        return (['J','F','M','A','M','J','J','A','S','O','N','D'],
-            [280, 255, 230, 210, 240, 300, 350, 360, 290, 260, 240, 310]);
+        return ([
+          'J',
+          'F',
+          'M',
+          'A',
+          'M',
+          'J',
+          'J',
+          'A',
+          'S',
+          'O',
+          'N',
+          'D'
+        ], [
+          280,
+          255,
+          230,
+          210,
+          240,
+          300,
+          350,
+          360,
+          290,
+          260,
+          240,
+          310
+        ]);
     }
   }
 
-  // ===== Simple progressive estimate (demo only) =====
   double _estimateWon(double kwh) {
     if (kwh <= 200) return 910 + kwh * 120;
     if (kwh <= 400) return 1600 + kwh * 214;
@@ -95,52 +141,34 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
   }
 
   double _sum(List<double> xs) => xs.fold(0.0, (a, b) => a + b);
+  double _previousPeriodTotal(ElecRange r) =>
+      r == ElecRange.week ? 64 : r == ElecRange.month ? 285 : 3250;
 
-  // Comparison vs previous period (demo).
-  double _previousPeriodTotal(ElecRange r) {
-    switch (r) {
-      case ElecRange.week:
-        return 64;
-      case ElecRange.month:
-        return 285;
-      case ElecRange.year:
-        return 3250;
-    }
-  }
-
-  String _rangeLabel(ElecRange r) {
-    switch (r) {
-      case ElecRange.week:
-        return 'This Week';
-      case ElecRange.month:
-        return 'This Month';
-      case ElecRange.year:
-        return 'This Year';
-    }
-  }
+  String _rangeLabel(ElecRange r) =>
+      r == ElecRange.week ? 'This Week' : r == ElecRange.month ? 'This Month' : 'This Year';
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final (labels, values) = _series(_range);
     final totalKwh = _sum(values);
     final prev = _previousPeriodTotal(_range);
     final pct = prev == 0 ? 0.0 : ((totalKwh - prev) / prev) * 100.0;
-    final estWon = _estimateWon(_range == ElecRange.year ? totalKwh / 12 : totalKwh); // avg/month for yearly
-    final projectedMonth = (_range == ElecRange.month)
-        ? (totalKwh / values.length) * 30.0
-        : null;
+    final estWon = _estimateWon(_range == ElecRange.year ? totalKwh / 12 : totalKwh);
+    final projectedMonth =
+        (_range == ElecRange.month) ? (totalKwh / values.length) * 30.0 : null;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: cs.surface,
         elevation: 0,
         leading: IconButton(
-          tooltip: 'Back',
-          icon: const Icon(Icons.arrow_back_ios_new, color: kPrimary),
+          icon: Icon(Icons.arrow_back_ios_new, color: cs.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Electricity Usage', style: _ts(20, fw: FontWeight.w700, color: kPrimary)),
+        title: Text('Electricity Usage',
+            style: _ts(context, 20, fw: FontWeight.w700, color: cs.onSurface)),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -149,17 +177,18 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ====== KPI HEADER CARD ======
+              // KPI Header
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: kCard,
+                  color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(_rangeLabel(_range), style: _ts(16, fw: FontWeight.w700, color: kPrimary)),
+                    Text(_rangeLabel(_range),
+                        style: _ts(context, 16, fw: FontWeight.w700, color: cs.primary)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -191,15 +220,14 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                         const SizedBox(width: 6),
                         Text(
                           '${pct >= 0 ? 'Up' : 'Down'} ${pct.abs().toStringAsFixed(1)}% vs last period',
-                          style: _ts(13, color: kPrimary),
+                          style: _ts(context, 13, color: cs.onSurface),
                         ),
                         const Spacer(),
-                        // Unit toggle
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cs.surface,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: kSoft),
+                            border: Border.all(color: cs.outlineVariant),
                           ),
                           child: Row(
                             children: [
@@ -222,26 +250,26 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                       const SizedBox(height: 8),
                       Text(
                         'Projection: ~${projectedMonth.toStringAsFixed(0)} kWh (₩${_estimateWon(projectedMonth).toStringAsFixed(0)})',
-                        style: _ts(13, color: kPrimary),
+                        style: _ts(context, 13, color: cs.onSurfaceVariant),
                       ),
                     ],
                   ],
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
 
-              // ====== BACKEND AVERAGE CARD (Jan 2025, demo) ======
+              // Backend average card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cs.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: kCard),
+                  border: Border.all(color: cs.outlineVariant),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: cs.shadow.withOpacity(0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     )
@@ -249,18 +277,18 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.bolt, color: kAccent),
+                    Icon(Icons.bolt, color: cs.primary),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _loadingAvg
                           ? Text('Fetching backend average for Jan 2025…',
-                              style: _ts(13, color: kPrimary))
+                              style: _ts(context, 13))
                           : (_avgKwh == null)
-                              ? Text('No backend average available (Jan 2025).',
-                                  style: _ts(13, color: kPrimary))
+                              ? Text('No backend average available.',
+                                  style: _ts(context, 13))
                               : Text(
                                   'Backend Avg (Jan 2025): ${_avgKwh!.toStringAsFixed(2)} $_avgUnit',
-                                  style: _ts(14, fw: FontWeight.w700, color: kPrimary),
+                                  style: _ts(context, 14, fw: FontWeight.w700),
                                 ),
                     ),
                     const SizedBox(width: 8),
@@ -269,143 +297,50 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                       icon: const Icon(Icons.refresh, size: 18),
                       label: const Text('Refresh'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: kPrimary,
-                        side: const BorderSide(color: kPrimary),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        foregroundColor: cs.primary,
+                        side: BorderSide(color: cs.primary),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
 
-              // ====== RANGE TABS ======
+              // Range buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _RangeButton(
-                    text: 'Week',
-                    selected: _range == ElecRange.week,
-                    onTap: () => setState(() => _range = ElecRange.week),
-                  ),
-                  _RangeButton(
-                    text: 'Month',
-                    selected: _range == ElecRange.month,
-                    onTap: () => setState(() => _range = ElecRange.month),
-                  ),
-                  _RangeButton(
-                    text: 'Year',
-                    selected: _range == ElecRange.year,
-                    onTap: () => setState(() => _range = ElecRange.year),
-                  ),
+                  _RangeButton('Week', _range == ElecRange.week,
+                      () => setState(() => _range = ElecRange.week)),
+                  _RangeButton('Month', _range == ElecRange.month,
+                      () => setState(() => _range = ElecRange.month)),
+                  _RangeButton('Year', _range == ElecRange.year,
+                      () => setState(() => _range = ElecRange.year)),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
-              // ====== CHART CARD ======
+              // Chart
               Container(
                 padding: const EdgeInsets.fromLTRB(14, 16, 14, 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cs.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: kCard),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
+                  border: Border.all(color: cs.outlineVariant),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Usage Chart', style: _ts(16, fw: FontWeight.w700, color: kPrimary)),
+                    Text('Usage Chart', style: _ts(context, 16, fw: FontWeight.w700)),
                     const SizedBox(height: 12),
                     SizedBox(
                       height: 220,
                       child: _range == ElecRange.year
-                          ? _buildLineChart(labels, values, showCost: _showCost, wonFn: _estimateWon)
-                          : _buildBarChart(labels, values, showCost: _showCost, wonFn: _estimateWon, highlightPeak: _range == ElecRange.week),
+                          ? _buildLineChart(labels, values)
+                          : _buildBarChart(labels, values),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _showCost
-                          ? 'Showing estimated cost (₩). For reference only.'
-                          : 'Showing energy use (kWh).',
-                      style: _ts(12, color: kSoft),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              // ====== BREAKDOWN & TIPS ======
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: kCard,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Likely Breakdown', style: _ts(16, fw: FontWeight.w700, color: kPrimary)),
-                    const SizedBox(height: 10),
-                    _breakdownRow('Air Conditioner / Heater', 0.36),
-                    _breakdownRow('Refrigerator', 0.18),
-                    _breakdownRow('Washer & Dryer', 0.12),
-                    _breakdownRow('Lighting', 0.10),
-                    _breakdownRow('Electronics & Standby', 0.24),
-                    const SizedBox(height: 12),
-                    Container(height: 1, color: Colors.white),
-                    const SizedBox(height: 12),
-                    Text('Quick Tips (KR Homes)', style: _ts(15, fw: FontWeight.w700, color: kPrimary)),
-                    const SizedBox(height: 8),
-                    _tipBullet('대기전력 차단 멀티탭 사용 (standby power off).'),
-                    _tipBullet('여름 에어컨 26–28°C, 겨울 난방 ~20°C 권장.'),
-                    _tipBullet('세탁은 찬물/에코 코스, 건조기 사용 줄이기.'),
-                    _tipBullet('LED 조명과 타이머/인체감지 센서 활용.'),
-                    _tipBullet('피크 시간대 전기사용 분산하기.'),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              // ====== GAMIFICATION ======
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: kCard),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Eco Achievements', style: _ts(16, fw: FontWeight.w700, color: kPrimary)),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: const [
-                        _Badge(label: 'Off-peak Pro'),
-                        _Badge(label: 'LED Swapper'),
-                        _Badge(label: 'Laundry Eco'),
-                        _Badge(label: 'Standby Slayer'),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text('Monthly XP', style: _ts(13, fw: FontWeight.w600, color: kPrimary)),
-                    const SizedBox(height: 6),
-                    _XpBar(progress: 0.62),
-                    const SizedBox(height: 6),
-                    Text('Earn XP by reducing kWh vs last month and completing eco-quests.',
-                        style: _ts(12, color: kSoft)),
                   ],
                 ),
               ),
@@ -416,179 +351,134 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
     );
   }
 
-  Widget _breakdownRow(String label, double pct) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(child: Text(label, style: _ts(14, color: kPrimary))),
-          SizedBox(
-            width: 120,
-            child: Stack(
-              children: [
-                Container(height: 10, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20))),
-                FractionallySizedBox(
-                  widthFactor: pct.clamp(0, 1),
-                  child: Container(height: 10, decoration: BoxDecoration(color: kAccent, borderRadius: BorderRadius.circular(20))),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text('${(pct * 100).toStringAsFixed(0)}%', style: _ts(13, color: kPrimary)),
-        ],
-      ),
-    );
-  }
-
-  Widget _tipBullet(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('•  ', style: TextStyle(color: kPrimary, fontSize: 16)),
-          Expanded(child: Text(text, style: _ts(13, color: kPrimary))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBarChart(
-    List<String> labels,
-    List<double> values, {
-    required bool showCost,
-    required double Function(double) wonFn,
-    bool highlightPeak = false,
-  }) {
-    final transValues = showCost
-        ? values.map((v) => wonFn(v) / 1000.0).toList() // scale cost (₩) down to fit
-        : values;
-
-    final maxCandidate = transValues.fold<double>(0, (m, v) => v > m ? v : m) * 1.25;
-    final maxY = maxCandidate.clamp(1.0, 999999.0).toDouble(); // <-- force double
+  /// BAR CHART
+  Widget _buildBarChart(List<String> labels, List<double> values) {
+    final cs = Theme.of(context).colorScheme;
+    final maxY = (values.reduce((a, b) => a > b ? a : b) * 1.3).toDouble();
 
     return BarChart(
       BarChartData(
         gridData: FlGridData(show: true, drawVerticalLine: false),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
+          topTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 36,
-              getTitlesWidget: (val, meta) => Text(
-                showCost ? '${val.toStringAsFixed(0)}k' : val.toStringAsFixed(0),
-                style: _ts(11, color: kSoft),
-              ),
+              reservedSize: 30,
+              getTitlesWidget: (val, _) {
+                // show only every 5 units (0,5,10,15,...) to avoid overlap
+                if (val % 5 != 0) return const SizedBox.shrink();
+                return Text(val.toInt().toString(), style: _ts(context, 11));
+              },
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              getTitlesWidget: (val, meta) {
+              reservedSize: 24,
+              getTitlesWidget: (val, _) {
                 final i = val.toInt();
                 if (i < 0 || i >= labels.length) return const SizedBox.shrink();
                 return Padding(
                   padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(labels[i], style: _ts(11, color: kSoft)),
+                  child: Text(labels[i], style: _ts(context, 10)),
                 );
               },
             ),
           ),
         ),
         barGroups: List.generate(labels.length, (i) {
-          final isPeak = highlightPeak && (i == 4 || i == 5); // Fri/Sat highlight (demo)
           return BarChartGroupData(
             x: i,
             barRods: [
               BarChartRodData(
-                toY: transValues[i],
+                toY: values[i],
                 width: 14,
-                borderRadius: BorderRadius.circular(6),
-                color: isPeak ? Colors.redAccent.withOpacity(0.85) : kAccent,
+                borderRadius: BorderRadius.circular(4),
+                color: cs.primary,
               )
             ],
           );
         }),
-        minY: 0,
-        maxY: maxY, // <-- safe double
+        maxY: maxY,
       ),
     );
   }
 
-  Widget _buildLineChart(
-    List<String> labels,
-    List<double> values, {
-    required bool showCost,
-    required double Function(double) wonFn,
-  }) {
-    final series = showCost ? values.map((v) => wonFn(v)).toList() : values;
-
-    final maxCandidate = series.fold<double>(0, (m, v) => v > m ? v : m) * 1.2;
-    final maxY = maxCandidate.clamp(1.0, 999999.0).toDouble(); // <-- safe double
+  /// LINE CHART (Year)
+  Widget _buildLineChart(List<String> labels, List<double> values) {
+    final cs = Theme.of(context).colorScheme;
+    final maxY = (values.reduce((a, b) => a > b ? a : b) * 1.2).toDouble();
 
     return LineChart(
       LineChartData(
         gridData: FlGridData(show: true, drawVerticalLine: false),
         titlesData: FlTitlesData(
+          topTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 44,
-              getTitlesWidget: (val, meta) => Text(
-                showCost ? '₩${val.toStringAsFixed(0)}' : val.toStringAsFixed(0),
-                style: _ts(11, color: kSoft),
-              ),
+              reservedSize: 30,
+              getTitlesWidget: (val, _) {
+                if (val % 50 != 0) return const SizedBox.shrink();
+                return Text(val.toInt().toString(), style: _ts(context, 11));
+              },
             ),
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              getTitlesWidget: (val, meta) {
+              reservedSize: 24,
+              getTitlesWidget: (val, _) {
                 final i = val.toInt();
                 if (i < 0 || i >= labels.length) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(labels[i], style: _ts(11, color: kSoft)),
-                );
+                return Text(labels[i], style: _ts(context, 10));
               },
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
-        minY: 0,
-        maxY: maxY, // <-- safe double
-        borderData: FlBorderData(show: false),
         lineBarsData: [
           LineChartBarData(
             isCurved: true,
+            color: cs.primary,
             barWidth: 3,
             dotData: const FlDotData(show: false),
-            color: kAccent,
             spots: [
-              for (int i = 0; i < labels.length; i++) FlSpot(i.toDouble(), series[i]),
+              for (int i = 0; i < values.length; i++)
+                FlSpot(i.toDouble(), values[i])
             ],
           )
         ],
+        maxY: maxY,
+        minY: 0,
+        borderData: FlBorderData(show: false),
       ),
     );
   }
 }
 
-/// ====== SMALL WIDGETS ======
+/// Small widgets
 
 class _RangeButton extends StatelessWidget {
   final String text;
   final bool selected;
   final VoidCallback onTap;
-  const _RangeButton({required this.text, required this.selected, required this.onTap});
+  const _RangeButton(this.text, this.selected, this.onTap);
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -596,16 +486,16 @@ class _RangeButton extends StatelessWidget {
           height: 40,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: selected ? kPrimary : Colors.white,
+            color: selected ? cs.primary : cs.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: kPrimary.withOpacity(0.2)),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: Text(
             text,
             style: GoogleFonts.alike(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: selected ? Colors.white : kPrimary,
+              color: selected ? cs.onPrimary : cs.primary,
             ),
           ),
         ),
@@ -622,21 +512,23 @@ class _KpiTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: GoogleFonts.alike(fontSize: 12, color: kSoft)),
+          Text(title, style: _ts(context, 12, color: cs.outline)),
           const SizedBox(height: 4),
-          Text(value, style: GoogleFonts.alike(fontSize: 18, fontWeight: FontWeight.w800, color: kPrimary)),
-          const SizedBox(height: 2),
-          Text(sub, style: GoogleFonts.alike(fontSize: 11, color: kSoft)),
+          Text(
+            value,
+            style: _ts(context, 18, fw: FontWeight.w800, color: cs.onSurface),
+          ),
+          Text(sub, style: _ts(context, 11, color: cs.outline)),
         ],
       ),
     );
@@ -647,17 +539,19 @@ class _ToggleChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _ToggleChip({required this.label, required this.selected, required this.onTap});
+  const _ToggleChip(
+      {required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? kAccent.withOpacity(0.12) : Colors.transparent,
+          color: selected ? cs.primary.withOpacity(0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
@@ -665,51 +559,7 @@ class _ToggleChip extends StatelessWidget {
           style: GoogleFonts.alike(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: selected ? kPrimary : kSoft,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  final String label;
-  const _Badge({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: kCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white),
-      ),
-      child: Text(label, style: GoogleFonts.alike(fontSize: 12, fontWeight: FontWeight.w700, color: kPrimary)),
-    );
-  }
-}
-
-class _XpBar extends StatelessWidget {
-  final double progress; // 0..1
-  const _XpBar({required this.progress});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 12,
-      decoration: BoxDecoration(
-        color: kCard,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: progress.clamp(0, 1),
-        child: Container(
-          decoration: BoxDecoration(
-            color: kAccent,
-            borderRadius: BorderRadius.circular(30),
+            color: selected ? cs.primary : cs.outline,
           ),
         ),
       ),

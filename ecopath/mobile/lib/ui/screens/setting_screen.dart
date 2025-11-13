@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import 'termsofservice_screen.dart';
 import 'privacypolicy_screen.dart';
 import 'feedback_screen.dart';
-import 'account_screen.dart'; // ← NEW IMPORT
+import 'account_screen.dart';
+import 'theme_screen.dart'; // ← NEW
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -75,7 +77,13 @@ class SettingsScreen extends StatelessWidget {
                     _RowItem(
                       icon: 'assets/icons/theme.svg',
                       label: 'Theme',
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context, rootNavigator: true).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ThemeScreen(),
+                          ),
+                        );
+                      },
                     ),
                     const _RowDivider(),
                     _RowItem(
@@ -85,8 +93,8 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const _RowDivider(),
                     _RowItem(
-                      icon: 'assets/icons/mode.svg',
-                      label: 'Mode',
+                      icon: 'assets/icons/mybag.svg',
+                      label: 'My Plastic Bag',
                       onTap: () {},
                     ),
                   ]),

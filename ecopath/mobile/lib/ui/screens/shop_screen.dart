@@ -1,3 +1,4 @@
+// lib/ui/screens/shop_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -6,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 class BagRule {
   final String colorName;        // e.g. "Yellow Bag"
   final String assetPath;        // e.g. assets/images/yellowbag.png
-  final String wasteType;        // e.g. "Food Waste", "General Waste"
+  final String wasteType;        // "Food Waste" or "General Waste"
   final int basePointsPerLiter;  // pricing base
 
   BagRule(
@@ -32,7 +33,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
   bool _loadingAddresses = true;
 
-  // Populated from kr_address.json
+  // Populated from assets/data/kr_address.json
   List<String> _regions = [];
   Map<String, List<String>> _districtsByRegion = {};
 
@@ -41,81 +42,59 @@ class _ShopScreenState extends State<ShopScreen> {
   final List<int> _quantity = [];
   final List<int> _sizeOptions = [1, 2, 3, 5, 10, 20, 30];
 
-  // ---- BAG DEFINITIONS (reusable objects) ----
+  // ---- BAG DEFINITIONS ----
   final BagRule whiteGeneral = BagRule(
-    "White Bag",
-    "assets/images/whitebag.png",
-    "General Waste",
+    "White Bag", "assets/images/whitebag.png", "General Waste",
     basePointsPerLiter: 2,
   );
 
   final BagRule greenGeneral = BagRule(
-    "Green Bag",
-    "assets/images/greenbag.png",
-    "General Waste",
+    "Green Bag", "assets/images/greenbag.png", "General Waste",
     basePointsPerLiter: 2,
   );
 
   final BagRule blueGeneral = BagRule(
-    "Blue Bag",
-    "assets/images/bluebag.png",
-    "General Waste",
+    "Blue Bag", "assets/images/bluebag.png", "General Waste",
     basePointsPerLiter: 2,
   );
 
   final BagRule blueFood = BagRule(
-    "Blue Bag",
-    "assets/images/bluebag.png",
-    "Food Waste",
+    "Blue Bag", "assets/images/bluebag.png", "Food Waste",
     basePointsPerLiter: 2,
   );
 
   final BagRule pinkGeneral = BagRule(
-    "Pink Bag",
-    "assets/images/pinkbag.png",
-    "General Waste",
+    "Pink Bag", "assets/images/pinkbag.png", "General Waste",
     basePointsPerLiter: 2,
   );
 
   final BagRule pinkFood = BagRule(
-    "Pink Bag",
-    "assets/images/pinkbag.png",
-    "Food Waste",
+    "Pink Bag", "assets/images/pinkbag.png", "Food Waste",
     basePointsPerLiter: 2,
   );
 
   final BagRule yellowGeneral = BagRule(
-    "Yellow Bag",
-    "assets/images/yellowbag.png",
-    "General Waste",
+    "Yellow Bag", "assets/images/yellowbag.png", "General Waste",
     basePointsPerLiter: 3,
   );
 
   final BagRule yellowFood = BagRule(
-    "Yellow Bag",
-    "assets/images/yellowbag.png",
-    "Food Waste",
+    "Yellow Bag", "assets/images/yellowbag.png", "Food Waste",
     basePointsPerLiter: 3,
   );
 
   final BagRule purpleGeneral = BagRule(
-    "Purple Bag",
-    "assets/images/purplebag.png",
-    "General Waste",
+    "Purple Bag", "assets/images/purplebag.png", "General Waste",
     basePointsPerLiter: 3,
   );
 
   final BagRule purpleFood = BagRule(
-    "Purple Bag",
-    "assets/images/purplebag.png",
-    "Food Waste",
+    "Purple Bag", "assets/images/purplebag.png", "Food Waste",
     basePointsPerLiter: 3,
   );
 
   final BagRule orangeFood = BagRule(
-    "Orange Bag",
-    "assets/images/orangebag.png",
-    "Food Waste",
+    "Orange Bag", "assets/images/orangebag.png", "Food Waste",
     basePointsPerLiter: 3,
   );
 
@@ -126,44 +105,40 @@ class _ShopScreenState extends State<ShopScreen> {
   }
 
   Future<void> _loadAddressData() async {
-    // Read assets/data/kr_address.json
-    final raw = await rootBundle.loadString('assets/data/kr_address.json');
-    final decoded = jsonDecode(raw);
+    try {
+      final raw = await rootBundle.loadString('assets/data/kr_address.json');
+      final decoded = jsonDecode(raw);
 
-    // expecting:
-    // {
-    //   "Seoul": ["Gangnam-gu", "Seocho-gu", ...],
-    //   "Gyeonggi-do": ["Seongnam-si Bundang-gu", ...],
-    //   ...
-    // }
-    final Map<String, dynamic> map = decoded is Map<String, dynamic>
-        ? decoded
-        : <String, dynamic>{};
+      final Map<String, dynamic> map =
+          decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
 
-    final regions = <String>[];
-    final districtsByRegion = <String, List<String>>{};
+      final regions = <String>[];
+      final districtsByRegion = <String, List<String>>{};
 
-    map.forEach((regionName, districtsDynamic) {
-      regions.add(regionName.toString());
-      final list = <String>[];
-      if (districtsDynamic is List) {
-        for (final d in districtsDynamic) {
-          list.add(d.toString());
+      map.forEach((regionName, districtsDynamic) {
+        regions.add(regionName.toString());
+        final list = <String>[];
+        if (districtsDynamic is List) {
+          for (final d in districtsDynamic) {
+            list.add(d.toString());
+          }
         }
-      }
-      districtsByRegion[regionName.toString()] = list;
-    });
+        districtsByRegion[regionName.toString()] = list;
+      });
 
-    setState(() {
-      _regions = regions;
-      _districtsByRegion = districtsByRegion;
-      _loadingAddresses = false;
-    });
+      regions.sort();
+
+      setState(() {
+        _regions = regions;
+        _districtsByRegion = districtsByRegion;
+        _loadingAddresses = false;
+      });
+    } catch (e) {
+      setState(() => _loadingAddresses = false);
+    }
   }
 
   // --------------------- CORE BAG LOGIC ---------------------
-
-  // We compute bags for (region, district) following your table.
 
   List<BagRule> _getVisibleBags() {
     if (_selectedRegion == null || _selectedDistrict == null) return [];
@@ -173,197 +148,101 @@ class _ShopScreenState extends State<ShopScreen> {
 
     final List<BagRule> result = [];
 
-    // 1. AREA-SPECIFIC RULES FROM YOUR TABLE
-
     // ----- GREEN BAG (General Waste) -----
-    // "Use in Gyeonggi-do Seongnam-si, Gyeonggi-do Hanam-si, Pyeongtaek-si"
-    //
-    // In kr_address.json:
-    //   Gyeonggi-do:
-    //     "Seongnam-si Bundang-gu", "Seongnam-si Sujeong-gu", "Seongnam-si Jungwon-gu",
-    //     "Hanam-si",
-    //     "Pyeongtaek-si"
     final isSeongnamArea =
         region == "Gyeonggi-do" && (district.contains("Seongnam-si "));
     final isHanam = region == "Gyeonggi-do" && district == "Hanam-si";
-    final isPyeongtaek = district == "Pyeongtaek-si"; // region should be Gyeonggi-do in your file
+    final isPyeongtaek = region == "Gyeonggi-do" && district == "Pyeongtaek-si";
 
     if (isSeongnamArea || isHanam || isPyeongtaek) {
       result.add(greenGeneral);
     }
 
     // ----- BLUE BAG -----
-    // Blue bag general waste: Gwangju Seo-gu
-    // Blue bag food waste: Seoul Seocho-gu
-    final isGwangjuSeogu = (region == "Gwangju" && district == "Seo-gu");
-    if (isGwangjuSeogu) {
-      // general waste blue
+    // Blue general: Gwangju Seo-gu
+    if (region == "Gwangju" && district == "Seo-gu") {
       result.add(blueGeneral);
-      // This area also uses white bag, we'll allow white later by not blocking.
     }
-
-    final isSeoulSeocho = (region == "Seoul" && district == "Seocho-gu");
-    if (isSeoulSeocho) {
-      // food waste blue
+    // Blue food: Seoul Seocho-gu
+    if (region == "Seoul" && district == "Seocho-gu") {
       result.add(blueFood);
     }
 
     // ----- PINK BAG -----
-    // Pink bag general waste: Gwangju Gwangsan-gu
-    // Pink bag food waste: Cheonan-si
-    //
-    // In kr_address.json:
-    //   Gwangju: "Gwangsan-gu"
-    final isGwangjuGwangsan = (region == "Gwangju" && district == "Gwangsan-gu");
-    if (isGwangjuGwangsan) {
+    // Pink general: Gwangju Gwangsan-gu
+    if (region == "Gwangju" && district == "Gwangsan-gu") {
       result.add(pinkGeneral);
     }
-
-    //   Cheonan-si in json is split:
-    //     "Cheonan-si Dongnam-gu", "Cheonan-si Seobuk-gu"
-    final isCheonan = region == "Chungcheongnam-do" && (district.startsWith("Cheonan-si "));
+    // Pink food: Cheonan-si (Dongnam-gu/Seobuk-gu)
+    final isCheonan = region == "Chungcheongnam-do" && district.startsWith("Cheonan-si ");
     if (isCheonan) {
-      // Pink bag = Food Waste (Cheonan-si)
       result.add(pinkFood);
     }
 
     // ----- YELLOW BAG -----
-    // Yellow bag general waste: Gwangju Nam-gu
-    // Yellow bag food waste:
-    //   - Seongnam-si Bundang-gu
-    //   - Asan-si
-    //   - most Seoul area uses as food waste
-    final isGwangjuNamgu = (region == "Gwangju" && district == "Nam-gu");
-    if (isGwangjuNamgu) {
+    // Yellow general: Gwangju Nam-gu
+    if (region == "Gwangju" && district == "Nam-gu") {
       result.add(yellowGeneral);
     }
-
-    // Seongnam-si Bundang-gu specifically:
-    final isSeongnamBundang = region == "Gyeonggi-do" && district == "Seongnam-si Bundang-gu";
-    if (isSeongnamBundang) {
+    // Yellow food: Seongnam-si Bundang-gu, Asan-si, most Seoul (except Seocho, Gwangjin)
+    if (region == "Gyeonggi-do" && district == "Seongnam-si Bundang-gu") {
       result.add(yellowFood);
     }
-
-    // Asan-si (Chungcheongnam-do list includes "Asan-si")
-    final isAsan = region == "Chungcheongnam-do" && district == "Asan-si";
-    if (isAsan) {
+    if (region == "Chungcheongnam-do" && district == "Asan-si") {
       result.add(yellowFood);
     }
-
-    // Seoul: "most Seoul area uses yellow as food waste bag"
-    // We'll attach yellowFood for any Seoul district EXCEPT:
-    //  - Seocho-gu (blueFood already defined)
-    //  - Gwangjin-gu (purpleFood below)
-    final isSeoul = region == "Seoul";
-    if (isSeoul && district != "Seocho-gu" && district != "Gwangjin-gu") {
+    if (region == "Seoul" && district != "Seocho-gu" && district != "Gwangjin-gu") {
       result.add(yellowFood);
     }
 
     // ----- PURPLE BAG -----
-    // Purple bag general waste: Gwangju Dong-gu
-    // Purple bag food waste:
-    //   - Seoul Gwangjin-gu
-    //   - Cheonan-si (again)
-    final isGwangjuDonggu = (region == "Gwangju" && district == "Dong-gu");
-    if (isGwangjuDonggu) {
+    // Purple general: Gwangju Dong-gu
+    if (region == "Gwangju" && district == "Dong-gu") {
       result.add(purpleGeneral);
     }
-
-    final isSeoulGwangjin = (region == "Seoul" && district == "Gwangjin-gu");
-    if (isSeoulGwangjin) {
+    // Purple food: Seoul Gwangjin-gu, Cheonan-si (again)
+    if (region == "Seoul" && district == "Gwangjin-gu") {
       result.add(purpleFood);
     }
-
     if (isCheonan) {
-      // Cheonan-si also uses purple bag for food waste in your table
       result.add(purpleFood);
     }
 
     // ----- ORANGE BAG -----
-    // Orange bag food waste: Pyeongtaek-si
-    final isPyeongtaekOrange = region == "Gyeonggi-do" && district == "Pyeongtaek-si";
-    if (isPyeongtaekOrange) {
+    // Orange food: Pyeongtaek-si
+    if (region == "Gyeonggi-do" && district == "Pyeongtaek-si") {
       result.add(orangeFood);
     }
 
-    // ----- WHITE BAG -----
-    // White bag = national general waste default
-    // EXCEPT:
-    //  - Seongnam-si (all its gus)
-    //  - Hanam-si
-    //  - Pyeongtaek-si
-    //  - Gwangju Gwangsan-gu
-    //  - Gwangju Nam-gu
-    //  - Gwangju Dong-gu
-    //
-    // We'll allow white unless this district hits an exclusion case.
+    // ----- WHITE BAG (national general default unless excluded) -----
     final allowWhite = _shouldAllowWhiteBag(region, district);
     if (allowWhite) {
       final alreadyHasWhite = result.any((b) => b.colorName == "White Bag");
-      if (!alreadyHasWhite) {
-        result.add(whiteGeneral);
-      }
+      if (!alreadyHasWhite) result.add(whiteGeneral);
     }
     if (result.isEmpty && allowWhite) {
       result.add(whiteGeneral);
     }
 
-    // ====== NEW: DEFAULT FOOD-WASTE MAPPING ======
-    // If no food-waste bag was assigned by the rules above,
-    // auto-assign Yellow Food Waste as a fallback.
+    // ====== DEFAULT FOOD-WASTE FALLBACK ======
     final hasFoodWaste = result.any((b) => b.wasteType == "Food Waste");
     if (!hasFoodWaste) {
       result.add(yellowFood);
     }
-    // ====== END DEFAULT ======
+    // =========================================
 
     return result;
   }
 
   bool _shouldAllowWhiteBag(String region, String district) {
-    // if this district is in a "no white bag for general waste" zone,
-    // we return false.
-
-    // 1. Gyeonggi-do Seongnam-si (any gu of Seongnam-si)
-    if (region == "Gyeonggi-do" && district.contains("Seongnam-si ")) {
-      return false;
-    }
-
-    // 2. Gyeonggi-do Hanam-si
-    if (region == "Gyeonggi-do" && district == "Hanam-si") {
-      return false;
-    }
-
-    // 3. Pyeongtaek-si
-    if (district == "Pyeongtaek-si") {
-      // region == "Gyeonggi-do" in your data, but we just check name
-      return false;
-    }
-
-    // 4. Gwangju Gwangsan-gu
-    if (region == "Gwangju" && district == "Gwangsan-gu") {
-      return false;
-    }
-
-    // 5. Gwangju Nam-gu
-    if (region == "Gwangju" && district == "Nam-gu") {
-      return false;
-    }
-
-    // 6. Gwangju Dong-gu
-    if (region == "Gwangju" && district == "Dong-gu") {
-      return false;
-    }
-
-    // NOTE:
-    // You did NOT say white bag is blocked in Asan-si or Cheonan-si
-    // in the new table, so we are allowing white there now.
-
-    // 7. Special case: Gwangju Seo-gu
-    // You said "people use both blue and white bag so display both" → allow white
-    // (so we do nothing here)
-
-    // otherwise allowed
+    // Exclusions for white general
+    if (region == "Gyeonggi-do" && district.contains("Seongnam-si ")) return false;
+    if (region == "Gyeonggi-do" && district == "Hanam-si") return false;
+    if (region == "Gyeonggi-do" && district == "Pyeongtaek-si") return false;
+    if (region == "Gwangju" && district == "Gwangsan-gu") return false;
+    if (region == "Gwangju" && district == "Nam-gu") return false;
+    if (region == "Gwangju" && district == "Dong-gu") return false;
+    // Gwangju Seo-gu: allow white alongside blue → not excluded
     return true;
   }
 
@@ -383,37 +262,23 @@ class _ShopScreenState extends State<ShopScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF00221C),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Confirm Purchase',
-          style: GoogleFonts.lato(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.lato(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         content: Text(
           'Are you sure to buy the plastic bag?',
-          style: GoogleFonts.lato(
-            color: Colors.white70,
-            fontSize: 14,
-          ),
+          style: GoogleFonts.lato(color: Colors.white70, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(
-              'No',
-              style: GoogleFonts.lato(color: Colors.white70),
-            ),
+            child: Text('No', style: GoogleFonts.lato(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              'Yes',
-              style: GoogleFonts.lato(color: Colors.white),
-            ),
+            child: Text('Yes', style: GoogleFonts.lato(color: Colors.white)),
           ),
         ],
       ),
@@ -426,30 +291,19 @@ class _ShopScreenState extends State<ShopScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: const Color(0xFF00221C),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
             'Not enough points',
-            style: GoogleFonts.lato(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.lato(color: Colors.white, fontWeight: FontWeight.w600),
           ),
           content: Text(
             'You only have $userPoints pts.',
-            style: GoogleFonts.lato(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
+            style: GoogleFonts.lato(color: Colors.white70, fontSize: 14),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(
-                'OK',
-                style: GoogleFonts.lato(color: Colors.white),
-              ),
+              child: Text('OK', style: GoogleFonts.lato(color: Colors.white)),
             ),
           ],
         ),
@@ -465,30 +319,19 @@ class _ShopScreenState extends State<ShopScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF00221C),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Purchase Complete',
-          style: GoogleFonts.lato(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.lato(color: Colors.white, fontWeight: FontWeight.w600),
         ),
         content: Text(
           "You bought the bag!\nCheck it in 'My Plastic Bags'.",
-          style: GoogleFonts.lato(
-            color: Colors.white70,
-            fontSize: 14,
-          ),
+          style: GoogleFonts.lato(color: Colors.white70, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'OK',
-              style: GoogleFonts.lato(color: Colors.white),
-            ),
+            child: Text('OK', style: GoogleFonts.lato(color: Colors.white)),
           ),
         ],
       ),
@@ -519,11 +362,7 @@ class _ShopScreenState extends State<ShopScreen> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white24, width: 1),
             ),
-            child: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Colors.white,
-              size: 18,
-            ),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
           ),
         ),
         const SizedBox(width: 12),
@@ -546,19 +385,12 @@ class _ShopScreenState extends State<ShopScreen> {
           ),
           child: Row(
             children: [
-              const Icon(
-                Icons.stars,
-                size: 18,
-                color: Colors.white,
-              ),
+              const Icon(Icons.stars, size: 18, color: Colors.white),
               const SizedBox(width: 6),
               Text(
                 '$userPoints pts',
                 style: GoogleFonts.lato(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
+                  color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
               ),
             ],
           ),
@@ -571,7 +403,7 @@ class _ShopScreenState extends State<ShopScreen> {
     final regionItems = _regions;
     final districtItems = _selectedRegion == null
         ? <String>[]
-        : (_districtsByRegion[_selectedRegion] ?? <String>[]);
+        : (_districtsByRegion[_selectedRegion!] ?? <String>[]);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -579,10 +411,7 @@ class _ShopScreenState extends State<ShopScreen> {
         Text(
           'Choose your area',
           style: GoogleFonts.lato(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
+            color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
         ),
         const SizedBox(height: 8),
 
@@ -597,8 +426,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   setState(() {
                     _selectedRegion = val;
                     _selectedDistrict = null;
-                    final bags = _getVisibleBags();
-                    _syncStateWithVisibleBags(bags);
+                    _syncStateWithVisibleBags(_getVisibleBags());
                   });
                 },
               ),
@@ -612,8 +440,7 @@ class _ShopScreenState extends State<ShopScreen> {
                 onChanged: (val) {
                   setState(() {
                     _selectedDistrict = val;
-                    final bags = _getVisibleBags();
-                    _syncStateWithVisibleBags(bags);
+                    _syncStateWithVisibleBags(_getVisibleBags());
                   });
                 },
               ),
@@ -634,29 +461,13 @@ class _ShopScreenState extends State<ShopScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.warning_rounded,
-                color: Color(0xFFFFC107),
-                size: 20,
-              ),
+              const Icon(Icons.warning_rounded, color: Color(0xFFFFC107), size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Each Korean city / 구 prints its own bag color.\n'
-                  'Pick your exact district first.\n\n'
-                  'White Bag = national general waste, EXCEPT:\n'
-                  '  • Seongnam-si (all gus)\n'
-                  '  • Hanam-si\n'
-                  '  • Pyeongtaek-si\n'
-                  '  • Gwangsan-gu (Gwangju)\n'
-                  '  • Nam-gu (Gwangju)\n'
-                  '  • Dong-gu (Gwangju)\n\n'
-                  'If no food-waste color is defined for your district, we default to Yellow Food Waste.',
-                  style: GoogleFonts.lato(
-                    color: Colors.white,
-                    fontSize: 12,
-                    height: 1.4,
-                  ),
+                  'Each Korean city/구 prints its own bag color. '
+                  'Pick your exact district first.',
+                  style: GoogleFonts.lato(color: Colors.white, fontSize: 12, height: 1.4),
                 ),
               ),
             ],
@@ -682,33 +493,23 @@ class _ShopScreenState extends State<ShopScreen> {
         isExpanded: false,
         style: GoogleFonts.lato(color: Colors.white),
         items: _sizeOptions
-            .map(
-              (sz) => DropdownMenuItem<int>(
-                value: sz,
-                child: Text(
-                  '${sz}L',
-                  style: GoogleFonts.lato(
-                    color: Colors.white,
-                    fontSize: 14,
+            .map((sz) => DropdownMenuItem<int>(
+                  value: sz,
+                  child: Text(
+                    '${sz}L',
+                    style: GoogleFonts.lato(color: Colors.white, fontSize: 14),
                   ),
-                ),
-              ),
-            )
+                ))
             .toList(),
         onChanged: (val) {
           if (val == null) return;
-          setState(() {
-            _selectedSizeL[index] = val;
-          });
+          setState(() => _selectedSizeL[index] = val);
         },
       ),
     );
   }
 
-  Widget _qtyBtn({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
+  Widget _qtyBtn({required IconData icon, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
@@ -735,9 +536,7 @@ class _ShopScreenState extends State<ShopScreen> {
             icon: Icons.remove,
             onTap: () {
               setState(() {
-                if (_quantity[index] > 1) {
-                  _quantity[index] = _quantity[index] - 1;
-                }
+                if (_quantity[index] > 1) _quantity[index] -= 1;
               });
             },
           ),
@@ -746,19 +545,14 @@ class _ShopScreenState extends State<ShopScreen> {
             child: Text(
               '$qty',
               style: GoogleFonts.lato(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
+                color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
             ),
           ),
           _qtyBtn(
             icon: Icons.add,
             onTap: () {
               setState(() {
-                if (_quantity[index] < 10) {
-                  _quantity[index] = _quantity[index] + 1;
-                }
+                if (_quantity[index] < 10) _quantity[index] += 1;
               });
             },
           ),
@@ -779,11 +573,7 @@ class _ShopScreenState extends State<ShopScreen> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white24, width: 1),
         boxShadow: const [
-          BoxShadow(
-            color: Colors.black54,
-            blurRadius: 12,
-            offset: Offset(0, 6),
-          ),
+          BoxShadow(color: Colors.black54, blurRadius: 12, offset: Offset(0, 6)),
         ],
       ),
       child: Column(
@@ -801,10 +591,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   color: Colors.black.withOpacity(0.2),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  bag.assetPath,
-                  fit: BoxFit.contain,
-                ),
+                child: Image.asset(bag.assetPath, fit: BoxFit.contain),
               ),
               const SizedBox(width: 12),
 
@@ -816,18 +603,12 @@ class _ShopScreenState extends State<ShopScreen> {
                     Text(
                       bag.colorName,
                       style: GoogleFonts.lato(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                      ),
+                        color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       bag.wasteType,
-                      style: GoogleFonts.lato(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
+                      style: GoogleFonts.lato(color: Colors.white70, fontSize: 13),
                     ),
                   ],
                 ),
@@ -840,17 +621,11 @@ class _ShopScreenState extends State<ShopScreen> {
                   Text(
                     '$cost pts',
                     style: GoogleFonts.lato(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
+                      color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
                   ),
                   Text(
                     '(${_quantity[index]}x ${_selectedSizeL[index]}L)',
-                    style: GoogleFonts.lato(
-                      color: Colors.white54,
-                      fontSize: 12,
-                    ),
+                    style: GoogleFonts.lato(color: Colors.white54, fontSize: 12),
                   ),
                 ],
               ),
@@ -866,13 +641,7 @@ class _ShopScreenState extends State<ShopScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Bag Size',
-                      style: GoogleFonts.lato(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
+                    Text('Bag Size', style: GoogleFonts.lato(color: Colors.white70, fontSize: 12)),
                     const SizedBox(height: 6),
                     _buildSizeDropdown(index),
                   ],
@@ -883,13 +652,7 @@ class _ShopScreenState extends State<ShopScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Quantity',
-                      style: GoogleFonts.lato(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
+                    Text('Quantity', style: GoogleFonts.lato(color: Colors.white70, fontSize: 12)),
                     const SizedBox(height: 6),
                     _buildQuantitySelector(index),
                   ],
@@ -908,19 +671,12 @@ class _ShopScreenState extends State<ShopScreen> {
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF00221C),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
-              onPressed: () {
-                _tryBuy(index, visibleBags);
-              },
+              onPressed: () => _tryBuy(index, visibleBags),
               child: Text(
                 'Buy',
-                style: GoogleFonts.lato(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
+                style: GoogleFonts.lato(fontWeight: FontWeight.w700, fontSize: 16),
               ),
             ),
           ),
@@ -935,43 +691,28 @@ class _ShopScreenState extends State<ShopScreen> {
     if (_loadingAddresses) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
-        child: Text(
-          'Loading locations…',
-          style: GoogleFonts.lato(
-            color: Colors.white54,
-            fontSize: 14,
-          ),
-        ),
+        child: Text('Loading locations…',
+            style: GoogleFonts.lato(color: Colors.white54, fontSize: 14)),
       );
     }
 
     if (_selectedRegion == null || _selectedDistrict == null) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
-        child: Text(
-          'Select your city / province and district.',
-          style: GoogleFonts.lato(
-            color: Colors.white54,
-            fontSize: 14,
-          ),
-        ),
+        child: Text('Select your city / province and district.',
+            style: GoogleFonts.lato(color: Colors.white54, fontSize: 14)),
       );
     }
 
     if (visibleBags.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
-        child: Text(
-          'No bag info for this district yet.',
-          style: GoogleFonts.lato(
-            color: Colors.white54,
-            fontSize: 14,
-          ),
-        ),
+        child: Text('No bag info for this district yet.',
+            style: GoogleFonts.lato(color: Colors.white54, fontSize: 14)),
       );
     }
 
-    // sync size/qty state with current visible bag list
+    // Ensure state arrays match the number of visible cards
     if (_selectedSizeL.length != visibleBags.length ||
         _quantity.length != visibleBags.length) {
       _syncStateWithVisibleBags(visibleBags);
@@ -1002,9 +743,7 @@ class _ShopScreenState extends State<ShopScreen> {
               _buildFilters(),
               const SizedBox(height: 24),
               Expanded(
-                child: SingleChildScrollView(
-                  child: _buildBagListSection(),
-                ),
+                child: SingleChildScrollView(child: _buildBagListSection()),
               ),
             ],
           ),
@@ -1031,16 +770,12 @@ class _FilterDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = GoogleFonts.lato(color: Colors.white, fontSize: 14);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.lato(
-            color: Colors.white70,
-            fontSize: 12,
-          ),
-        ),
+        Text(label, style: GoogleFonts.lato(color: Colors.white70, fontSize: 12)),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1055,20 +790,12 @@ class _FilterDropdown<T> extends StatelessWidget {
             underline: const SizedBox.shrink(),
             isExpanded: true,
             iconEnabledColor: Colors.white,
-            style: GoogleFonts.lato(color: Colors.white),
+            style: textStyle,
             items: items
-                .map(
-                  (opt) => DropdownMenuItem<T>(
-                    value: opt,
-                    child: Text(
-                      '$opt',
-                      style: GoogleFonts.lato(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                )
+                .map((opt) => DropdownMenuItem<T>(
+                      value: opt,
+                      child: Text('$opt', style: textStyle),
+                    ))
                 .toList(),
             onChanged: onChanged,
           ),

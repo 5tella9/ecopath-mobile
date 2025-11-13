@@ -1,3 +1,4 @@
+// lib/ui/screens/feedback_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,54 +11,70 @@ class FeedbackScreen extends StatefulWidget {
 }
 
 class _FeedbackScreenState extends State<FeedbackScreen> {
-  static const Color kInk = Color(0xFF00221C);
-  static const Color kBg = Color(0xFFF5F5F5);
-
   String query = '';
 
-  TextStyle get _titleStyle =>
-      GoogleFonts.lato(color: kInk, fontSize: 32, fontWeight: FontWeight.w700);
+  TextStyle _titleStyle(BuildContext context) =>
+      GoogleFonts.lato(
+        color: Theme.of(context).colorScheme.onSurface,
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+      );
 
-  TextStyle get _btnStyle =>
-      GoogleFonts.alike(color: kInk, fontSize: 16, fontWeight: FontWeight.w400);
+  TextStyle _btnStyle(BuildContext context) =>
+      GoogleFonts.alike(
+        color: Theme.of(context).colorScheme.onSurface,
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      );
 
-  Widget _pillButton(String label, VoidCallback onTap) {
+  Widget _pillButton(BuildContext context, String label, VoidCallback onTap) {
+    final cs = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(10),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 18),
         margin: const EdgeInsets.symmetric(horizontal: 34, vertical: 20),
         decoration: BoxDecoration(
-          color: kBg,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: kInk, width: 1),
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: cs.outlineVariant, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: cs.shadow.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
         ),
         alignment: Alignment.center,
-        child: Text(label, style: _btnStyle),
+        child: Text(label, style: _btnStyle(context)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    final cs = t.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: Column(
           children: [
-            // Top header with back + search
+            // ======= THEMED HEADER (primary bg) =======
             Stack(
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  color: kInk,
+                  color: cs.primary,
                   padding: const EdgeInsets.only(top: 21, bottom: 83),
                   width: double.infinity,
                   child: Column(
                     children: [
-                      // ✅ Back icon with dark box and white arrow
+                      // Back button (kept as SVG, tinted with onPrimary)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Padding(
@@ -68,16 +85,20 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                               width: 44,
                               height: 39,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF00221C), // dark green box
+                                color: cs.primary, // blend into header
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: cs.onPrimary.withOpacity(.25),
+                                  width: 1,
+                                ),
                               ),
                               child: Center(
                                 child: SvgPicture.asset(
                                   'assets/icons/back.svg',
                                   width: 20,
                                   height: 20,
-                                  colorFilter: const ColorFilter.mode(
-                                    Color(0xFFF5F5F5), // white icon
+                                  colorFilter: ColorFilter.mode(
+                                    cs.onPrimary,
                                     BlendMode.srcIn,
                                   ),
                                 ),
@@ -87,35 +108,39 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                         ),
                       ),
 
-                      // Search bar
-                      Container(
+                      // Search bar (surface on primary)
+                      Container
+                      (
                         margin: const EdgeInsets.symmetric(horizontal: 48),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         decoration: BoxDecoration(
-                          color: kBg,
+                          color: cs.surface,
                           borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: cs.onPrimary.withOpacity(.15)),
                         ),
                         child: Row(
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(right: 13),
-                              child: Icon(Icons.search, color: Colors.grey[600]),
+                              child: Icon(Icons.search, color: cs.onSurfaceVariant),
                             ),
                             Expanded(
                               child: TextField(
                                 onChanged: (v) => setState(() => query = v),
                                 style: GoogleFonts.alike(
-                                  color: const Color(0xFF878A87),
+                                  color: cs.onSurfaceVariant,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w400,
                                 ),
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   border: InputBorder.none,
                                   isDense: true,
                                   hintText: 'Search',
-                                  contentPadding:
-                                      EdgeInsets.symmetric(vertical: 0),
+                                  hintStyle: GoogleFonts.alike(
+                                    color: cs.onSurfaceVariant.withOpacity(.7),
+                                    fontSize: 12,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
                                 ),
                               ),
                             ),
@@ -142,34 +167,33 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ],
             ),
 
-            // Content area
+            // ======= CONTENT =======
             Expanded(
               child: Container(
                 width: double.infinity,
-                color: kBg,
+                color: cs.surfaceContainerLowest,
                 child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.only(top: 32, bottom: 32), // scrollable
+                  padding: const EdgeInsets.only(top: 32, bottom: 32),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 34),
-                        child: Text('Feedback', style: _titleStyle),
+                        child: Text('Feedback', style: _titleStyle(context)),
                       ),
                       const SizedBox(height: 8),
 
-                      _pillButton('App Experience',
+                      _pillButton(context, 'App Experience',
                           () => _tap(context, 'App Experience')),
-                      _pillButton('Feature Functionality',
+                      _pillButton(context, 'Feature Functionality',
                           () => _tap(context, 'Feature Functionality')),
-                      _pillButton('Content & Information',
+                      _pillButton(context, 'Content & Information',
                           () => _tap(context, 'Content & Information')),
-                      _pillButton('Performance & Technical Issues',
+                      _pillButton(context, 'Performance & Technical Issues',
                           () => _tap(context, 'Performance & Technical Issues')),
-                      _pillButton('Suggestions',
+                      _pillButton(context, 'Suggestions',
                           () => _tap(context, 'Suggestions')),
-                      _pillButton('Satisfaction Rating',
+                      _pillButton(context, 'Satisfaction Rating',
                           () => _tap(context, 'Satisfaction Rating')),
                     ],
                   ),

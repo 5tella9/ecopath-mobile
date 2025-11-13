@@ -1,3 +1,4 @@
+// lib/ui/screens/edit_avatar_screen.dart
 import 'package:flutter/material.dart';
 
 class EditAvatarScreen extends StatefulWidget {
@@ -36,32 +37,32 @@ class _EditAvatarScreenState extends State<EditAvatarScreen> {
     'assets/images/seablue.png',
   ];
 
-  void _saveAndClose() async {
+  Future<void> _saveAndClose() async {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     // show alert: "Saved Successfully!"
     await showDialog(
       context: context,
       builder: (ctx) {
         return AlertDialog(
+          backgroundColor: cs.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text(
+          title: Text(
             'Saved Successfully!',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF00221C),
+            style: tt.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-              child: const Text(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(
                 'OK',
-                style: TextStyle(
-                  color: Color(0xFF007AFF), // iOS blue
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                style: tt.titleSmall?.copyWith(
+                  color: cs.primary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -71,22 +72,24 @@ class _EditAvatarScreenState extends State<EditAvatarScreen> {
     );
 
     // after dismissing alert, go back to Profile screen
-    Navigator.of(context).pop({
-      "character": _selectedChar,
-      "background": _selectedBg,
-    });
+    if (mounted) {
+      Navigator.of(context).pop({
+        "character": _selectedChar,
+        "background": _selectedBg,
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    const dark = Color(0xFF00221C);
-    const pageBg = Color(0xFFF5F5F5);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: Container(
-          color: pageBg,
+          color: cs.surface, // page background from theme
           width: double.infinity,
           child: Column(
             children: [
@@ -96,25 +99,19 @@ class _EditAvatarScreenState extends State<EditAvatarScreen> {
                 child: Row(
                   children: [
                     // Back
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop(); // just go back
-                      },
-                      child: const Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 20,
-                        color: dark,
-                      ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(Icons.arrow_back_ios_new, size: 20, color: cs.onSurface),
+                      tooltip: 'Back',
                     ),
                     const SizedBox(width: 8),
 
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Edit Avatar',
-                        style: TextStyle(
-                          fontSize: 20,
+                        style: tt.titleLarge?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: dark,
+                          color: cs.onSurface,
                         ),
                       ),
                     ),
@@ -122,12 +119,12 @@ class _EditAvatarScreenState extends State<EditAvatarScreen> {
                     // Done button
                     TextButton(
                       onPressed: _saveAndClose,
-                      child: const Text(
+                      child: Text(
                         'Done',
-                        style: TextStyle(
+                        style: tt.titleSmall?.copyWith(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF007AFF), // iOS blue style
+                          fontWeight: FontWeight.w700,
+                          color: cs.primary,
                         ),
                       ),
                     ),
@@ -144,28 +141,20 @@ class _EditAvatarScreenState extends State<EditAvatarScreen> {
               const SizedBox(height: 24),
 
               // Tab buttons row
-              Container(
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
                     _TabButton(
                       label: 'Character',
                       selected: _tabIndex == 0,
-                      onTap: () {
-                        setState(() {
-                          _tabIndex = 0;
-                        });
-                      },
+                      onTap: () => setState(() => _tabIndex = 0),
                     ),
                     const SizedBox(width: 12),
                     _TabButton(
                       label: 'Background Color',
                       selected: _tabIndex == 1,
-                      onTap: () {
-                        setState(() {
-                          _tabIndex = 1;
-                        });
-                      },
+                      onTap: () => setState(() => _tabIndex = 1),
                     ),
                   ],
                 ),
@@ -177,31 +166,28 @@ class _EditAvatarScreenState extends State<EditAvatarScreen> {
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: cs.shadow.withOpacity(.06),
+                        blurRadius: 10,
+                        offset: const Offset(0, -2),
+                      ),
+                    ],
                   ),
                   padding: const EdgeInsets.all(16),
                   child: _tabIndex == 0
                       ? _CharacterGrid(
                           characters: _characters,
                           selected: _selectedChar,
-                          onSelect: (val) {
-                            setState(() {
-                              _selectedChar = val;
-                            });
-                          },
+                          onSelect: (val) => setState(() => _selectedChar = val),
                         )
                       : _BgGrid(
                           bgAssets: _bgColors,
                           selected: _selectedBg,
-                          onSelect: (val) {
-                            setState(() {
-                              _selectedBg = val;
-                            });
-                          },
+                          onSelect: (val) => setState(() => _selectedBg = val),
                         ),
                 ),
               ),
@@ -225,8 +211,7 @@ class _AvatarPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // We'll render background as a circle using bgAsset as decoration image,
-    // and then overlay the animal character in the middle.
+    final cs = Theme.of(context).colorScheme;
 
     return Stack(
       alignment: Alignment.center,
@@ -241,11 +226,11 @@ class _AvatarPreview extends StatelessWidget {
               image: AssetImage(bgAsset),
               fit: BoxFit.cover,
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Colors.black26,
-                blurRadius: 6,
-                offset: Offset(0, 3),
+                color: cs.shadow.withOpacity(.25),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -265,7 +250,7 @@ class _AvatarPreview extends StatelessWidget {
   }
 }
 
-// ========= Tab Button Widget =========
+// ========= Tab Button Widget (theme-aware) =========
 class _TabButton extends StatelessWidget {
   final String label;
   final bool selected;
@@ -279,29 +264,32 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const dark = Color(0xFF00221C);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+          duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: selected ? const Color(0xFFE0F0ED) : const Color(0xFFF5F5F5),
+            color: selected
+                ? cs.primary.withOpacity(.12)
+                : cs.surfaceVariant.withOpacity(.6),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: selected ? dark : Colors.transparent,
+              color: selected ? cs.primary : cs.outlineVariant,
               width: 1,
             ),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: tt.labelLarge?.copyWith(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: selected ? dark : Colors.black87,
+              fontWeight: FontWeight.w700,
+              color: selected ? cs.primary : cs.onSurface,
             ),
           ),
         ),
@@ -324,6 +312,8 @@ class _CharacterGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GridView.count(
       physics: const BouncingScrollPhysics(),
       crossAxisCount: 4,
@@ -342,14 +332,14 @@ class _CharacterGrid extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isChosen ? const Color(0xFF00221C) : Colors.transparent,
+                    color: isChosen ? cs.primary : Colors.transparent,
                     width: 2,
                   ),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Colors.black12,
+                      color: cs.shadow.withOpacity(.12),
                       blurRadius: 4,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -360,7 +350,6 @@ class _CharacterGrid extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              // we can show nothing or show label; for now no text
             ],
           ),
         );
@@ -383,6 +372,8 @@ class _BgGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GridView.count(
       physics: const BouncingScrollPhysics(),
       crossAxisCount: 4,
@@ -401,18 +392,18 @@ class _BgGrid extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isChosen ? const Color(0xFF00221C) : Colors.transparent,
+                    color: isChosen ? cs.primary : Colors.transparent,
                     width: 2,
                   ),
                   image: DecorationImage(
                     image: AssetImage(assetPath),
                     fit: BoxFit.cover,
                   ),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Colors.black12,
+                      color: cs.shadow.withOpacity(.12),
                       blurRadius: 4,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),

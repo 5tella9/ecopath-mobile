@@ -1,11 +1,10 @@
 // lib/ui/screens/profile_screen.dart
-import 'package:ecopath/ui/screens/notifications_screen.dart';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:math';
+import 'notifications_screen.dart';
 import 'setting_screen.dart';
 import 'edit_avatar_screen.dart';
-import 'notifications_screen.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -16,32 +15,20 @@ class Profile extends StatefulWidget {
 class ProfileState extends State<Profile> {
   DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   final Random _rand = Random();
-
-  // Random mock data for recycle days
   final Map<int, int> _recycleDays = {};
 
   @override
   void initState() {
     super.initState();
-    // Create random recycle days
     for (int i = 1; i <= 31; i++) {
       if (_rand.nextBool()) {
-        _recycleDays[i] = _rand.nextInt(20) + 5; // 5–25 points
+        _recycleDays[i] = _rand.nextInt(20) + 5;
       }
     }
   }
 
-  // Calendar helpers
-  int _daysInMonth(DateTime d) {
-    final firstNextMonth = DateTime(d.year, d.month + 1, 1);
-    return firstNextMonth.subtract(const Duration(days: 1)).day;
-  }
-
-  int _firstWeekdayOfMonth(DateTime d) {
-    final w = DateTime(d.year, d.month, 1).weekday;
-    return w % 7; // Sun=0
-  }
-
+  int _daysInMonth(DateTime d) => DateTime(d.year, d.month + 1, 0).day;
+  int _firstWeekdayOfMonth(DateTime d) => DateTime(d.year, d.month, 1).weekday % 7;
   String get _monthLabel {
     const months = [
       'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
@@ -49,141 +36,77 @@ class ProfileState extends State<Profile> {
     return '${months[_focusedMonth.month - 1]} ${_focusedMonth.year}';
   }
 
-  void _prevMonth() {
-    setState(() {
-      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1);
-    });
-  }
+  void _prevMonth() => setState(() => _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1));
+  void _nextMonth() => setState(() => _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1));
 
-  void _nextMonth() {
-    setState(() {
-      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1);
-    });
-  }
-
-  // ---------------- Avatar Action Sheet ----------------
   void _showAvatarActionSheet() {
+    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      backgroundColor: const Color(0xFFF9F9F9),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFE0E0E0), width: 1),
-                  ),
+      backgroundColor: cs.surface,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: cs.outlineVariant, width: 1),
                 ),
-                child: const Center(
-                  child: Text(
-                    'Change Avatar',
+              ),
+              child: Center(
+                child: Text('Change Avatar',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF000000),
-                    ),
-                  ),
-                ),
+                      color: cs.onSurface,
+                    )),
               ),
-              _ActionSheetItem(text: 'Take Photo', onTap: () {}),
-              _ActionSheetItem(text: 'Choose from album', onTap: () {}),
-              _ActionSheetItem(
-                text: 'Choose from character',
-                onTap: () async {
-                  Navigator.pop(ctx);
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const EditAvatarScreen()),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              _ActionSheetItem(
-                isCancel: true,
-                text: 'Cancel',
-                onTap: () => Navigator.pop(ctx),
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // ---------- New Info Alert for ? ----------
-  void _showRecycleInfo() {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.4),
-      builder: (ctx) => Center(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 30),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              )
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Track your eco journey! Each time you recycle and earn points, your activity appears here. Check your streaks and see how consistent your recycling habits are!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFF00221C),
-                  fontSize: 14,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 18),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00221C),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
-                ),
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("Got it!", style: TextStyle(color: Colors.white)),
-              )
-            ],
-          ),
+            ),
+            _ActionSheetItem(text: 'Take Photo', onTap: () {}),
+            _ActionSheetItem(text: 'Choose from album', onTap: () {}),
+            _ActionSheetItem(
+              text: 'Choose from character',
+              onTap: () async {
+                Navigator.pop(ctx);
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const EditAvatarScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            _ActionSheetItem(
+              isCancel: true,
+              text: 'Cancel',
+              onTap: () => Navigator.pop(ctx),
+            ),
+            const SizedBox(height: 12),
+          ],
         ),
       ),
     );
   }
 
-  // ---------- Info Box for Recycle Icon ----------
-  void _showDayInfo(int day, int points) {
+  void _showRecycleInfo() {
+    final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: cs.scrim.withOpacity(0.4),
       builder: (ctx) => Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 30),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: cs.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: cs.shadow.withOpacity(0.15),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               )
@@ -193,30 +116,70 @@ class ProfileState extends State<Profile> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Oct $day, ${_focusedMonth.year}",
-                style: const TextStyle(
-                  color: Color(0xFF00221C),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                "Track your eco journey! Each time you recycle and earn points, your activity appears here. Check your streaks and see how consistent your recycling habits are!",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: cs.onSurface, fontSize: 14, height: 1.4),
+              ),
+              const SizedBox(height: 18),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: cs.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
                 ),
+                onPressed: () => Navigator.pop(ctx),
+                child: Text("Got it!", style: TextStyle(color: cs.onPrimary)),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDayInfo(int day, int points) {
+    final cs = Theme.of(context).colorScheme;
+    showDialog(
+      context: context,
+      barrierColor: cs.scrim.withOpacity(0.4),
+      builder: (ctx) => Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: cs.shadow.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "${_monthLabel.split(' ')[0]} $day, ${_focusedMonth.year}",
+                style: TextStyle(
+                    color: cs.onSurface, fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 "You earned $points points on this day!",
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF00221C), fontSize: 14),
+                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
               ),
               const SizedBox(height: 18),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00221C),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  backgroundColor: cs.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
                 ),
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text("Got it!", style: TextStyle(color: Colors.white)),
+                child: Text("Got it!", style: TextStyle(color: cs.onPrimary)),
               )
             ],
           ),
@@ -225,33 +188,25 @@ class ProfileState extends State<Profile> {
     );
   }
 
-  // ---- navigate helpers (force rebuild after return) ----
   Future<void> _openNotifications() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-    );
-    // when we come back, rebuild the header so icons show again
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationsScreen()));
     setState(() {});
   }
 
   Future<void> _openSettings() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const SettingsScreen()),
-    );
+    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    const dark = Color(0xFF00221C);
-    const pale = Color(0xFFE0F0ED);
-    const bg = Color(0xFFF5F5F5);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: Container(
-          color: bg,
+          color: cs.surface,
           width: double.infinity,
           child: SingleChildScrollView(
             child: Column(
@@ -263,27 +218,19 @@ class ProfileState extends State<Profile> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _HeaderIcon(
-                        asset: 'assets/icons/bell.svg',
-                        onTap: _openNotifications,
-                        allowOriginalColor: false,
-                        isBold: true,
-                      ),
+                      _HeaderIcon(asset: 'assets/icons/bell.svg', onTap: _openNotifications, isBold: true),
                       const SizedBox(width: 8),
-                      _HeaderIcon(
-                        asset: 'assets/icons/setting.svg',
-                        onTap: _openSettings,
-                      ),
+                      _HeaderIcon(asset: 'assets/icons/setting.svg', onTap: _openSettings),
                     ],
                   ),
                 ),
 
-                const Padding(
-                  padding: EdgeInsets.only(left: 29, bottom: 10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 29, bottom: 10),
                   child: Text(
                     'Profile',
                     style: TextStyle(
-                      color: dark,
+                      color: cs.onSurface,
                       fontSize: 36,
                       fontWeight: FontWeight.bold,
                     ),
@@ -312,39 +259,26 @@ class ProfileState extends State<Profile> {
                             child: GestureDetector(
                               onTap: _showAvatarActionSheet,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 4,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.black,
+                                  color: cs.primary,
                                   borderRadius: BorderRadius.circular(14),
-                                  boxShadow: const [
+                                  boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black26,
+                                      color: cs.shadow.withOpacity(0.3),
                                       blurRadius: 4,
-                                      offset: Offset(0, 2),
+                                      offset: const Offset(0, 2),
                                     ),
                                   ],
                                 ),
-                                child: const Text(
-                                  '...',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                                child: Text('...', style: TextStyle(color: cs.onPrimary, fontSize: 14)),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 14),
-                      const Text(
-                        'Stella',
-                        style: TextStyle(color: dark, fontSize: 18),
-                      ),
+                      Text('Stella', style: TextStyle(color: cs.onSurface, fontSize: 18)),
                     ],
                   ),
                 ),
@@ -365,15 +299,13 @@ class ProfileState extends State<Profile> {
 
                 const SizedBox(height: 28),
 
-                // recycle history + ?
+                // recycle history
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const Text(
-                        'Recycle History',
-                        style: TextStyle(color: dark, fontSize: 16),
-                      ),
+                      Text('Recycle History',
+                          style: TextStyle(color: cs.onSurface, fontSize: 16)),
                       const SizedBox(width: 6),
                       GestureDetector(
                         onTap: _showRecycleInfo,
@@ -381,15 +313,12 @@ class ProfileState extends State<Profile> {
                           width: 18,
                           height: 18,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cs.surfaceContainerHighest,
                             shape: BoxShape.circle,
-                            border: Border.all(color: dark.withOpacity(0.4)),
+                            border: Border.all(color: cs.outlineVariant),
                           ),
                           alignment: Alignment.center,
-                          child: const Text(
-                            '?',
-                            style: TextStyle(fontSize: 12, color: dark),
-                          ),
+                          child: Text('?', style: TextStyle(fontSize: 12, color: cs.onSurface)),
                         ),
                       ),
                     ],
@@ -403,7 +332,7 @@ class ProfileState extends State<Profile> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: pale,
+                      color: cs.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     padding: const EdgeInsets.fromLTRB(8, 10, 8, 14),
@@ -413,14 +342,14 @@ class ProfileState extends State<Profile> {
                           children: [
                             IconButton(
                               onPressed: _prevMonth,
-                              icon: const Icon(Icons.chevron_left, color: dark),
+                              icon: Icon(Icons.chevron_left, color: cs.onSurface),
                             ),
                             Expanded(
                               child: Center(
                                 child: Text(
                                   _monthLabel,
-                                  style: const TextStyle(
-                                    color: dark,
+                                  style: TextStyle(
+                                    color: cs.onSurface,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -429,7 +358,7 @@ class ProfileState extends State<Profile> {
                             ),
                             IconButton(
                               onPressed: _nextMonth,
-                              icon: const Icon(Icons.chevron_right, color: dark),
+                              icon: Icon(Icons.chevron_right, color: cs.onSurface),
                             ),
                           ],
                         ),
@@ -446,7 +375,7 @@ class ProfileState extends State<Profile> {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        _buildDaysGrid(),
+                        _buildDaysGrid(context),
                       ],
                     ),
                   ),
@@ -460,9 +389,8 @@ class ProfileState extends State<Profile> {
     );
   }
 
-  Widget _buildDaysGrid() {
-    const dark = Color(0xFF00221C);
-    const dayStyle = TextStyle(color: dark, fontSize: 13);
+  Widget _buildDaysGrid(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final firstWeekday = _firstWeekdayOfMonth(_focusedMonth);
     final totalDays = _daysInMonth(_focusedMonth);
     final today = DateTime.now();
@@ -487,7 +415,6 @@ class ProfileState extends State<Profile> {
               final isToday = today.year == _focusedMonth.year &&
                   today.month == _focusedMonth.month &&
                   today.day == dayNum;
-
               final recyclePoints = _recycleDays[dayNum];
 
               if (recyclePoints != null) {
@@ -508,10 +435,11 @@ class ProfileState extends State<Profile> {
                 decoration: isToday
                     ? BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: dark, width: 1),
+                        border: Border.all(color: cs.primary, width: 1),
                       )
                     : null,
-                child: Text('$dayNum', style: dayStyle),
+                child: Text('$dayNum',
+                    style: TextStyle(color: cs.onSurface, fontSize: 13)),
               );
             }),
           ),
@@ -521,27 +449,24 @@ class ProfileState extends State<Profile> {
   }
 }
 
-// ========== Helper Widgets ==========
+// ======== Helper Widgets ========
 
 class _HeaderIcon extends StatelessWidget {
   final String asset;
   final VoidCallback onTap;
-  final bool allowOriginalColor;
   final bool isBold;
 
   const _HeaderIcon({
     required this.asset,
     required this.onTap,
-    this.allowOriginalColor = false,
     this.isBold = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = const Color(0xFF00221C);
-
+    final cs = Theme.of(context).colorScheme;
     return Material(
-      color: const Color(0xFFF5F5F5),
+      color: cs.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -553,13 +478,12 @@ class _HeaderIcon extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               if (isBold)
-                // shadow layer for “thick” look
                 SvgPicture.asset(
                   asset,
                   width: 22,
                   height: 22,
                   colorFilter: ColorFilter.mode(
-                    baseColor.withOpacity(0.4),
+                    cs.onSurface.withOpacity(0.4),
                     BlendMode.srcIn,
                   ),
                 ),
@@ -567,7 +491,7 @@ class _HeaderIcon extends StatelessWidget {
                 asset,
                 width: isBold ? 26 : 20,
                 height: isBold ? 26 : 20,
-                colorFilter: ColorFilter.mode(baseColor, BlendMode.srcIn),
+                colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
               ),
             ],
           ),
@@ -576,7 +500,6 @@ class _HeaderIcon extends StatelessWidget {
     );
   }
 }
-
 
 class _ActionSheetItem extends StatelessWidget {
   final String text;
@@ -591,10 +514,11 @@ class _ActionSheetItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color textColor = isCancel ? const Color(0xFF007AFF) : Colors.black;
+    final cs = Theme.of(context).colorScheme;
+    final textColor = isCancel ? cs.primary : cs.onSurface;
 
     return Material(
-      color: Colors.white,
+      color: cs.surface,
       child: InkWell(
         onTap: onTap,
         child: Container(
@@ -607,10 +531,7 @@ class _ActionSheetItem extends StatelessWidget {
             border: Border(
               top: isCancel
                   ? BorderSide.none
-                  : const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
+                  : BorderSide(color: cs.outlineVariant, width: 1),
             ),
           ),
           child: Center(
@@ -618,8 +539,7 @@ class _ActionSheetItem extends StatelessWidget {
               text,
               style: TextStyle(
                 fontSize: isCancel ? 18 : 17,
-                fontWeight:
-                    isCancel ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: isCancel ? FontWeight.w600 : FontWeight.normal,
                 color: textColor,
               ),
             ),
@@ -637,22 +557,19 @@ class _StatBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const dark = Color(0xFF00221C);
+    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         Text(
           value,
-          style: const TextStyle(
-            color: dark,
+          style: TextStyle(
+            color: cs.onSurface,
             fontSize: 32,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(color: dark, fontSize: 14),
-        ),
+        Text(label, style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14)),
       ],
     );
   }
@@ -664,13 +581,14 @@ class _Weekday extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return SizedBox(
       width: 32,
       child: Center(
         child: Text(
           text,
-          style: const TextStyle(
-            color: Color(0xFF00221C),
+          style: TextStyle(
+            color: cs.onSurfaceVariant,
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),

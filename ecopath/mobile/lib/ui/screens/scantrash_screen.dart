@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
-// ✅ Import your root shell that owns the BottomNavigationBar
-import 'package:ecopath/ui/root_shell.dart'; // EcoPathRoot should live here
+import 'package:ecopath/ui/root_shell.dart';
 
 class ScanTrashScreen extends StatefulWidget {
   const ScanTrashScreen({super.key});
@@ -19,17 +18,17 @@ class ScanTrashScreen extends StatefulWidget {
 
 class _ScanTrashScreenState extends State<ScanTrashScreen>
     with SingleTickerProviderStateMixin {
-  static const Color kInk = Color(0xFF00221C);
-  static const Color kBg = Color(0xFFF5F5F5);
-
   CameraController? _controller;
   Future<void>? _initFuture;
+  List<CameraDescription> _cameras = const [];
+  bool _hasCamera = false;
+  bool _isScanning = false;
+  String? _camError;
 
   late final AnimationController _lineCtrl;
   late final Animation<double> _lineAnim;
 
   int pointsEarned = 0;
-  bool _isScanning = false;
 
   @override
   void initState() {
@@ -45,21 +44,41 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   }
 
   Future<void> _initCamera() async {
+    setState(() => _camError = null);
+
     try {
-      final cams = await availableCameras();
-      if (cams.isEmpty) {
-        debugPrint('⚠️ No cameras found on this device');
-        return;
+      if (kIsWeb) {
+        _hasCamera = false;
+        _cameras = const [];
+      } else {
+        _cameras = await availableCameras();
+        _hasCamera = _cameras.isNotEmpty;
+        if (_hasCamera) {
+          final back = _cameras.firstWhere(
+            (c) => c.lensDirection == CameraLensDirection.back,
+            orElse: () => _cameras.first,
+          );
+          final ctrl = CameraController(
+            back,
+            ResolutionPreset.medium,
+            enableAudio: false,
+            imageFormatGroup: ImageFormatGroup.jpeg,
+          );
+          _initFuture = ctrl.initialize();
+          await _controller?.dispose();
+          setState(() => _controller = ctrl);
+        } else {
+          await _controller?.dispose();
+          setState(() => _controller = null);
+        }
       }
-      final back = cams.firstWhere(
-        (c) => c.lensDirection == CameraLensDirection.back,
-        orElse: () => cams.first,
-      );
-      final ctrl = CameraController(back, ResolutionPreset.medium, enableAudio: false);
-      _initFuture = ctrl.initialize();
-      setState(() => _controller = ctrl);
     } catch (e) {
-      debugPrint('⚠️ Camera init error: $e');
+      _camError = e.toString();
+      await _controller?.dispose();
+      setState(() {
+        _controller = null;
+        _hasCamera = false;
+      });
     }
   }
 
@@ -75,44 +94,45 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
 
     setState(() => _isScanning = true);
     final XFile? photo = await _controller?.takePicture();
-    if (photo == null) return;
+    if (photo == null) {
+      setState(() => _isScanning = false);
+      return;
+    }
 
-    const String apiUrl = "https://floor-tribunal-joseph-asus.trycloudflare.com/predict";
+    const String apiUrl =
+        "https://almost-enhancements-phys-doe.trycloudflare.com/predict";
 
     try {
       final bytes = await photo.readAsBytes();
       final base64Image = base64Encode(bytes);
 
-      final Map<String, dynamic> body = {
-        "image_b64": base64Image,
-      };
-
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
+        body: jsonEncode({"image_b64": base64Image}),
       );
 
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        debugPrint("✅ Prediction: $result");
         _finishScan(result);
       } else {
-        debugPrint("❌ Error: ${response.statusCode}");
-        debugPrint(response.body);
+        debugPrint("❌ Error ${response.statusCode}: ${response.body}");
+        _toast('Scan failed (${response.statusCode})');
       }
-      setState(() => _isScanning = false);
     } catch (e) {
       debugPrint("⚠️ Exception: $e");
-      setState(() => _isScanning = false);
+      _toast('Scan error: $e');
+    } finally {
+      if (mounted) setState(() => _isScanning = false);
     }
   }
 
   void _finishScan(Map<String, dynamic> result) {
+    final cs = Theme.of(context).colorScheme;
     setState(() => pointsEarned += 15);
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -123,26 +143,28 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
           children: [
             Text('Scan Complete!',
                 style: GoogleFonts.lato(
-                    color: kInk, fontSize: 20, fontWeight: FontWeight.w700)),
+                    color: cs.onSurface, fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Text(
-                'you scanned ${result['item']}, this needs to be in the ${result['bin_korea']} • +15 pts',
-                style: GoogleFonts.alike(color: kInk, fontSize: 14)),
+              'you scanned ${result['item']}, this needs to be in the ${result['bin_korea']} • +15 pts',
+              style: GoogleFonts.alike(color: cs.onSurface),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: kInk,
+                color: cs.primary,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.stars, color: Color(0xFFF5F5F5)),
+                  Icon(Icons.stars, color: cs.onPrimary),
                   const SizedBox(width: 8),
                   Text('+15 points',
                       style: GoogleFonts.lato(
-                        color: const Color(0xFFF5F5F5),
+                        color: cs.onPrimary,
                         fontWeight: FontWeight.w700,
                       )),
                 ],
@@ -155,40 +177,39 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
     );
   }
 
-  /// ✅ Return to the tab root with Games tab selected; keeps the 5-icon bottom bar.
+  void _toast(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   Future<void> _goToGamesTab() async {
     try {
       await _controller?.dispose();
     } catch (_) {}
     _controller = null;
-
     if (!mounted) return;
-
-    // ⬇️ Remove `const` and pass your tab index prop
-    // If your prop is named differently (e.g., selectedIndex/startIndex), rename it here.
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (_) => RootShell(
-          initialIndex: 3, // 👈 index of the Games tab in your BottomNav
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => const RootShell(initialIndex: 3)),
       (route) => false,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final init = _initFuture;
+
     return WillPopScope(
       onWillPop: () async {
         await _goToGamesTab();
         return false;
       },
       child: Scaffold(
-        backgroundColor: kBg,
+        backgroundColor: cs.surface,
         body: SafeArea(
           child: Stack(
             children: [
+              // Camera preview if available; otherwise a neutral dim background
               if (_controller != null && init != null)
                 FutureBuilder(
                   future: init,
@@ -200,53 +221,41 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
                   },
                 )
               else
-                const Center(child: CircularProgressIndicator()),
+                Container(color: Colors.black.withOpacity(0.35)),
 
+              // Scanner overlay
               _ScannerOverlay(lineAnim: _lineAnim),
 
+              // Top bar: Material back button (no SVG) + title + points
               Positioned(
-                left: 16,
+                left: 8,
                 right: 16,
-                top: 12,
+                top: 8,
                 child: Row(
                   children: [
-                    InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: _goToGamesTab,
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00221C),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x33000000),
-                              blurRadius: 8,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: SvgPicture.asset(
-                          'assets/icons/back.svg',
-                          width: 20,
-                          height: 20,
-                        ),
+                    IconButton.filled(
+                      style: IconButton.styleFrom(
+                        backgroundColor: cs.primary,
+                      ),
+                      onPressed: _goToGamesTab,
+                      icon: Icon(Icons.arrow_back_rounded, color: cs.onPrimary),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Scan Trash',
+                      style: GoogleFonts.lato(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Text('Scan Trash',
-                        style: GoogleFonts.lato(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700)),
                     const Spacer(),
                     _PointsPill(points: pointsEarned),
                   ],
                 ),
               ),
 
+              // Bottom controls
               Positioned(
                 left: 0,
                 right: 0,
@@ -255,48 +264,76 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(.92),
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: Text('Daily Quest: Scan 3 items • +30',
-                          style: GoogleFonts.alike(
-                              color: kInk,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400)),
-                    ),
-                    const SizedBox(height: 14),
-                    GestureDetector(
-                      onTap: _scanTrash,
-                      child: Container(
-                        width: 86,
-                        height: 86,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x33000000),
-                              blurRadius: 18,
-                              offset: Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Container(
-                          margin: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: kInk, width: 4),
-                          ),
+                      child: Text(
+                        'Daily Quest: Scan 3 items • +30',
+                        style: GoogleFonts.alike(
+                          color: cs.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
+                    const SizedBox(height: 14),
+
+                    // Capture button only when a real camera is initialized.
+                    if (_controller != null &&
+                        _hasCamera &&
+                        (_controller?.value.isInitialized ?? false))
+                      GestureDetector(
+                        onTap: _scanTrash,
+                        child: Container(
+                          width: 86,
+                          height: 86,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0x33000000),
+                                blurRadius: 18,
+                                offset: Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Container(
+                            margin: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: cs.primary, width: 4),
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      Column(
+                        children: [
+                          FilledButton.icon(
+                            onPressed: _initCamera,
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: const Text('Retry'),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            (defaultTargetPlatform == TargetPlatform.iOS && !kIsWeb)
+                                ? 'iOS Simulator has no camera.'
+                                : (_camError ?? 'No cameras found.'),
+                            style: TextStyle(color: cs.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
-              // ✅ Show loading overlay when scanning
+
+              // Loading veil during scan
               if (_isScanning)
                 Positioned.fill(
                   child: BackdropFilter(
@@ -324,23 +361,26 @@ class _PointsPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF00221C),
+        color: cs.primary,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.stars, color: Color(0xFFF5F5F5), size: 18),
+          Icon(Icons.stars, color: cs.onPrimary, size: 18),
           const SizedBox(width: 6),
-          Text('$points pts',
-              style: GoogleFonts.lato(
-                color: const Color(0xFFF5F5F5),
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              )),
+          Text(
+            '$points pts',
+            style: GoogleFonts.lato(
+              color: cs.onPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -417,17 +457,17 @@ class _CutoutPainter extends CustomPainter {
     final overlay = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
     final cutout = Path()
       ..addRRect(RRect.fromRectAndRadius(scanRect, Radius.circular(radius)));
-    final paint = Paint()
+    final cutPaint = Paint()
       ..color = Colors.black.withOpacity(0.35)
       ..blendMode = BlendMode.dstOut;
 
     canvas.saveLayer(Offset.zero & size, Paint());
     canvas.drawPath(overlay, Paint()..color = Colors.black.withOpacity(0.35));
-    canvas.drawPath(cutout, paint);
+    canvas.drawPath(cutout, cutPaint);
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _CutoutPainter oldDelegate) =>
-      oldDelegate.scanRect != scanRect || oldDelegate.radius != radius;
+  bool shouldRepaint(covariant _CutoutPainter old) =>
+      old.scanRect != scanRect || old.radius != radius;
 }
