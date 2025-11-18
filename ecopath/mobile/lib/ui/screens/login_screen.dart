@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ecopath/ui/root_shell.dart'; // you already navigate to /root so keeping import
+import 'package:ecopath/ui/root_shell.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,17 +21,17 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _goToDashboard() {
-    Navigator.of(context).pushReplacementNamed('/root'); // ✅ go to RootShell
+    Navigator.of(context).pushReplacementNamed('/root');
   }
 
   @override
   Widget build(BuildContext context) {
     const Color bgDark = Color(0xFF00221C); // deep green
     const Color fieldBg = Color(0xFFEFF6F3); // pale greenish field fill
-    const Color buttonDisabled = Color(0xFFB9BFB7); // gray/green button
+    const Color buttonBase = Color(0xFFB9BFB7); // idle button color
+    const Color buttonPressed = Color(0xFF00221C); // when pressed
 
     final double mascotSize = 120;
-    final double sheetTopOffset = 100; // how far down the white sheet starts
 
     return Scaffold(
       backgroundColor: bgDark,
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               ),
 
-                              // ===== BOTTOM content (clean version) =====
+                              // ===== BOTTOM content =====
                               Column(
                                 children: [
                                   const SizedBox(height: 24),
@@ -148,16 +148,33 @@ class _LoginScreenState extends State<LoginScreen> {
                                     width: double.infinity,
                                     child: TextButton(
                                       onPressed: _goToDashboard,
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: buttonDisabled,
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.resolveWith<
+                                                Color>((states) {
+                                          // pressed -> dark green, otherwise base color
+                                          if (states
+                                              .contains(MaterialState.pressed)) {
+                                            return buttonPressed;
+                                          }
+                                          return buttonBase;
+                                        }),
                                         foregroundColor:
-                                            Colors.black.withOpacity(0.8),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 16,
+                                            MaterialStateProperty.all(
+                                          Colors.black.withOpacity(0.8),
                                         ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                        padding:
+                                            MaterialStateProperty.all(
+                                          const EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                        ),
+                                        shape:
+                                            MaterialStateProperty.all(
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
                                         ),
                                       ),
                                       child: const Text(
@@ -169,10 +186,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ),
                                   ),
-
-                                  // ⬇ removed:
-                                  // - the "or log in with" divider Row
-                                  // - the 3 social icon buttons Row
                                 ],
                               ),
                             ],

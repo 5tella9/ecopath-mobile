@@ -85,7 +85,8 @@ class FeaturesScreen extends StatelessWidget {
                       subtitle: 'Scan, sort, and track',
                       iconPath: 'assets/images/tracker.png',
                       bubbleTone: _Tone.secondary,
-                      onTap: () => _open(context, const _TrashRecyclingScreen()),
+                      onTap: () =>
+                          _open(context, const _TrashRecyclingScreen()),
                     ),
                     _FeatureCard(
                       title: 'Shop',
@@ -163,23 +164,17 @@ class _FeatureCard extends StatelessWidget {
       child: Ink(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              cs.surface,
-              cs.surfaceContainerHighest,
-            ],
-          ),
+          // *** MAIN CHANGE: solid card color instead of same gradient as bg ***
+          color: cs.surfaceContainerHighest,
           boxShadow: [
             BoxShadow(
-              color: cs.shadow.withOpacity(0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
+              color: Colors.black.withOpacity(0.18),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
             ),
           ],
           border: Border.all(
-            color: cs.outlineVariant.withOpacity(.35),
+            color: cs.outlineVariant.withOpacity(.5),
             width: 1,
           ),
         ),

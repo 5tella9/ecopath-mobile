@@ -35,6 +35,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Widget? suffix,
   }) {
     return InputDecoration(
+      // ↓↓↓ these two lines override the dark InputDecorationTheme
+      filled: true,
+      fillColor: Colors.white, // always light textbox
+
       hintText: hint,
       hintStyle: GoogleFonts.alike(
         fontSize: 14,
@@ -82,7 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             children: [
               /* ---------- TOP HERO SECTION ---------- */
               SizedBox(
-                height: 260, // can shrink a bit now that gap is smaller
+                height: 260,
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -109,7 +113,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               vertical: 6,
                             ),
                             margin: const EdgeInsets.only(
-                              right: 8, // bubble sits to her left
+                              right: 8,
                               top: 12,
                             ),
                             decoration: BoxDecoration(
@@ -145,13 +149,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
 
-                    // WHITE CONTAINER (card), stays visually where you liked it
+                    // WHITE CONTAINER (card)
                     Positioned(
                       left: 0,
                       right: 0,
                       top: 120,
                       child: Container(
-                        // ↓↓↓ reduced top padding from 80 → 32
                         padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
                         decoration: const BoxDecoration(
                           color: Colors.white,
@@ -191,7 +194,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
 
-              // we pulled padding down, so we can also pull form up a bit
               const SizedBox(height: 12),
 
               /* ---------- FORM SECTION ---------- */
@@ -388,12 +390,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const LoginScreen()),
+                            builder: (_) => const LoginScreen(),
+                          ),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         "Log in!",
-                        style: GoogleFonts.alike(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF00221C),

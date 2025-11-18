@@ -5,6 +5,10 @@ import 'quiz_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 
+// NEW: real screens
+import 'recycle_screen.dart';
+import 'education_screen.dart';
+
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
   @override
@@ -131,12 +135,14 @@ class DashboardState extends State<Dashboard> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Stella', style: _ts(context, 20, fw: FontWeight.w600)),
+                        Text('Stella',
+                            style: _ts(context, 20, fw: FontWeight.w600)),
                         const SizedBox(height: 6),
                         Text('Current Rank : 9', style: _ts(context, 18)),
                         const SizedBox(height: 6),
                         Row(children: [
-                          Image.asset('assets/images/star.png', width: 28, height: 28),
+                          Image.asset('assets/images/star.png',
+                              width: 28, height: 28),
                           const SizedBox(width: 8),
                           Text('Points : 94', style: _ts(context, 18)),
                         ]),
@@ -154,26 +160,28 @@ class DashboardState extends State<Dashboard> {
                 borderRadius: BorderRadius.circular(24),
               ),
               padding: const EdgeInsets.all(20),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Your Impact This Week:',
-                    style: _ts(context, 18, fw: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Row(children: [
-                  Text('Electricity ↓ 12%', style: _ts(context, 16)),
-                  const SizedBox(width: 8),
-                  Text('⚡', style: _ts(context, 20))
-                ]),
-                Row(children: [
-                  Text('Gas ↑ 4%', style: _ts(context, 16)),
-                  const SizedBox(width: 8),
-                  Text('🔥', style: _ts(context, 20))
-                ]),
-                Row(children: [
-                  Text('Overall Score: 78', style: _ts(context, 16)),
-                  const SizedBox(width: 8),
-                  Text('🌱', style: _ts(context, 20))
-                ]),
-              ]),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Your Impact This Week:',
+                        style: _ts(context, 18, fw: FontWeight.w600)),
+                    const SizedBox(height: 4),
+                    Row(children: [
+                      Text('Electricity ↓ 12%', style: _ts(context, 16)),
+                      const SizedBox(width: 8),
+                      Text('⚡', style: _ts(context, 20))
+                    ]),
+                    Row(children: [
+                      Text('Gas ↑ 4%', style: _ts(context, 16)),
+                      const SizedBox(width: 8),
+                      Text('🔥', style: _ts(context, 20))
+                    ]),
+                    Row(children: [
+                      Text('Overall Score: 78', style: _ts(context, 16)),
+                      const SizedBox(width: 8),
+                      Text('🌱', style: _ts(context, 20))
+                    ]),
+                  ]),
             ),
 
             const SizedBox(height: 24),
@@ -188,8 +196,21 @@ class DashboardState extends State<Dashboard> {
                   title: 'Did you recycle item today?',
                   subtitle: 'Go & Recycle!',
                   asset: 'assets/images/dashboardg1.png',
-                  onTap: () {},
                   color: cs.primaryContainer.withOpacity(.4),
+                  onTap: () {
+                    _confirmAndGo(
+                      title: 'Recycle item',
+                      message:
+                          'Do you want to recycle an item?',
+                      onYes: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const RecycleScreen(),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 14),
@@ -199,8 +220,20 @@ class DashboardState extends State<Dashboard> {
                   title: 'Do you want to challenge?',
                   subtitle: 'Take the quiz and get full marks!',
                   asset: 'assets/images/dashboardg.png',
-                  onTap: () {},
                   color: cs.tertiaryContainer.withOpacity(.4),
+                  onTap: () {
+                    _confirmAndGo(
+                      title: 'Challenge yourself',
+                      message: 'Do you want to take a quiz now?',
+                      onYes: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const QuizScreen(),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
             ]),
@@ -210,46 +243,61 @@ class DashboardState extends State<Dashboard> {
             // -------------------------------------------------
             //                 EDUCATION BANNER
             // -------------------------------------------------
-            Container(
-              width: 400,
-              height: 190,                    
-              decoration: BoxDecoration(
-                color: cs.primary,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Educate yourself',
-                          style: _ts(context, 12, color: cs.onPrimary)),
-                      const SizedBox(height: 8),
-                      Text('and', style: _ts(context, 12, color: cs.onPrimary)),
-                      const SizedBox(height: 8),
-                      Text('“Protect” the environment',
-                          style: _ts(context, 14,
-                              fw: FontWeight.w600, color: cs.onPrimary)),
-                    ],
-                  ),
-
-                  // -----------------------------------------
-                  //   dashboardg2.png EXACT POSITIONED
-                  //   ⭐ You can change bottom/right numbers
-                  // -----------------------------------------
-                  Positioned(
-                    bottom: -20,  
-                    right: -20,   
-                    child: Image.asset(
-                      'assets/images/dashboardg2.png',
-                      width: 175,
-                      height: 175,
-                      fit: BoxFit.contain,
+            InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: () {
+                _confirmAndGo(
+                  title: 'Educate yourself',
+                  message:
+                      'Do you want to learn more eco tips and lessons now?',
+                  onYes: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const EducationScreen(),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Container(
+                width: 400,
+                height: 190,
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Educate yourself',
+                            style: _ts(context, 12, color: cs.onPrimary)),
+                        const SizedBox(height: 8),
+                        Text('and',
+                            style: _ts(context, 12, color: cs.onPrimary)),
+                        const SizedBox(height: 8),
+                        Text('“Protect” the environment',
+                            style: _ts(context, 14,
+                                fw: FontWeight.w600, color: cs.onPrimary)),
+                      ],
                     ),
-                  ),
-                ],
+
+                    // girl image
+                    Positioned(
+                      bottom: -20,
+                      right: -20,
+                      child: Image.asset(
+                        'assets/images/dashboardg2.png',
+                        width: 175,
+                        height: 175,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -306,15 +354,10 @@ class DashboardState extends State<Dashboard> {
                 ],
               ),
             ),
-
-            // ----------------------------------------------------
-            // ⭐ dashboardg1.png & dashboardg.png Positioned Here
-            // ⭐ You can change bottom/top/left/right manually
-            // ----------------------------------------------------
             Positioned(
-              bottom: -15,   // ← change this
-              left: 0,     // ← change this
-              right: 0,    // ← center by default
+              bottom: -15,
+              left: 0,
+              right: 0,
               child: Image.asset(
                 asset,
                 width: 120,
@@ -404,7 +447,9 @@ class StatsSectionPoints extends StatelessWidget {
                     reservedSize: 40,
                     interval: step,
                     getTitlesWidget: (value, meta) {
-                      if (value != 0 && value % step != 0) return const SizedBox();
+                      if (value != 0 && value % step != 0) {
+                        return const SizedBox();
+                      }
                       return Text(
                         value.toInt().toString(),
                         style: ts(fontSize: 10, color: cs.onSurfaceVariant),
@@ -417,7 +462,9 @@ class StatsSectionPoints extends StatelessWidget {
                     showTitles: true,
                     getTitlesWidget: (val, meta) {
                       final idx = val.toInt();
-                      if (idx < 0 || idx >= labels.length) return const SizedBox();
+                      if (idx < 0 || idx >= labels.length) {
+                        return const SizedBox();
+                      }
                       return Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
@@ -441,8 +488,8 @@ class StatsSectionPoints extends StatelessWidget {
                     BarChartRodData(
                       toY: values[i].toDouble(),
                       width: 14,
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(4)),
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(4)),
                       color: cs.primary,
                     )
                   ],
@@ -455,8 +502,7 @@ class StatsSectionPoints extends StatelessWidget {
     );
   }
 
-  static String _labelFor(TimeRange r) =>
-      switch (r) {
+  static String _labelFor(TimeRange r) => switch (r) {
         TimeRange.day => 'D',
         TimeRange.week => 'W',
         TimeRange.month => 'M',
@@ -470,11 +516,13 @@ class StatsSectionPoints extends StatelessWidget {
       case TimeRange.day:
         return 'Today, ${_fmtDate(now)}';
       case TimeRange.week:
-        return '${_fmtDate(now.subtract(const Duration(days: 6)))} — ${_fmtDate(now)}';
+        return
+            '${_fmtDate(now.subtract(const Duration(days: 6)))} — ${_fmtDate(now)}';
       case TimeRange.month:
         return 'Since ${_fmtMonth(DateTime(now.year, now.month, 1))}';
       case TimeRange.sixMonth:
-        return '${_fmtMonth(DateTime(now.year, now.month - 5, 1))} — ${_fmtMonth(now)}';
+        return
+            '${_fmtMonth(DateTime(now.year, now.month - 5, 1))} — ${_fmtMonth(now)}';
       case TimeRange.year:
         return '${DateTime(now.year, 1, 1).year} — ${now.year}';
     }
@@ -533,19 +581,4 @@ class _Segment extends StatelessWidget {
       ),
     );
   }
-}
-
-// ---------- placeholders ----------
-class RecycleScreen extends StatelessWidget {
-  const RecycleScreen({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      Scaffold(appBar: AppBar(title: const Text('Recycle')), body: const Center(child: Text('Recycle flow here.')));
-}
-
-class EducationScreen extends StatelessWidget {
-  const EducationScreen({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      Scaffold(appBar: AppBar(title: const Text('Education')), body: const Center(child: Text('Education content here.')));
 }

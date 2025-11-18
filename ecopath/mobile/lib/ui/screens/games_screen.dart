@@ -5,6 +5,7 @@ import 'scantrash_screen.dart';
 import 'quiz_screen.dart';
 import 'todo_screen.dart';
 import 'community_screen.dart';
+import 'trash_sort_game_screen.dart'; // 👈 NEW
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -163,6 +164,14 @@ class _GamesScreenState extends State<GamesScreen> {
                       assetPath: 'assets/images/star.png',
                       onTap: _openCommunity,
                     ),
+
+                    // 👇 NEW: Trash sorting mini game
+                    _GameTile(
+                      title: 'Sort Trash',
+                      tileColor: cs.secondaryContainer.withOpacity(0.9),
+                      iconData: Icons.recycling,
+                      onTap: _openTrashSortGame,
+                    ),
                   ],
                 ),
               ),
@@ -200,6 +209,27 @@ class _GamesScreenState extends State<GamesScreen> {
       MaterialPageRoute(builder: (_) => const CommunityScreen()),
     );
     _gainPoints(5);
+  }
+
+  // 👇 NEW: open Trash Sorting game
+  Future<void> _openTrashSortGame() async {
+    final result = await Navigator.of(context).push<Map<String, int>>(
+      MaterialPageRoute(
+        builder: (_) => TrashSortGameScreen(initialEnergy: energy),
+      ),
+    );
+
+    if (!mounted || result == null) return;
+
+    setState(() {
+      if (result.containsKey('energy')) {
+        energy = result['energy']!.clamp(0, 9999);
+      }
+      final gainedPoints = result['points'] ?? 0;
+      if (gainedPoints > 0) {
+        _gainPoints(gainedPoints); // also adds XP + handles level up
+      }
+    });
   }
 
   void _gainPoints(int add) {

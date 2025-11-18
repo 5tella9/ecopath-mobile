@@ -28,16 +28,30 @@ class ProfileState extends State<Profile> {
   }
 
   int _daysInMonth(DateTime d) => DateTime(d.year, d.month + 1, 0).day;
-  int _firstWeekdayOfMonth(DateTime d) => DateTime(d.year, d.month, 1).weekday % 7;
+  int _firstWeekdayOfMonth(DateTime d) =>
+      DateTime(d.year, d.month, 1).weekday % 7;
   String get _monthLabel {
     const months = [
-      'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return '${months[_focusedMonth.month - 1]} ${_focusedMonth.year}';
   }
 
-  void _prevMonth() => setState(() => _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1));
-  void _nextMonth() => setState(() => _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1));
+  void _prevMonth() => setState(
+      () => _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1));
+  void _nextMonth() => setState(
+      () => _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1));
 
   void _showAvatarActionSheet() {
     final cs = Theme.of(context).colorScheme;
@@ -60,12 +74,14 @@ class ProfileState extends State<Profile> {
                 ),
               ),
               child: Center(
-                child: Text('Change Avatar',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    )),
+                child: Text(
+                  'Change Avatar',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
               ),
             ),
             _ActionSheetItem(text: 'Take Photo', onTap: () {}),
@@ -124,8 +140,10 @@ class ProfileState extends State<Profile> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: cs.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
                 ),
                 onPressed: () => Navigator.pop(ctx),
                 child: Text("Got it!", style: TextStyle(color: cs.onPrimary)),
@@ -163,20 +181,25 @@ class ProfileState extends State<Profile> {
               Text(
                 "${_monthLabel.split(' ')[0]} $day, ${_focusedMonth.year}",
                 style: TextStyle(
-                    color: cs.onSurface, fontSize: 16, fontWeight: FontWeight.bold),
+                    color: cs.onSurface,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 "You earned $points points on this day!",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
+                style:
+                    TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
               ),
               const SizedBox(height: 18),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: cs.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
                 ),
                 onPressed: () => Navigator.pop(ctx),
                 child: Text("Got it!", style: TextStyle(color: cs.onPrimary)),
@@ -189,12 +212,14 @@ class ProfileState extends State<Profile> {
   }
 
   Future<void> _openNotifications() async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const NotificationsScreen()));
     setState(() {});
   }
 
   Future<void> _openSettings() async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
     setState(() {});
   }
 
@@ -214,13 +239,21 @@ class ProfileState extends State<Profile> {
               children: [
                 // top right icons
                 Padding(
-                  padding: const EdgeInsets.only(top: 64, right: 18, bottom: 8),
+                  padding:
+                      const EdgeInsets.only(top: 64, right: 18, bottom: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _HeaderIcon(asset: 'assets/icons/bell.svg', onTap: _openNotifications, isBold: true),
+                      _HeaderIcon(
+                        asset: 'assets/icons/bell.svg',
+                        onTap: _openNotifications,
+                        isBold: true,
+                      ),
                       const SizedBox(width: 8),
-                      _HeaderIcon(asset: 'assets/icons/setting.svg', onTap: _openSettings),
+                      _HeaderIcon(
+                        asset: 'assets/icons/setting.svg',
+                        onTap: _openSettings,
+                      ),
                     ],
                   ),
                 ),
@@ -246,8 +279,8 @@ class ProfileState extends State<Profile> {
                         clipBehavior: Clip.none,
                         children: [
                           ClipOval(
-                            child: Image.network(
-                              'https://storage.googleapis.com/tagjs-prod.appspot.com/v1/a2h7Z2oc98/bekcjzgx_expires_30_days.png',
+                            child: Image.asset(
+                              'assets/images/profileimg.png',
                               width: 84,
                               height: 84,
                               fit: BoxFit.cover,
@@ -259,26 +292,36 @@ class ProfileState extends State<Profile> {
                             child: GestureDetector(
                               onTap: _showAvatarActionSheet,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: cs.primary,
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: cs.shadow.withOpacity(0.3),
+                                      color:
+                                          cs.shadow.withOpacity(0.3),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
                                   ],
                                 ),
-                                child: Text('...', style: TextStyle(color: cs.onPrimary, fontSize: 14)),
+                                child: Text(
+                                  '...',
+                                  style: TextStyle(
+                                      color: cs.onPrimary, fontSize: 14),
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 14),
-                      Text('Stella', style: TextStyle(color: cs.onSurface, fontSize: 18)),
+                      Text(
+                        'Stella',
+                        style:
+                            TextStyle(color: cs.onSurface, fontSize: 18),
+                      ),
                     ],
                   ),
                 ),
@@ -304,8 +347,11 @@ class ProfileState extends State<Profile> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      Text('Recycle History',
-                          style: TextStyle(color: cs.onSurface, fontSize: 16)),
+                      Text(
+                        'Recycle History',
+                        style: TextStyle(
+                            color: cs.onSurface, fontSize: 16),
+                      ),
                       const SizedBox(width: 6),
                       GestureDetector(
                         onTap: _showRecycleInfo,
@@ -318,7 +364,11 @@ class ProfileState extends State<Profile> {
                             border: Border.all(color: cs.outlineVariant),
                           ),
                           alignment: Alignment.center,
-                          child: Text('?', style: TextStyle(fontSize: 12, color: cs.onSurface)),
+                          child: Text(
+                            '?',
+                            style: TextStyle(
+                                fontSize: 12, color: cs.onSurface),
+                          ),
                         ),
                       ),
                     ],
@@ -335,14 +385,18 @@ class ProfileState extends State<Profile> {
                       color: cs.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    padding: const EdgeInsets.fromLTRB(8, 10, 8, 14),
+                    padding:
+                        const EdgeInsets.fromLTRB(8, 10, 8, 14),
                     child: Column(
                       children: [
                         Row(
                           children: [
                             IconButton(
                               onPressed: _prevMonth,
-                              icon: Icon(Icons.chevron_left, color: cs.onSurface),
+                              icon: Icon(
+                                Icons.chevron_left,
+                                color: cs.onSurface,
+                              ),
                             ),
                             Expanded(
                               child: Center(
@@ -358,12 +412,16 @@ class ProfileState extends State<Profile> {
                             ),
                             IconButton(
                               onPressed: _nextMonth,
-                              icon: Icon(Icons.chevron_right, color: cs.onSurface),
+                              icon: Icon(
+                                Icons.chevron_right,
+                                color: cs.onSurface,
+                              ),
                             ),
                           ],
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceAround,
                           children: const [
                             _Weekday('S'),
                             _Weekday('M'),
@@ -397,14 +455,16 @@ class ProfileState extends State<Profile> {
 
     final leading = firstWeekday;
     final cells = leading + totalDays;
-    final padded = (cells % 7 == 0) ? cells : cells + (7 - cells % 7);
+    final padded =
+        (cells % 7 == 0) ? cells : cells + (7 - cells % 7);
 
     return Column(
       children: List.generate(padded ~/ 7, (row) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment:
+                MainAxisAlignment.spaceAround,
             children: List.generate(7, (col) {
               final index = row * 7 + col;
               final dayNum = index - leading + 1;
@@ -419,7 +479,8 @@ class ProfileState extends State<Profile> {
 
               if (recyclePoints != null) {
                 return GestureDetector(
-                  onTap: () => _showDayInfo(dayNum, recyclePoints),
+                  onTap: () =>
+                      _showDayInfo(dayNum, recyclePoints),
                   child: Image.asset(
                     'assets/images/recycle.png',
                     width: 22,
@@ -434,12 +495,17 @@ class ProfileState extends State<Profile> {
                 alignment: Alignment.center,
                 decoration: isToday
                     ? BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: cs.primary, width: 1),
+                        borderRadius:
+                            BorderRadius.circular(8),
+                        border: Border.all(
+                            color: cs.primary, width: 1),
                       )
                     : null,
-                child: Text('$dayNum',
-                    style: TextStyle(color: cs.onSurface, fontSize: 13)),
+                child: Text(
+                  '$dayNum',
+                  style: TextStyle(
+                      color: cs.onSurface, fontSize: 13),
+                ),
               );
             }),
           ),
@@ -491,7 +557,8 @@ class _HeaderIcon extends StatelessWidget {
                 asset,
                 width: isBold ? 26 : 20,
                 height: isBold ? 26 : 20,
-                colorFilter: ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
+                colorFilter:
+                    ColorFilter.mode(cs.onSurface, BlendMode.srcIn),
               ),
             ],
           ),
@@ -531,7 +598,8 @@ class _ActionSheetItem extends StatelessWidget {
             border: Border(
               top: isCancel
                   ? BorderSide.none
-                  : BorderSide(color: cs.outlineVariant, width: 1),
+                  : BorderSide(
+                      color: cs.outlineVariant, width: 1),
             ),
           ),
           child: Center(
@@ -539,7 +607,8 @@ class _ActionSheetItem extends StatelessWidget {
               text,
               style: TextStyle(
                 fontSize: isCancel ? 18 : 17,
-                fontWeight: isCancel ? FontWeight.w600 : FontWeight.normal,
+                fontWeight:
+                    isCancel ? FontWeight.w600 : FontWeight.normal,
                 color: textColor,
               ),
             ),
@@ -569,7 +638,11 @@ class _StatBlock extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14)),
+        Text(
+          label,
+          style: TextStyle(
+              color: cs.onSurfaceVariant, fontSize: 14),
+        ),
       ],
     );
   }
