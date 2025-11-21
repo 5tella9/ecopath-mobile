@@ -1,9 +1,13 @@
 // lib/ui/screens/community_screen.dart
 import 'dart:io';
 
+import 'package:ecopath/core/progress_tracker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+
+// NEW: localization
+import 'package:ecopath/l10n/app_localizations.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -16,7 +20,6 @@ class _CommunityScreenState extends State<CommunityScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tab;
 
-  // ✅ Asset paths
   static const _userAvatar = 'assets/images/profileimg.png';
   static const _keziaAvatar = 'assets/images/otter.png';
   static const _thomasAvatar = 'assets/images/polar.png';
@@ -25,15 +28,9 @@ class _CommunityScreenState extends State<CommunityScreen>
   static const _keziaFeedImg = 'assets/images/community1.png';
   static const _severusAvatar = 'assets/images/elephant.png';
 
-  // current logged-in user in leaderboard
   final String _currentUserName = 'Stella';
 
-  int level = 4;
-  int xp = 120;
-  int xpToNext = 200;
   int streak = 5;
-  int weeklyXP = 68;
-
   String? _filterTag;
 
   final _quests = <Quest>[
@@ -63,7 +60,6 @@ class _CommunityScreenState extends State<CommunityScreen>
     ),
   ];
 
-  // ✅ Leaderboard data – XP-based. Severus is #1, Stella is rank 9.
   final _leaders = <Leader>[
     Leader('Severus', 250, _severusAvatar),
     Leader('Hermione', 210, _keziaAvatar),
@@ -73,10 +69,9 @@ class _CommunityScreenState extends State<CommunityScreen>
     Leader('Ginny', 140, _keziaAvatar),
     Leader('Draco', 130, _thomasAvatar),
     Leader('Neville', 120, _jinAvatar),
-    Leader('Stella', 90, _userAvatar), // current user, rank 9
+    Leader('Stella', 90, _userAvatar),
   ];
 
-  // which posts user has liked
   final Set<String> _likedPosts = {};
 
   final _feed = <Post>[
@@ -111,7 +106,6 @@ class _CommunityScreenState extends State<CommunityScreen>
     'p2': ['Great tip, thanks!', 'I do this too.'],
   };
 
-  // ❌ No XP for events anymore
   final _missions = <Mission>[
     Mission(
       id: 'm1',
@@ -145,15 +139,7 @@ class _CommunityScreenState extends State<CommunityScreen>
   }
 
   void _gainXP(int add, {String? toast}) {
-    setState(() {
-      xp += add;
-      weeklyXP += add;
-      while (xp >= xpToNext) {
-        xp -= xpToNext;
-        level += 1;
-        xpToNext = (xpToNext * 1.25).round();
-      }
-    });
+    ProgressTracker.instance.addXp(add);
     if (toast != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -163,15 +149,15 @@ class _CommunityScreenState extends State<CommunityScreen>
         ),
       );
     }
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    final progress = (xp / xpToNext).clamp(0.0, 1.0);
+    final l10n = AppLocalizations.of(context)!;
 
-    // 🌑 DARK, THEME-DYNAMIC BACKGROUND
     final Color dark1 = Color.lerp(Colors.black, cs.primary, 0.35)!;
     final Color dark2 = Color.lerp(Colors.black, cs.primary, 0.75)!;
     final bgGradient = LinearGradient(
@@ -180,8 +166,8 @@ class _CommunityScreenState extends State<CommunityScreen>
       end: Alignment.bottomCenter,
     );
 
-    // pill color for Join buttons & tab indicator
-    final Color pillColor = Color.lerp(cs.primaryContainer, Colors.black, 0.35)!;
+    final Color pillColor =
+        Color.lerp(cs.primaryContainer, Colors.black, 0.35)!;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -193,7 +179,7 @@ class _CommunityScreenState extends State<CommunityScreen>
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Community',
+          l10n.communityTitle,
           style: GoogleFonts.lato(
             color: Colors.white,
             fontSize: 22,
@@ -209,7 +195,7 @@ class _CommunityScreenState extends State<CommunityScreen>
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                child: _gamerHeader(progress, cs, text),
+                child: _gamerHeader(cs, text),
               ),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -226,10 +212,10 @@ class _CommunityScreenState extends State<CommunityScreen>
                   ),
                   labelColor: cs.onPrimary,
                   unselectedLabelColor: cs.onPrimary.withOpacity(.7),
-                  tabs: const [
-                    Tab(text: 'Quests'),
-                    Tab(text: 'Feed'),
-                    Tab(text: 'Events'),
+                  tabs: [
+                    Tab(text: l10n.tabQuests),
+                    Tab(text: l10n.tabFeed),
+                    Tab(text: l10n.tabEvents),
                   ],
                 ),
               ),
@@ -238,9 +224,9 @@ class _CommunityScreenState extends State<CommunityScreen>
                 child: TabBarView(
                   controller: _tab,
                   children: [
-                    _questsTab(cs, text, pillColor),
-                    _feedTab(cs, text),
-                    _eventsTab(cs, text, pillColor),
+                    _questsTab(context, cs, text, pillColor),
+                    _feedTab(context, cs, text),
+                    _eventsTab(context, cs, text, pillColor),
                   ],
                 ),
               ),
@@ -253,14 +239,23 @@ class _CommunityScreenState extends State<CommunityScreen>
               backgroundColor: pillColor,
               onPressed: _composePost,
               child: Icon(Icons.add, color: cs.onPrimary),
-              tooltip: 'Add eco tip',
+              tooltip: l10n.fabAddEcoTip,
             )
           : null,
     );
   }
 
   // ---------- HEADER ----------
-  Widget _gamerHeader(double progress, ColorScheme cs, TextTheme text) {
+  Widget _gamerHeader(ColorScheme cs, TextTheme text) {
+    final tracker = ProgressTracker.instance;
+    final level = tracker.level;
+    final xp = tracker.currentXp;
+    final xpToNext = tracker.xpToNext;
+    final progress =
+        xpToNext == 0 ? 0.0 : (xp / xpToNext).clamp(0.0, 1.0);
+
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -291,7 +286,7 @@ class _CommunityScreenState extends State<CommunityScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Level $level',
+                  '${l10n.levelPrefix} $level',
                   style: text.titleMedium?.copyWith(
                     color: cs.onPrimary,
                     fontWeight: FontWeight.bold,
@@ -328,7 +323,7 @@ class _CommunityScreenState extends State<CommunityScreen>
                     size: 16, color: Colors.orangeAccent),
                 const SizedBox(width: 4),
                 Text(
-                  'Streak $streak',
+                  '${l10n.streakPrefix} $streak',
                   style: text.bodySmall?.copyWith(
                     color: cs.onPrimary,
                     fontWeight: FontWeight.w600,
@@ -343,19 +338,22 @@ class _CommunityScreenState extends State<CommunityScreen>
   }
 
   // ---------- QUESTS + LEADERBOARD ----------
-  Widget _questsTab(ColorScheme cs, TextTheme text, Color pillColor) {
+  Widget _questsTab(
+      BuildContext context, ColorScheme cs, TextTheme text, Color pillColor) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
-        ..._quests.map((q) => _questCard(q, cs, text, pillColor)),
+        ..._quests.map((q) => _questCard(context, q, cs, text, pillColor)),
         const SizedBox(height: 16),
-        _leaderboardCard(cs, text),
+        _leaderboardCard(context, cs, text),
       ],
     );
   }
 
-  Widget _questCard(
-      Quest q, ColorScheme cs, TextTheme text, Color pillColor) {
+  Widget _questCard(BuildContext context, Quest q, ColorScheme cs,
+      TextTheme text, Color pillColor) {
+    final l10n = AppLocalizations.of(context)!;
+
     final color = switch (q.rarity) {
       Rarity.common => cs.primary,
       Rarity.rare => cs.secondary,
@@ -406,8 +404,12 @@ class _CommunityScreenState extends State<CommunityScreen>
                 ElevatedButton(
                   onPressed: () {
                     setState(() => q.joined = !q.joined);
-                    _gainXP(5,
-                        toast: q.joined ? 'Joined quest' : 'Left quest');
+                    _gainXP(
+                      5,
+                      toast: q.joined
+                          ? l10n.joinedQuestToast
+                          : l10n.leftQuestToast,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: pillColor,
@@ -424,9 +426,18 @@ class _CommunityScreenState extends State<CommunityScreen>
   }
 
   // ---------- LEADERBOARD ----------
-  Widget _leaderboardCard(ColorScheme cs, TextTheme text) {
-    // sort by xp (descending)
-    final sorted = [..._leaders]..sort((a, b) => b.xp.compareTo(a.xp));
+  Widget _leaderboardCard(
+      BuildContext context, ColorScheme cs, TextTheme text) {
+    final tracker = ProgressTracker.instance;
+    final l10n = AppLocalizations.of(context)!;
+
+    final leaders = _leaders
+        .map((l) => l.name == _currentUserName
+            ? Leader(l.name, tracker.currentXp, l.avatar)
+            : Leader(l.name, l.xp, l.avatar))
+        .toList();
+
+    final sorted = [...leaders]..sort((a, b) => b.xp.compareTo(a.xp));
     final top5 = sorted.take(5).toList();
     final currentIndex =
         sorted.indexWhere((l) => l.name == _currentUserName);
@@ -436,6 +447,7 @@ class _CommunityScreenState extends State<CommunityScreen>
     Leader? currentLeader;
     if (currentIndex != -1) {
       currentLeader = sorted[currentIndex];
+      ProgressTracker.instance.setRank(currentRank);
     }
 
     return Container(
@@ -447,19 +459,18 @@ class _CommunityScreenState extends State<CommunityScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // header row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Leaderboard • This Week',
+                l10n.leaderboardThisWeek,
                 style: text.titleMedium?.copyWith(
                   color: cs.onPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '$weeklyXP XP',
+                '${tracker.currentXp} XP',
                 style: text.bodySmall?.copyWith(
                   color: cs.onPrimary.withOpacity(.9),
                   fontWeight: FontWeight.w600,
@@ -468,7 +479,6 @@ class _CommunityScreenState extends State<CommunityScreen>
             ],
           ),
           const SizedBox(height: 12),
-          // podium (top 3)
           if (top5.isNotEmpty)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -500,7 +510,6 @@ class _CommunityScreenState extends State<CommunityScreen>
               ],
             ),
           const SizedBox(height: 8),
-          // rank 4 & 5 rows
           for (int i = 3; i < top5.length; i++)
             _leaderRow(
               rank: i + 1,
@@ -532,17 +541,16 @@ class _CommunityScreenState extends State<CommunityScreen>
     required double height,
     bool highlight = false,
   }) {
-    // Medal colors
     Color medalColor;
     switch (rank) {
       case 1:
-        medalColor = const Color(0xFFFFD54F); // gold
+        medalColor = const Color(0xFFFFD54F);
         break;
       case 2:
-        medalColor = const Color(0xFFE0E0E0); // silver
+        medalColor = const Color(0xFFE0E0E0);
         break;
       case 3:
-        medalColor = const Color(0xFFB87333); // bronze
+        medalColor = const Color(0xFFB87333);
         break;
       default:
         medalColor = cs.surface;
@@ -590,6 +598,8 @@ class _CommunityScreenState extends State<CommunityScreen>
     required TextTheme text,
     bool isYou = false,
   }) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -609,7 +619,7 @@ class _CommunityScreenState extends State<CommunityScreen>
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              isYou ? '${leader.name} (You)' : leader.name,
+              isYou ? '${leader.name} ${l10n.isYouSuffix}' : leader.name,
               style: text.bodyMedium
                   ?.copyWith(color: cs.onPrimary.withOpacity(.9)),
             ),
@@ -627,10 +637,11 @@ class _CommunityScreenState extends State<CommunityScreen>
   }
 
   // ---------- FEED ----------
-  Widget _feedTab(ColorScheme cs, TextTheme text) {
+  Widget _feedTab(BuildContext context, ColorScheme cs, TextTheme text) {
     final posts = _filterTag == null
         ? _feed
         : _feed.where((p) => p.tags.contains(_filterTag)).toList();
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: [
@@ -640,7 +651,7 @@ class _CommunityScreenState extends State<CommunityScreen>
             child: Row(
               children: [
                 Text(
-                  'Showing $_filterTag',
+                  '${l10n.filterShowingPrefix} $_filterTag',
                   style: text.bodySmall?.copyWith(color: cs.onPrimary),
                 ),
                 const SizedBox(width: 8),
@@ -648,7 +659,7 @@ class _CommunityScreenState extends State<CommunityScreen>
                   onPressed: () {
                     setState(() => _filterTag = null);
                   },
-                  child: const Text('Clear'),
+                  child: Text(l10n.clear),
                 ),
               ],
             ),
@@ -686,6 +697,8 @@ class _CommunityScreenState extends State<CommunityScreen>
 
   void _openComments(Post p) {
     final controller = TextEditingController();
+    final l10n = AppLocalizations.of(context)!;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -710,8 +723,11 @@ class _CommunityScreenState extends State<CommunityScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Comments',
-                        style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                        l10n.commentsTitle,
+                        style: Theme.of(ctx)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
@@ -747,10 +763,11 @@ class _CommunityScreenState extends State<CommunityScreen>
                         child: TextField(
                           controller: controller,
                           style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            hintText: 'Add a comment...',
-                            hintStyle: TextStyle(color: Colors.white70),
-                            border: OutlineInputBorder(
+                          decoration: InputDecoration(
+                            hintText: l10n.commentsHint,
+                            hintStyle:
+                                const TextStyle(color: Colors.white70),
+                            border: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(16)),
                             ),
@@ -763,11 +780,11 @@ class _CommunityScreenState extends State<CommunityScreen>
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.white),
                         onPressed: () {
-                          final text = controller.text.trim();
-                          if (text.isEmpty) return;
+                          final textValue = controller.text.trim();
+                          if (textValue.isEmpty) return;
                           setState(() {
                             _comments.putIfAbsent(p.id, () => []);
-                            _comments[p.id]!.add(text);
+                            _comments[p.id]!.add(textValue);
                             p.comments = _comments[p.id]!.length;
                           });
                           controller.clear();
@@ -905,17 +922,20 @@ class _CommunityScreenState extends State<CommunityScreen>
   }
 
   // ---------- EVENTS ----------
-  Widget _eventsTab(ColorScheme cs, TextTheme text, Color pillColor) {
+  Widget _eventsTab(
+      BuildContext context, ColorScheme cs, TextTheme text, Color pillColor) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: _missions
-          .map((m) => _missionCard(m, cs, text, pillColor))
+          .map((m) => _missionCard(context, m, cs, text, pillColor))
           .toList(),
     );
   }
 
-  Widget _missionCard(
-      Mission m, ColorScheme cs, TextTheme text, Color pillColor) {
+  Widget _missionCard(BuildContext context, Mission m, ColorScheme cs,
+      TextTheme text, Color pillColor) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -967,7 +987,7 @@ class _CommunityScreenState extends State<CommunityScreen>
               const Icon(Icons.schedule, size: 16, color: Colors.white70),
               const SizedBox(width: 6),
               Text(
-                'Register by ${m.registerUntil}',
+                '${l10n.registerByPrefix} ${m.registerUntil}',
                 style: text.bodySmall
                     ?.copyWith(color: cs.onPrimary.withOpacity(0.8)),
               ),
@@ -987,9 +1007,11 @@ class _CommunityScreenState extends State<CommunityScreen>
                   setState(() => m.joined = !m.joined);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(m.joined
-                          ? 'Joined ${m.title}'
-                          : 'Left ${m.title}'),
+                      content: Text(
+                        m.joined
+                            ? '${l10n.joinedPrefix} ${m.title}'
+                            : '${l10n.leftPrefix} ${m.title}',
+                      ),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -1016,6 +1038,8 @@ class _CommunityScreenState extends State<CommunityScreen>
         TextEditingController(text: '#EcoTips #ZeroWaste');
     String? pickedImagePath;
 
+    final l10n = AppLocalizations.of(context)!;
+
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1038,7 +1062,7 @@ class _CommunityScreenState extends State<CommunityScreen>
                 Row(
                   children: [
                     Text(
-                      'New Post',
+                      l10n.newPostTitle,
                       style: Theme.of(ctx)
                           .textTheme
                           .titleMedium
@@ -1056,10 +1080,10 @@ class _CommunityScreenState extends State<CommunityScreen>
                   controller: contentController,
                   maxLines: 3,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    hintText: 'Share your eco tip...',
-                    hintStyle: TextStyle(color: Colors.white70),
-                    border: OutlineInputBorder(
+                  decoration: InputDecoration(
+                    hintText: l10n.shareEcoTipHint,
+                    hintStyle: const TextStyle(color: Colors.white70),
+                    border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
                     filled: true,
@@ -1070,16 +1094,16 @@ class _CommunityScreenState extends State<CommunityScreen>
                 TextField(
                   controller: tagsController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    hintText: '#hashtag #separated',
-                    hintStyle: TextStyle(color: Colors.white70),
-                    border: OutlineInputBorder(
+                  decoration: InputDecoration(
+                    hintText: l10n.hashtagsHint,
+                    hintStyle: const TextStyle(color: Colors.white70),
+                    border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
                     ),
                     filled: true,
                     fillColor: Colors.black54,
-                    labelText: 'Hashtags',
-                    labelStyle: TextStyle(color: Colors.white70),
+                    labelText: l10n.hashtagsLabel,
+                    labelStyle: const TextStyle(color: Colors.white70),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -1095,15 +1119,15 @@ class _CommunityScreenState extends State<CommunityScreen>
                     }
                   },
                   icon: const Icon(Icons.photo_library),
-                  label: const Text('Add Photo'),
+                  label: Text(l10n.addPhotoButton),
                 ),
                 const SizedBox(height: 16),
                 Align(
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
                     onPressed: () {
-                      final text = contentController.text.trim();
-                      if (text.isEmpty) return;
+                      final textValue = contentController.text.trim();
+                      if (textValue.isEmpty) return;
                       final tagsText = tagsController.text.trim();
                       final tags = tagsText
                           .split(RegExp(r'\s+'))
@@ -1115,7 +1139,7 @@ class _CommunityScreenState extends State<CommunityScreen>
                           id: 'user_${DateTime.now().millisecondsSinceEpoch}',
                           author: _currentUserName,
                           avatar: _userAvatar,
-                          content: text +
+                          content: textValue +
                               (tags.isNotEmpty
                                   ? ' ${tags.join(' ')}'
                                   : ''),
@@ -1130,7 +1154,7 @@ class _CommunityScreenState extends State<CommunityScreen>
                       });
                       Navigator.of(ctx).pop();
                     },
-                    child: const Text('Post'),
+                    child: Text(l10n.postButton),
                   ),
                 ),
               ],
@@ -1143,6 +1167,7 @@ class _CommunityScreenState extends State<CommunityScreen>
 }
 
 /* ------------------ DATA CLASSES ------------------ */
+
 enum Rarity { common, rare, epic }
 
 class Quest {
@@ -1183,7 +1208,7 @@ class Post {
   int likes;
   int comments;
   final DateTime time;
-  final bool isLocal; // true = Image.file, false = Image.asset
+  final bool isLocal;
 
   Post({
     required this.id,
@@ -1198,7 +1223,6 @@ class Post {
     this.isLocal = false,
   });
 
-  // helper to avoid duplicate tags
   Iterable<String> mapTags() {
     final set = <String>{};
     for (final t in tags) {

@@ -4,6 +4,11 @@ import 'package:ecopath/ui/screens/shop_screen.dart';
 import 'package:ecopath/ui/screens/carbon_screen.dart';
 import 'package:ecopath/ui/screens/electricity_screen.dart';
 import 'package:ecopath/ui/screens/gas_screen.dart';
+import 'package:ecopath/ui/screens/notitruck_screen.dart';
+import 'package:ecopath/ui/screens/education_screen.dart';
+
+// NEW: localization
+import 'package:ecopath/l10n/app_localizations.dart';
 
 class FeaturesScreen extends StatelessWidget {
   const FeaturesScreen({super.key});
@@ -12,6 +17,7 @@ class FeaturesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final cs = t.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -21,7 +27,7 @@ class FeaturesScreen extends StatelessWidget {
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Text(
-          'Features',
+          l10n.featuresTitle,
           style: t.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
@@ -45,7 +51,7 @@ class FeaturesScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Choose your eco-mission",
+                l10n.chooseEcoMission,
                 style: t.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: cs.onSurface,
@@ -60,47 +66,54 @@ class FeaturesScreen extends StatelessWidget {
                   childAspectRatio: .92,
                   children: [
                     _FeatureCard(
-                      title: 'Electricity',
-                      subtitle: 'Track weekly / monthly / yearly usage',
+                      title: l10n.featureElectricityTitle,
+                      subtitle: l10n.featureElectricitySubtitle,
                       iconPath: 'assets/images/electricity.png',
                       bubbleTone: _Tone.primary,
                       onTap: () => _open(context, const ElectricityScreen()),
                     ),
                     _FeatureCard(
-                      title: 'Gas',
-                      subtitle: 'Monitor and set save goals',
+                      title: l10n.featureGasTitle,
+                      subtitle: l10n.featureGasSubtitle,
                       iconPath: 'assets/images/gas.png',
                       bubbleTone: _Tone.error,
                       onTap: () => _open(context, const GasScreen()),
                     ),
                     _FeatureCard(
-                      title: 'Carbon\nFootprint',
-                      subtitle: 'See your CO₂ footprint',
+                      title: l10n.featureCarbonTitle,
+                      subtitle: l10n.featureCarbonSubtitle,
                       iconPath: 'assets/images/carbon.png',
                       bubbleTone: _Tone.tertiary,
                       onTap: () => _open(context, const CarbonScreen()),
                     ),
                     _FeatureCard(
-                      title: 'Trash &\nRecycling',
-                      subtitle: 'Scan, sort, and track',
+                      title: l10n.featureTrashTitle,
+                      subtitle: l10n.featureTrashSubtitle,
                       iconPath: 'assets/images/tracker.png',
                       bubbleTone: _Tone.secondary,
                       onTap: () =>
                           _open(context, const _TrashRecyclingScreen()),
                     ),
                     _FeatureCard(
-                      title: 'Shop',
-                      subtitle: 'Exchange points for goods',
+                      title: l10n.featureShopTitle,
+                      subtitle: l10n.featureShopSubtitle,
                       iconPath: 'assets/images/shop.png',
                       bubbleTone: _Tone.inverse,
                       onTap: () => _open(context, const ShopScreen()),
                     ),
                     _FeatureCard(
-                      title: 'Education',
-                      subtitle: 'Quick eco lessons & quizzes',
+                      title: l10n.featureEducationTitle,
+                      subtitle: l10n.featureEducationSubtitle,
                       iconPath: 'assets/images/education.png',
                       bubbleTone: _Tone.primarySoft,
-                      onTap: () => _open(context, const _EducationScreen()),
+                      onTap: () => _open(context, const EducationScreen()),
+                    ),
+                    _FeatureCard(
+                      title: l10n.featureNotiTruckTitle,
+                      subtitle: l10n.featureNotiTruckSubtitle,
+                      iconPath: 'assets/images/truck.png',
+                      bubbleTone: _Tone.primarySoft,
+                      onTap: () => _open(context, const NotiTruckScreen()),
                     ),
                   ],
                 ),
@@ -164,7 +177,6 @@ class _FeatureCard extends StatelessWidget {
       child: Ink(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          // *** MAIN CHANGE: solid card color instead of same gradient as bg ***
           color: cs.surfaceContainerHighest,
           boxShadow: [
             BoxShadow(
@@ -201,7 +213,6 @@ class _FeatureCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // title
             Text(
               title,
               maxLines: 2,
@@ -214,7 +225,6 @@ class _FeatureCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
-            // subtitle / description
             Expanded(
               child: Text(
                 subtitle,
@@ -227,7 +237,6 @@ class _FeatureCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            // Open →
             Row(
               children: [
                 Text(
@@ -252,8 +261,9 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
+
 /// ----------------------
-/// Simple stub pages (Trash & Recycling, Education)
+/// Simple stub page for Trash & Recycling
 /// ----------------------
 
 class _TrashRecyclingScreen extends StatelessWidget {
@@ -263,47 +273,22 @@ class _TrashRecyclingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final cs = t.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: AppBar(
         backgroundColor: cs.surface,
-        title: Text('Trash & Recycling', style: t.textTheme.titleMedium),
+        title: Text(l10n.trashRecyclingTitle, style: t.textTheme.titleMedium),
       ),
       body: _StubBody(
         iconPath: 'assets/images/tracker.png',
         bubbleTone: _Tone.secondary,
-        title: 'Trash & Recycling',
-        lines: const [
-          '• Scan items & sort correctly',
-          '• Track recycling streaks',
-          '• Leaderboard boosts',
-        ],
-      ),
-    );
-  }
-}
-
-class _EducationScreen extends StatelessWidget {
-  const _EducationScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    final cs = t.colorScheme;
-    return Scaffold(
-      backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        title: Text('Education', style: t.textTheme.titleMedium),
-      ),
-      body: _StubBody(
-        iconPath: 'assets/images/education.png',
-        bubbleTone: _Tone.primarySoft,
-        title: 'Eco Education',
-        lines: const [
-          '• Micro-lessons on recycling & eco-living',
-          '• Quizzes to earn XP',
-          '• Tips tailored to your data',
+        title: l10n.trashRecyclingTitle,
+        lines: [
+          l10n.trashRecyclingLine1,
+          l10n.trashRecyclingLine2,
+          l10n.trashRecyclingLine3,
         ],
       ),
     );
@@ -327,6 +312,7 @@ class _StubBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final cs = t.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     Color bubble(_Tone tone) {
       switch (tone) {
@@ -413,7 +399,7 @@ class _StubBody extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Complete actions here to earn EcoPath points & badges.',
+                    l10n.trashRecyclingHint,
                     style: t.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: cs.primary,

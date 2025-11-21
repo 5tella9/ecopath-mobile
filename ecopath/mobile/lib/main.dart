@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
+
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 import 'theme/app_theme.dart';
 import 'theme/theme_controller.dart';
+import 'theme/language_controller.dart';  // <-- ADD THIS
+import 'core/notification_service.dart';
 
 import 'ui/root_shell.dart';
 import 'ui/screens/intro_screen.dart';
@@ -11,12 +18,20 @@ import 'ui/screens/survey_flow.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Theme
   final themeController = ThemeController();
-  await themeController.load(); // restore saved theme before building
+  await themeController.load();
+
+  // Language
+  final languageController = LanguageController();
+  await languageController.load();
 
   runApp(
-    ChangeNotifierProvider.value(
-      value: themeController,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: themeController),
+        ChangeNotifierProvider.value(value: languageController),
+      ],
       child: const EcoPathRoot(),
     ),
   );
@@ -27,15 +42,32 @@ class EcoPathRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = context.watch<ThemeController>();
+    final themeCtrl = context.watch<ThemeController>();
+    final langCtrl = context.watch<LanguageController>();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'EcoPath',
-      theme: AppTheme.themeOf(ctrl.themeId, dark: ctrl.isDark),
-      // Start on the Intro screen
+
+      // *********** LOCALIZATION SETTINGS ***********
+      locale: langCtrl.locale,                         // <-- User-selected language
+      supportedLocales: const [
+        Locale('en'),
+        Locale('ko'),
+      ],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      onGenerateTitle: (context) =>
+          AppLocalizations.of(context)!.appTitle,
+      // **********************************************
+
+      theme: AppTheme.themeOf(themeCtrl.themeId, dark: themeCtrl.isDark),
+
       home: const IntroScreen(),
-      // Route into RootShell or Survey
+
       onGenerateRoute: (settings) {
         if (settings.name == '/root') {
           final arg = settings.arguments;

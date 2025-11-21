@@ -1,10 +1,12 @@
 // lib/ui/screens/profile_screen.dart
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ecopath/core/progress_tracker.dart';
+import 'package:ecopath/core/recycle_history.dart';
 import 'notifications_screen.dart';
 import 'setting_screen.dart';
 import 'edit_avatar_screen.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -14,22 +16,11 @@ class Profile extends StatefulWidget {
 
 class ProfileState extends State<Profile> {
   DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
-  final Random _rand = Random();
-  final Map<int, int> _recycleDays = {};
-
-  @override
-  void initState() {
-    super.initState();
-    for (int i = 1; i <= 31; i++) {
-      if (_rand.nextBool()) {
-        _recycleDays[i] = _rand.nextInt(20) + 5;
-      }
-    }
-  }
 
   int _daysInMonth(DateTime d) => DateTime(d.year, d.month + 1, 0).day;
   int _firstWeekdayOfMonth(DateTime d) =>
       DateTime(d.year, d.month, 1).weekday % 7;
+
   String get _monthLabel {
     const months = [
       'Jan',
@@ -55,6 +46,8 @@ class ProfileState extends State<Profile> {
 
   void _showAvatarActionSheet() {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -75,7 +68,7 @@ class ProfileState extends State<Profile> {
               ),
               child: Center(
                 child: Text(
-                  'Change Avatar',
+                  l10n.changeAvatarTitle,
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -84,10 +77,10 @@ class ProfileState extends State<Profile> {
                 ),
               ),
             ),
-            _ActionSheetItem(text: 'Take Photo', onTap: () {}),
-            _ActionSheetItem(text: 'Choose from album', onTap: () {}),
+            _ActionSheetItem(text: l10n.changeAvatarTakePhoto, onTap: () {}),
+            _ActionSheetItem(text: l10n.changeAvatarChooseAlbum, onTap: () {}),
             _ActionSheetItem(
-              text: 'Choose from character',
+              text: l10n.changeAvatarChooseCharacter,
               onTap: () async {
                 Navigator.pop(ctx);
                 await Navigator.of(context).push(
@@ -98,7 +91,7 @@ class ProfileState extends State<Profile> {
             const SizedBox(height: 8),
             _ActionSheetItem(
               isCancel: true,
-              text: 'Cancel',
+              text: l10n.cancel,
               onTap: () => Navigator.pop(ctx),
             ),
             const SizedBox(height: 12),
@@ -110,6 +103,8 @@ class ProfileState extends State<Profile> {
 
   void _showRecycleInfo() {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       barrierColor: cs.scrim.withOpacity(0.4),
@@ -132,7 +127,7 @@ class ProfileState extends State<Profile> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Track your eco journey! Each time you recycle and earn points, your activity appears here. Check your streaks and see how consistent your recycling habits are!",
+                l10n.recycleInfoText,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: cs.onSurface, fontSize: 14, height: 1.4),
               ),
@@ -146,7 +141,7 @@ class ProfileState extends State<Profile> {
                       const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
                 ),
                 onPressed: () => Navigator.pop(ctx),
-                child: Text("Got it!", style: TextStyle(color: cs.onPrimary)),
+                child: Text(l10n.gotIt, style: TextStyle(color: cs.onPrimary)),
               )
             ],
           ),
@@ -157,6 +152,8 @@ class ProfileState extends State<Profile> {
 
   void _showDayInfo(int day, int points) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       barrierColor: cs.scrim.withOpacity(0.4),
@@ -187,7 +184,7 @@ class ProfileState extends State<Profile> {
               ),
               const SizedBox(height: 8),
               Text(
-                "You earned $points points on this day!",
+                '${l10n.dayPointsMessagePrefix} $points ${l10n.dayPointsMessageSuffix}',
                 textAlign: TextAlign.center,
                 style:
                     TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
@@ -202,7 +199,7 @@ class ProfileState extends State<Profile> {
                       const EdgeInsets.symmetric(vertical: 12, horizontal: 32),
                 ),
                 onPressed: () => Navigator.pop(ctx),
-                child: Text("Got it!", style: TextStyle(color: cs.onPrimary)),
+                child: Text(l10n.gotIt, style: TextStyle(color: cs.onPrimary)),
               )
             ],
           ),
@@ -226,6 +223,8 @@ class ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tracker = ProgressTracker.instance;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -261,7 +260,7 @@ class ProfileState extends State<Profile> {
                 Padding(
                   padding: const EdgeInsets.only(left: 29, bottom: 10),
                   child: Text(
-                    'Profile',
+                    l10n.profileTitle,
                     style: TextStyle(
                       color: cs.onSurface,
                       fontSize: 36,
@@ -318,7 +317,7 @@ class ProfileState extends State<Profile> {
                       ),
                       const SizedBox(height: 14),
                       Text(
-                        'Stella',
+                        l10n.profileName,
                         style:
                             TextStyle(color: cs.onSurface, fontSize: 18),
                       ),
@@ -328,14 +327,20 @@ class ProfileState extends State<Profile> {
 
                 const SizedBox(height: 24),
 
-                // stats
+                // stats (now using tracker)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 36),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      _StatBlock(value: '34', label: 'Points earned'),
-                      _StatBlock(value: '16', label: 'Progress done'),
+                    children: [
+                      _StatBlock(
+                        value: tracker.totalPoints.toString(),
+                        label: l10n.pointsEarnedLabel,
+                      ),
+                      _StatBlock(
+                        value: tracker.progressDone.toString(),
+                        label: l10n.progressDoneLabel,
+                      ),
                     ],
                   ),
                 ),
@@ -348,7 +353,7 @@ class ProfileState extends State<Profile> {
                   child: Row(
                     children: [
                       Text(
-                        'Recycle History',
+                        l10n.recycleHistoryTitle,
                         style: TextStyle(
                             color: cs.onSurface, fontSize: 16),
                       ),
@@ -422,14 +427,14 @@ class ProfileState extends State<Profile> {
                         Row(
                           mainAxisAlignment:
                               MainAxisAlignment.spaceAround,
-                          children: const [
-                            _Weekday('S'),
-                            _Weekday('M'),
-                            _Weekday('T'),
-                            _Weekday('W'),
-                            _Weekday('T'),
-                            _Weekday('F'),
-                            _Weekday('S'),
+                          children: [
+                            _Weekday(AppLocalizations.of(context)!.weekdayShortSun),
+                            _Weekday(AppLocalizations.of(context)!.weekdayShortMon),
+                            _Weekday(AppLocalizations.of(context)!.weekdayShortTue),
+                            _Weekday(AppLocalizations.of(context)!.weekdayShortWed),
+                            _Weekday(AppLocalizations.of(context)!.weekdayShortThu),
+                            _Weekday(AppLocalizations.of(context)!.weekdayShortFri),
+                            _Weekday(AppLocalizations.of(context)!.weekdayShortSat),
                           ],
                         ),
                         const SizedBox(height: 6),
@@ -449,6 +454,8 @@ class ProfileState extends State<Profile> {
 
   Widget _buildDaysGrid(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final history = RecycleHistory.instance;
+
     final firstWeekday = _firstWeekdayOfMonth(_focusedMonth);
     final totalDays = _daysInMonth(_focusedMonth);
     final today = DateTime.now();
@@ -475,9 +482,12 @@ class ProfileState extends State<Profile> {
               final isToday = today.year == _focusedMonth.year &&
                   today.month == _focusedMonth.month &&
                   today.day == dayNum;
-              final recyclePoints = _recycleDays[dayNum];
 
-              if (recyclePoints != null) {
+              final date = DateTime(
+                  _focusedMonth.year, _focusedMonth.month, dayNum);
+              final recyclePoints = history.pointsFor(date);
+
+              if (recyclePoints != null && recyclePoints > 0) {
                 return GestureDetector(
                   onTap: () =>
                       _showDayInfo(dayNum, recyclePoints),

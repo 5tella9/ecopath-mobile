@@ -1,0 +1,170 @@
+{
+  "@@locale": "ko",
+
+  "appTitle": "에코패스",
+
+  "settingsTitle": "설정",
+  "languageOption": "언어",
+  "languageEnglish": "영어",
+  "languageKorean": "한국어",
+
+  "account": "계정",
+  "premium": "프리미엄",
+  "theme": "테마",
+  "myPlasticBag": "내 비닐봉지",
+
+  "helpAndFeedback": "도움말 및 피드백",
+  "helpCenter": "도움말 센터",
+  "feedback": "피드백",
+  "privacyPolicy": "개인정보 처리방침",
+  "termsOfService": "서비스 이용약관",
+
+  "dashboardTitle": "대시보드",
+  "gamesTitle": "게임",
+  "scanTrash": "쓰레기 스캔",
+  "quiz": "퀴즈",
+  "recycle": "분리배출",
+  "community": "커뮤니티",
+
+  "profileName": "Stella",
+  "currentRankPrefix": "Current Rank :",
+  "pointsPrefix": "Points :",
+
+  "impactThisWeek": "이번 주 나의 영향력:",
+  "electricityChange": "전기 사용량 ↓ 12%",
+  "gasChange": "가스 사용량 ↑ 4%",
+  "overallScore": "종합 점수: 78",
+
+  "recycleTileTitle": "오늘 재활용 했나요?",
+  "recycleTileSubtitle": "지금 재활용하러 가기!",
+  "quizTileTitle": "도전해 보고 싶나요?",
+  "quizTileSubtitle": "퀴즈 풀고 만점에 도전하세요!",
+
+  "educateSmallTitle": "스스로를 교육하고",
+  "educateSmallAnd": "그리고",
+  "educateSmallMain": "환경을 ‘보호’하세요",
+
+  "recycleDialogTitle": "재활용하기",
+  "recycleDialogMessage": "지금 재활용을 하시겠습니까?",
+  "quizDialogTitle": "스스로에게 도전하기",
+  "quizDialogMessage": "지금 퀴즈를 풀어볼까요?",
+  "educationDialogTitle": "배우기",
+  "educationDialogMessage": "지금 더 많은 친환경 팁과 수업을 배워볼까요?",
+
+  "no": "No",
+  "yes": "Yes",
+
+  "ecoPointsTrend": "에코 포인트 추세",
+  "avgPointsPrefix": "평균:",
+
+    "featuresTitle": "기능",
+  "chooseEcoMission": "에코 미션을 선택하세요",
+
+  "featureElectricityTitle": "전기",
+  "featureElectricitySubtitle": "주간 / 월간 / 연간 사용량 확인",
+
+  "featureGasTitle": "가스",
+  "featureGasSubtitle": "사용량을 확인하고 절약 목표 설정",
+
+  "featureCarbonTitle": "탄소\n발자국",
+  "featureCarbonSubtitle": "나의 CO₂ 발자국 보기",
+
+  "featureTrashTitle": "쓰레기 &\n재활용",
+  "featureTrashSubtitle": "스캔하고 분리배출 기록하기",
+
+  "featureShopTitle": "샵",
+  "featureShopSubtitle": "포인트로 상품 교환하기",
+
+  "featureEducationTitle": "교육",
+  "featureEducationSubtitle": "짧은 에코 레슨 & 퀴즈",
+
+  "featureNotiTruckTitle": "수거 트럭 알림",
+  "featureNotiTruckSubtitle": "쓰레기 수거 요청 보내기",
+
+  "trashRecyclingTitle": "쓰레기 & 재활용",
+  "trashRecyclingLine1": "• 품목을 스캔해서 올바르게 분류하기",
+  "trashRecyclingLine2": "• 재활용 스트릭을 기록하기",
+  "trashRecyclingLine3": "• 리더보드 순위를 올리기",
+  "trashRecyclingHint": "여기서 행동을 완료하면 에코패스 포인트와 배지를 얻을 수 있어요.",
+
+    "communityTitle": "커뮤니티",
+
+  "tabQuests": "퀘스트",
+  "tabFeed": "피드",
+  "tabEvents": "이벤트",
+
+  "fabAddEcoTip": "에코 팁 추가",
+
+  "streakPrefix": "연속",
+
+  "joinedQuestToast": "퀘스트 참여 완료",
+  "leftQuestToast": "퀘스트 참여 취소",
+
+  "leaderboardThisWeek": "이번 주 리더보드",
+
+  "filterShowingPrefix": "표시 중",
+  "clear": "지우기",
+
+  "commentsTitle": "댓글",
+  "commentsHint": "댓글을 입력하세요...",
+
+  "registerByPrefix": "등록 마감",
+
+  "joinedPrefix": "참여함",
+  "leftPrefix": "취소함",
+    "levelPrefix": "레벨",
+  "isYouSuffix": "(나)",
+  "hashtagsHint": "#해시태그 #띄어쓰기",
+
+  "newPostTitle": "새 게시글",
+  "shareEcoTipHint": "에코 팁을 공유하세요...",
+  "hashtagHint": "#해시태그 #구분",
+  "hashtagsLabel": "해시태그",
+
+  "addPhotoButton": "사진 추가",
+  "postButton": "게시",
+
+  "gamesTitle": "Play & Earn",
+
+  "levelPrefix": "Level",
+
+  "gameQuiz": "퀴즈",
+  "gameScanTrash": "쓰레기 스캔",
+  "gameRecycle": "재활용",
+  "gameDailyChallenge": "데일리 챌린지",
+  "gameCommunity": "커뮤니티",
+  "gameTrashSorting": "분리수거 게임",
+
+  "energyDialogTitle": "에너지가 부족합니다",
+  "energyDialogMessage": "에너지가 모두 소모되었습니다. 다시 충전될 때까지 기다려 주세요.",
+  "ok": "확인",
+
+  "pointsSuffix": "pts",
+
+    "profileTitle": "프로필",
+
+  "changeAvatarTitle": "아바타 변경",
+  "changeAvatarTakePhoto": "사진 찍기",
+  "changeAvatarChooseAlbum": "앨범에서 선택",
+  "changeAvatarChooseCharacter": "캐릭터 선택",
+  "cancel": "취소",
+
+  "recycleInfoText": "재활용할 때마다 활동과 포인트가 여기에 표시됩니다. 나의 연속 기록을 확인하고 얼마나 꾸준히 실천하고 있는지 확인해 보세요!",
+  "gotIt": "알겠어요!",
+
+  "dayPointsMessagePrefix": "이 날에는",
+  "dayPointsMessageSuffix": "포인트를 얻었어요!",
+
+  "pointsEarnedLabel": "획득한 포인트",
+  "progressDoneLabel": "완료한 진행",
+  "recycleHistoryTitle": "재활용 이력",
+
+  "weekdayShortSun": "일",
+  "weekdayShortMon": "월",
+  "weekdayShortTue": "화",
+  "weekdayShortWed": "수",
+  "weekdayShortThu": "목",
+  "weekdayShortFri": "금",
+  "weekdayShortSat": "토"
+
+}

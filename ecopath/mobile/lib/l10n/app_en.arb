@@ -1,0 +1,172 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "EcoPath",
+
+  "settingsTitle": "Settings",
+  "languageOption": "Language",
+  "languageEnglish": "English",
+  "languageKorean": "Korean",
+
+  "account": "Account",
+  "premium": "Premium",
+  "theme": "Theme",
+  "myPlasticBag": "My Plastic Bag",
+
+  "helpAndFeedback": "Help & Feedback",
+  "helpCenter": "Help Center",
+  "feedback": "Feedback",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service",
+
+  "dashboardTitle": "Dashboard",
+  "gamesTitle": "Games",
+  "scanTrash": "Scan Trash",
+  "quiz": "Quiz",
+  "recycle": "Recycle",
+  "community": "Community",
+
+  "profileName": "Stella",
+  "currentRankPrefix": "Current Rank :",
+  "pointsPrefix": "Points :",
+
+  "impactThisWeek": "Your Impact This Week:",
+  "electricityChange": "Electricity ↓ 12%",
+  "gasChange": "Gas ↑ 4%",
+  "overallScore": "Overall Score: 78",
+
+  "recycleTileTitle": "Did you recycle item today?",
+  "recycleTileSubtitle": "Go & Recycle!",
+  "quizTileTitle": "Do you want to challenge?",
+  "quizTileSubtitle": "Take the quiz and get full marks!",
+
+  "educateSmallTitle": "Educate yourself",
+  "educateSmallAnd": "and",
+  "educateSmallMain": "“Protect” the environment",
+
+  "recycleDialogTitle": "Recycle item",
+  "recycleDialogMessage": "Do you want to recycle an item?",
+  "quizDialogTitle": "Challenge yourself",
+  "quizDialogMessage": "Do you want to take a quiz now?",
+  "educationDialogTitle": "Educate yourself",
+  "educationDialogMessage": "Do you want to learn more eco tips and lessons now?",
+
+  "no": "No",
+  "yes": "Yes",
+
+  "ecoPointsTrend": "Eco Points Trend",
+  "avgPointsPrefix": "Avg:",
+
+    "featuresTitle": "Features",
+  "chooseEcoMission": "Choose your eco-mission",
+
+  "featureElectricityTitle": "Electricity",
+  "featureElectricitySubtitle": "Track weekly / monthly / yearly usage",
+
+  "featureGasTitle": "Gas",
+  "featureGasSubtitle": "Monitor and set save goals",
+
+  "featureCarbonTitle": "Carbon\nFootprint",
+  "featureCarbonSubtitle": "See your CO₂ footprint",
+
+  "featureTrashTitle": "Trash &\nRecycling",
+  "featureTrashSubtitle": "Scan, sort, and track",
+
+  "featureShopTitle": "Shop",
+  "featureShopSubtitle": "Exchange points for goods",
+
+  "featureEducationTitle": "Education",
+  "featureEducationSubtitle": "Quick eco lessons & quizzes",
+
+  "featureNotiTruckTitle": "Notify Truck",
+  "featureNotiTruckSubtitle": "Alert to collect trash",
+
+  "trashRecyclingTitle": "Trash & Recycling",
+  "trashRecyclingLine1": "• Scan items & sort correctly",
+  "trashRecyclingLine2": "• Track recycling streaks",
+  "trashRecyclingLine3": "• Leaderboard boosts",
+  "trashRecyclingHint": "Complete actions here to earn EcoPath points & badges.",
+
+    "communityTitle": "Community",
+
+  "tabQuests": "Quests",
+  "tabFeed": "Feed",
+  "tabEvents": "Events",
+
+  "fabAddEcoTip": "Add eco tip",
+
+  "streakPrefix": "Streak",
+
+  "joinedQuestToast": "Joined quest",
+  "leftQuestToast": "Left quest",
+
+  "leaderboardThisWeek": "Leaderboard • This Week",
+
+  "filterShowingPrefix": "Showing",
+  "clear": "Clear",
+
+  "commentsTitle": "Comments",
+  "commentsHint": "Add a comment...",
+
+  "registerByPrefix": "Register by",
+
+  "joinedPrefix": "Joined",
+  "leftPrefix": "Left",
+    "levelPrefix": "Level",
+  "isYouSuffix": "(You)",
+  "hashtagsHint": "#hashtag #separated",
+
+  "newPostTitle": "New Post",
+  "shareEcoTipHint": "Share your eco tip...",
+  "hashtagHint": "#hashtag #separated",
+  "hashtagsLabel": "Hashtags",
+
+  "addPhotoButton": "Add Photo",
+  "postButton": "Post",
+
+    "gamesTitle": "Play & Earn",
+
+  "levelPrefix": "Level",
+
+    "pointsSuffix": "pts",
+
+  "gameQuiz": "Quiz",
+  "gameScanTrash": "Scan Trash",
+  "gameRecycle": "Recycle",
+  "gameDailyChallenge": "Daily Challenge",
+  "gameCommunity": "Community",
+  "gameTrashSorting": "Trash Sorting",
+
+  "energyDialogTitle": "Not enough energy",
+  "energyDialogMessage": "Your energy is empty. Wait until it refills to play again.",
+  "ok": "OK",
+
+    "profileTitle": "Profile",
+
+  "changeAvatarTitle": "Change Avatar",
+  "changeAvatarTakePhoto": "Take Photo",
+  "changeAvatarChooseAlbum": "Choose from album",
+  "changeAvatarChooseCharacter": "Choose from character",
+  "cancel": "Cancel",
+
+  "recycleInfoText": "Track your eco journey! Each time you recycle and earn points, your activity appears here. Check your streaks and see how consistent your recycling habits are!",
+  "gotIt": "Got it!",
+
+  "dayPointsMessagePrefix": "You earned",
+  "dayPointsMessageSuffix": "points on this day!",
+
+  "pointsEarnedLabel": "Points earned",
+  "progressDoneLabel": "Progress done",
+  "recycleHistoryTitle": "Recycle History",
+
+  "weekdayShortSun": "S",
+  "weekdayShortMon": "M",
+  "weekdayShortTue": "T",
+  "weekdayShortWed": "W",
+  "weekdayShortThu": "T",
+  "weekdayShortFri": "F",
+  "weekdayShortSat": "S"
+
+
+
+}

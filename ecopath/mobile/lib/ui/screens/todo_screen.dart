@@ -1,6 +1,9 @@
 // lib/ui/screens/todo_screen.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecopath/core/progress_tracker.dart';
 
 class TodoScreen extends StatefulWidget {
   const TodoScreen({super.key});
@@ -15,12 +18,14 @@ class _TodoScreenState extends State<TodoScreen> {
   static const Color kBg = Color(0xFFF5F5F5);
   static const Color kCard = Colors.white;
 
-  // track total earned today from individual missions
+  // track total earned today from individual missions (points only)
   int _earnedToday = 0;
 
-  // daily bonus config
-  final int _dailyBonus = 30;
-  bool _bonusClaimed = false;
+  // ----- DAILY CHEST STATE -----
+  // Chest can give XP or points
+  _ChestType? _chestType;
+  int? _chestAmount;
+  bool _chestClaimed = false; // once per day
 
   // list of today's missions (placeholder default set)
   late List<_Challenge> _challenges;
@@ -72,6 +77,9 @@ class _TodoScreenState extends State<TodoScreen> {
       ch.completed = true;
       _earnedToday += ch.reward;
 
+      // update global progress + points
+      ProgressTracker.instance.completeMission(points: ch.reward);
+
       // placeholder for notifications
       _pushNotification(
         title: 'Challenge completed!',
@@ -80,17 +88,173 @@ class _TodoScreenState extends State<TodoScreen> {
     });
   }
 
-  void _claimBonus() {
-    if (!_allDone() || _bonusClaimed) return;
-    setState(() {
-      _bonusClaimed = true;
-      _earnedToday += _dailyBonus;
+  /// Opens a modal dialog with a closed chest.
+  /// When user taps the chest, it opens and reveals a random reward.
+  void _openChestDialog() {
+    if (_chestClaimed) return; // already opened today
 
-      _pushNotification(
-        title: 'Daily Eco Hero 🌿',
-        body: 'All missions cleared! Bonus +$_dailyBonus pts awarded.',
-      );
-    });
+    showDialog(
+      context: context,
+      barrierDismissible: false, // must use Close button
+      builder: (dialogCtx) {
+        bool opened = false;
+        _ChestType? type;
+        int? amount;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            // decide what to show depending on opened state
+            Widget chestImage;
+            String titleText;
+            String subtitleText;
+            Widget bottomButton;
+
+            if (!opened) {
+              chestImage = Image.asset(
+                'assets/images/closechest.png',
+                width: 140,
+                height: 140,
+                fit: BoxFit.contain,
+              );
+              titleText = 'Daily Chest';
+              subtitleText = 'Tap the chest to see your reward!';
+              bottomButton = const SizedBox.shrink();
+            } else {
+              // opened: show type-specific chest
+              if (type == _ChestType.xp) {
+                chestImage = Image.asset(
+                  'assets/images/xpchest.png',
+                  width: 140,
+                  height: 140,
+                  fit: BoxFit.contain,
+                );
+                subtitleText = 'You got $amount XP!';
+              } else {
+                chestImage = Image.asset(
+                  'assets/images/pointchest.png',
+                  width: 140,
+                  height: 140,
+                  fit: BoxFit.contain,
+                );
+                subtitleText = 'You got $amount points!';
+              }
+              titleText = 'Nice reward!';
+
+              bottomButton = Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(dialogCtx).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kInk,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                    ),
+                    child: Text(
+                      'Close',
+                      style: GoogleFonts.lato(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      titleText,
+                      style: GoogleFonts.lato(
+                        color: kInk,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () {
+                        if (opened) return;
+
+                        // generate the reward
+                        final rand = Random();
+                        final bool giveXp = rand.nextBool();
+                        int generatedAmount;
+
+                        if (giveXp) {
+                          // XP: 5–30
+                          generatedAmount = 5 + rand.nextInt(26);
+                          type = _ChestType.xp;
+                          // update global XP
+                          ProgressTracker.instance.addXp(generatedAmount);
+                        } else {
+                          // Points: 1–10
+                          generatedAmount = 1 + rand.nextInt(10);
+                          type = _ChestType.points;
+                          // update today + global points
+                          _earnedToday += generatedAmount;
+                          ProgressTracker.instance.addPoints(generatedAmount);
+                        }
+
+                        amount = generatedAmount;
+
+                        // Update main state
+                        setState(() {
+                          _chestClaimed = true;
+                          _chestType = type;
+                          _chestAmount = amount;
+                        });
+
+                        // send notification
+                        _pushNotification(
+                          title: 'Daily Chest opened 🎁',
+                          body: type == _ChestType.xp
+                              ? 'You received $generatedAmount XP!'
+                              : 'You received $generatedAmount points!',
+                        );
+
+                        // update dialog state to show opened chest
+                        setDialogState(() {
+                          opened = true;
+                        });
+                      },
+                      child: chestImage,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      subtitleText,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.alike(
+                        color: kInk.withOpacity(.9),
+                        fontSize: 13,
+                      ),
+                    ),
+                    bottomButton,
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   // later you connect this to notification_screen.dart state
@@ -201,10 +365,12 @@ class _TodoScreenState extends State<TodoScreen> {
                       ),
                     ),
 
-                    // right side bonus badge
+                    // right side small chest status badge
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 10),
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: kInk,
                         borderRadius: BorderRadius.circular(16),
@@ -212,14 +378,14 @@ class _TodoScreenState extends State<TodoScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.stars,
+                          const Icon(
+                            Icons.inventory_2_outlined,
                             color: kBg,
                             size: 20,
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Bonus +$_dailyBonus',
+                            'Daily Chest',
                             style: GoogleFonts.lato(
                               color: kBg,
                               fontWeight: FontWeight.w700,
@@ -227,11 +393,7 @@ class _TodoScreenState extends State<TodoScreen> {
                             ),
                           ),
                           Text(
-                            _bonusClaimed
-                                ? 'CLAIMED'
-                                : _allDone()
-                                    ? 'Ready'
-                                    : 'Locked',
+                            _chestClaimed ? 'Opened' : 'Ready',
                             style: GoogleFonts.alike(
                               color: kBg,
                               fontSize: 11,
@@ -245,6 +407,67 @@ class _TodoScreenState extends State<TodoScreen> {
                 ),
               ),
 
+              // --- DAILY CHEST SUMMARY BANNER (beneath Today's Progress) ---
+              if (_chestClaimed && _chestAmount != null && _chestType != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: kCard,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x14000000),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.asset(
+                            _chestType == _ChestType.xp
+                                ? 'assets/images/xpchest.png'
+                                : 'assets/images/pointchest.png',
+                            width: 44,
+                            height: 44,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Today\'s Chest Reward',
+                                style: GoogleFonts.lato(
+                                  color: kInk,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _chestType == _ChestType.xp
+                                    ? 'You got $_chestAmount XP!'
+                                    : 'You got $_chestAmount points!',
+                                style: GoogleFonts.alike(
+                                  color: kInk.withOpacity(.85),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
               const SizedBox(height: 20),
 
               Text(
@@ -257,10 +480,10 @@ class _TodoScreenState extends State<TodoScreen> {
               ),
               const SizedBox(height: 12),
 
-              // --- LIST OF CHALLENGES + BONUS CARD LAST ---
+              // --- LIST OF CHALLENGES + DAILY CHEST CARD LAST ---
               Expanded(
                 child: ListView.separated(
-                  itemCount: _challenges.length + 1, // +1 is bonus card
+                  itemCount: _challenges.length + 1, // +1 is daily chest card
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, i) {
                     if (i < _challenges.length) {
@@ -271,12 +494,11 @@ class _TodoScreenState extends State<TodoScreen> {
                         onComplete: () => _completeChallenge(i),
                       );
                     } else {
-                      // last item = daily bonus card
-                      return _BonusCard(
+                      // last item = daily chest card
+                      return _ChestCard(
+                        claimed: _chestClaimed,
                         allDone: _allDone(),
-                        claimed: _bonusClaimed,
-                        bonus: _dailyBonus,
-                        onClaim: _claimBonus,
+                        onGet: _openChestDialog,
                       );
                     }
                   },
@@ -308,9 +530,9 @@ class _Challenge {
   });
 }
 
+enum _ChestType { xp, points }
+
 // ---------------------- SAFE ICON WIDGET ----------------------
-// this tries to load an asset. if asset can't load, it shows a fallback icon.
-// good for debugging missing/transparent PNGs.
 
 class _SafeAssetIcon extends StatelessWidget {
   final String assetPath;
@@ -492,28 +714,34 @@ class _ChallengeCard extends StatelessWidget {
   }
 }
 
-// ---------------------- BONUS CARD WIDGET ----------------------
+// ---------------------- DAILY CHEST CARD WIDGET ----------------------
 
-class _BonusCard extends StatelessWidget {
+class _ChestCard extends StatelessWidget {
   static const Color kInk = Color(0xFF00221C);
   static const Color kCard = Colors.white;
 
-  final bool allDone;
   final bool claimed;
-  final int bonus;
-  final VoidCallback onClaim;
+  final bool allDone;
+  final VoidCallback onGet;
 
-  const _BonusCard({
-    required this.allDone,
+  const _ChestCard({
     required this.claimed,
-    required this.bonus,
-    required this.onClaim,
+    required this.allDone,
+    required this.onGet,
   });
 
   @override
   Widget build(BuildContext context) {
-    // can we press claim button?
-    final bool canClaim = allDone && !claimed;
+    final bool canPress = !claimed;
+
+    String statusText;
+    if (claimed) {
+      statusText = 'Already opened today';
+    } else if (allDone) {
+      statusText = 'Missions done – grab your chest!';
+    } else {
+      statusText = 'Free chest once a day.';
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -540,7 +768,7 @@ class _BonusCard extends StatelessWidget {
             ),
             child: const Center(
               child: Icon(
-                Icons.emoji_events,
+                Icons.inventory_2_outlined,
                 color: kInk,
                 size: 28,
               ),
@@ -554,7 +782,7 @@ class _BonusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Daily Bonus',
+                  'Daily Chest',
                   style: GoogleFonts.lato(
                     color: kInk,
                     fontSize: 15,
@@ -563,34 +791,20 @@ class _BonusCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Complete all missions to earn +$bonus pts.',
+                  'Open a free chest for random XP or points.',
                   style: GoogleFonts.alike(
                     color: kInk.withOpacity(.8),
                     fontSize: 12,
                   ),
                 ),
                 const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.stars,
-                      size: 16,
-                      color: Color(0xFF71D8C6),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      claimed
-                          ? 'Bonus claimed'
-                          : allDone
-                              ? 'Ready to claim'
-                              : 'Locked',
-                      style: GoogleFonts.lato(
-                        color: kInk,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                Text(
+                  statusText,
+                  style: GoogleFonts.lato(
+                    color: kInk,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -601,9 +815,10 @@ class _BonusCard extends StatelessWidget {
           SizedBox(
             width: 92,
             child: ElevatedButton(
-              onPressed: canClaim ? onClaim : null,
+              onPressed: canPress ? onGet : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: canClaim ? kInk : const Color(0xFFE6ECEA),
+                backgroundColor:
+                    canPress ? kInk : const Color(0xFFE6ECEA),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 10,
@@ -611,16 +826,13 @@ class _BonusCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                elevation: canClaim ? 2 : 0,
+                elevation: canPress ? 2 : 0,
               ),
               child: Text(
-                claimed
-                    ? 'Claimed'
-                    : canClaim
-                        ? 'Claim'
-                        : 'Locked',
+                claimed ? 'Claimed' : 'Get',
                 style: GoogleFonts.lato(
-                  color: canClaim ? Colors.white : kInk.withOpacity(.6),
+                  color:
+                      canPress ? Colors.white : kInk.withOpacity(.6),
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),

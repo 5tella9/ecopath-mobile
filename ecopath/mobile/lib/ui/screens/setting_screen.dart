@@ -1,20 +1,90 @@
+// lib/ui/screens/setting_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import 'mybag_screen.dart';
 import 'termsofservice_screen.dart';
 import 'privacypolicy_screen.dart';
 import 'feedback_screen.dart';
 import 'account_screen.dart';
-import 'theme_screen.dart'; // ← Theme settings
+import 'theme_screen.dart'; // Theme settings
+
+import 'package:ecopath/theme/language_controller.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  void _showLanguageSheet(BuildContext context) {
+    final langCtrl = context.read<LanguageController>();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (sheetCtx) {
+        final cs = Theme.of(sheetCtx).colorScheme;
+        final textTheme = Theme.of(sheetCtx).textTheme;
+        final l10n = AppLocalizations.of(sheetCtx)!;
+        final currentCode = langCtrl.locale.languageCode;
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.outlineVariant,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.languageOption,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: cs.onSurface,
+                ),
+              ),
+              const SizedBox(height: 16),
+              RadioListTile<String>(
+                value: 'en',
+                groupValue: currentCode,
+                title: Text(l10n.languageEnglish),
+                onChanged: (value) {
+                  langCtrl.setLocale(const Locale('en'));
+                  Navigator.pop(sheetCtx);
+                },
+              ),
+              RadioListTile<String>(
+                value: 'ko',
+                groupValue: currentCode,
+                title: Text(l10n.languageKorean),
+                onChanged: (value) {
+                  langCtrl.setLocale(const Locale('ko'));
+                  Navigator.pop(sheetCtx);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       // DYNAMIC BACKGROUND
@@ -53,7 +123,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Settings',
+                        l10n.settingsTitle, // localized
                         style: textTheme.headlineMedium?.copyWith(
                           color: cs.onBackground,
                           fontWeight: FontWeight.bold,
@@ -72,7 +142,7 @@ class SettingsScreen extends StatelessWidget {
                     children: [
                       _RowItem(
                         icon: 'assets/icons/account.svg',
-                        label: 'Account',
+                        label: l10n.account,
                         onTap: () {
                           Navigator.of(context, rootNavigator: true).push(
                             MaterialPageRoute(
@@ -84,13 +154,13 @@ class SettingsScreen extends StatelessWidget {
                       const _RowDivider(),
                       _RowItem(
                         icon: 'assets/icons/premium.svg',
-                        label: 'Premium',
+                        label: l10n.premium,
                         onTap: () {},
                       ),
                       const _RowDivider(),
                       _RowItem(
                         icon: 'assets/icons/theme.svg',
-                        label: 'Theme',
+                        label: l10n.theme,
                         onTap: () {
                           Navigator.of(context, rootNavigator: true).push(
                             MaterialPageRoute(
@@ -102,13 +172,13 @@ class SettingsScreen extends StatelessWidget {
                       const _RowDivider(),
                       _RowItem(
                         icon: 'assets/icons/language.svg',
-                        label: 'Language',
-                        onTap: () {},
+                        label: l10n.languageOption,
+                        onTap: () => _showLanguageSheet(context),
                       ),
                       const _RowDivider(),
                       _RowItem(
                         icon: 'assets/icons/mybag.svg',
-                        label: 'My Plastic Bag',
+                        label: l10n.myPlasticBag,
                         onTap: () {
                           Navigator.of(context, rootNavigator: true).push(
                             MaterialPageRoute(
@@ -127,7 +197,7 @@ class SettingsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 24, bottom: 14),
                   child: Text(
-                    'Help & Feedback',
+                    l10n.helpAndFeedback,
                     style: textTheme.titleMedium?.copyWith(
                       color: cs.onBackground,
                       fontWeight: FontWeight.bold,
@@ -142,13 +212,13 @@ class SettingsScreen extends StatelessWidget {
                     children: [
                       _RowItem(
                         icon: 'assets/icons/helpcenter.svg',
-                        label: 'Help Center',
+                        label: l10n.helpCenter,
                         onTap: () {},
                       ),
                       const _RowDivider(),
                       _RowItem(
                         icon: 'assets/icons/settingfeedback.svg',
-                        label: 'Feedback',
+                        label: l10n.feedback,
                         onTap: () {
                           Navigator.of(context, rootNavigator: true).push(
                             MaterialPageRoute(
@@ -160,7 +230,7 @@ class SettingsScreen extends StatelessWidget {
                       const _RowDivider(),
                       _RowItem(
                         icon: 'assets/icons/privacypolicy.svg',
-                        label: 'Privacy Policy',
+                        label: l10n.privacyPolicy,
                         onTap: () {
                           Navigator.of(context, rootNavigator: true).push(
                             MaterialPageRoute(
@@ -172,7 +242,7 @@ class SettingsScreen extends StatelessWidget {
                       const _RowDivider(),
                       _RowItem(
                         icon: 'assets/icons/termofservice.svg',
-                        label: 'Terms of Service',
+                        label: l10n.termsOfService,
                         onTap: () {
                           Navigator.of(context, rootNavigator: true).push(
                             MaterialPageRoute(

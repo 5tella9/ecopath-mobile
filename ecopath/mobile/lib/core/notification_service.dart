@@ -73,15 +73,18 @@ class NotificationService {
     }
 
     await _plugin.zonedSchedule(
-      _dailyMarketingId,
-      'EcoPath reminder 🌱',
-      'Take a small action today — open EcoPath and help the planet!',
-      scheduledDate,
-      _details(),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      // 🔁 This makes it repeat every day at the same time
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+  _dailyMarketingId,
+  'EcoPath reminder 🌱',
+  'Take a small action today — open EcoPath and help the planet!',
+  scheduledDate,                     // must be a TZDateTime
+  _details(),
+  androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.wallClockTime,
+  // 🔁 This makes it repeat every day at the same time
+  matchDateTimeComponents: DateTimeComponents.time,
+);
+
   }
 
   /// ❌ Cancel the daily reminder

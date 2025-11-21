@@ -68,8 +68,8 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
 
   double _trashX = 0;             // Current horizontal offset
   double _velocityX = 0;          // Smoothed horizontal velocity
-  double _accelFactor = 0.04;     // Affect on velocity
-  double _friction = 0.70;        // Smooth movement
+  double _accelFactor = 0.02;     // Affect on velocity
+  double _friction = 0.90;        // Smooth movement
 
   @override
   void initState() {
