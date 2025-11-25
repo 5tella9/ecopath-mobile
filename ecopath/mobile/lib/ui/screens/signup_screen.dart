@@ -67,15 +67,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _onSignUpPressed() {
-    if (_formKey.currentState?.validate() ?? false) {
-      final user = User(
-        fullName: _nameController.text,
-        email: _emailController.text,
-      );
-      Provider.of<UserProvider>(context, listen: false).setUser(user);
-      Navigator.pushReplacementNamed(context, '/survey');
-    }
+  if (_formKey.currentState?.validate() ?? false) {
+    Navigator.pushReplacementNamed(context, '/survey');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -208,11 +204,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Full name
-                      Text("Full name", style: _labelStyle(context)),
+                      Text("username", style: _labelStyle(context)),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _nameController,
-                        decoration: _inputDecoration(hint: "Your name"),
+                        decoration: _inputDecoration(hint: "uniquename"),
                         style: GoogleFonts.alike(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
@@ -234,7 +230,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration:
-                            _inputDecoration(hint: "example@email.com"),
+                            _inputDecoration(hint: "example@gmail.com"),
                         style: GoogleFonts.alike(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,

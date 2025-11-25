@@ -211,6 +211,12 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  void _onTapLogout() {
+    // TODO: change '/login' to your actual login route if different
+    Navigator.of(context, rootNavigator: true)
+        .pushNamedAndRemoveUntil('/login', (route) => false);
+  }
+
   Future<void> _openDatePicker() async {
     final now = DateTime.now();
     final initial = _parseDobOrNow(_dobCtrl.text, now);
@@ -396,8 +402,10 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _infoRowDob() {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
-    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
+    final labelStyle =
+        theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    final valueStyle = theme.textTheme.bodyMedium
+        ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
 
     if (_isEditing) {
       return _LinedRow(
@@ -422,7 +430,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  icon: Icon(Icons.calendar_today_outlined, size: 20, color: cs.primary),
+                  icon: Icon(Icons.calendar_today_outlined,
+                      size: 20, color: cs.primary),
                   onPressed: _openDatePicker,
                 ),
               ],
@@ -447,8 +456,10 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _infoRowAddress() {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
-    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
+    final labelStyle =
+        theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    final valueStyle = theme.textTheme.bodyMedium
+        ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
 
     if (_isEditing) {
       return _LinedRow(
@@ -502,8 +513,35 @@ class _AccountScreenState extends State<AccountScreen> {
             _infoRowDob(),
             const _InnerDivider(),
             _infoRowAddress(),
-            const _InnerDivider(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+      child: GestureDetector(
+        onTap: _onTapLogout,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: cs.primary,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Center(
+            child: Text(
+              "Log out",
+              style: TextStyle(
+                color: cs.onPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -526,7 +564,11 @@ class _AccountScreenState extends State<AccountScreen> {
           child: Center(
             child: Text(
               "Delete Account",
-              style: TextStyle(color: cs.error, fontSize: 14, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: cs.error,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -548,6 +590,7 @@ class _AccountScreenState extends State<AccountScreen> {
               _buildHeaderBar(context),
               _sectionTitle("Your Info"),
               _buildMainCard(),
+              _buildLogoutButton(),
               _buildDeleteButton(),
             ],
           ),

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ecopath/l10n/app_localizations.dart';
@@ -16,7 +17,6 @@ import 'ui/root_shell.dart';
 import 'ui/screens/survey_flow.dart';
 import 'ui/screens/intro_loading_screen.dart';
 import 'ui/screens/signup_screen.dart'; // ✅ new home
-import 'providers/userProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,9 +29,6 @@ void main() async {
   final languageController = LanguageController();
   await languageController.load();
 
-  final userProvider = UserProvider();
-  await userProvider.load();
-
   // (If you still use timezone + notifications somewhere, keep these)
   tz.initializeTimeZones();
   await NotificationService().init();
@@ -41,7 +38,6 @@ void main() async {
       providers: [
         ChangeNotifierProvider.value(value: themeController),
         ChangeNotifierProvider.value(value: languageController),
-        ChangeNotifierProvider.value(value: userProvider),
       ],
       child: const EcoPathRoot(),
     ),
@@ -55,17 +51,6 @@ class EcoPathRoot extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeCtrl = context.watch<ThemeController>();
     final langCtrl = context.watch<LanguageController>();
-    final userProvider = context.watch<UserProvider>();
-
-    Widget startScreen;
-
-    if (!userProvider.hasUser) {
-      startScreen = const SignUpScreen();  // no user → sign up
-    } else if (!userProvider.hasCompletedSurvey) {
-      startScreen = const SurveyFlow();    // user exists but survey not finished
-    } else {
-      startScreen = RootShell(initialIndex: 0); // user & survey → main app
-    }
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
