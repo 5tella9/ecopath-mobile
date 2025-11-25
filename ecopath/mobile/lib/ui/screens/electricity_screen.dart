@@ -3,6 +3,7 @@ import 'package:ecopath/core/meters_api.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 
 TextStyle _ts(BuildContext context, double size,
     {FontWeight? fw, Color? color, double? height}) {
@@ -32,7 +33,8 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
   double? _avgKwh;
   String _avgUnit = 'kWh';
 
-  static const String _demoSmartMeterId = '80c22b98-7799-41c6-abfc-59047915ca3c';
+  static const String _demoSmartMeterId =
+      '80c22b98-7799-41c6-abfc-59047915ca3c';
 
   @override
   void initState() {
@@ -56,8 +58,9 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to load average: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load average: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() => _loadingAvg = false);
@@ -67,70 +70,78 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
   (List<String>, List<double>) _series(ElecRange r) {
     switch (r) {
       case ElecRange.week:
-        return (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            [9, 8, 10, 7, 11, 13, 12]);
+        return (
+          ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          [9, 8, 10, 7, 11, 13, 12]
+        );
       case ElecRange.month:
-        return ([
-          '1',
-          '3',
-          '5',
-          '7',
-          '9',
-          '11',
-          '13',
-          '15',
-          '17',
-          '19',
-          '21',
-          '23',
-          '25',
-          '27',
-          '29'
-        ], [
-          8,
-          9,
-          7.5,
-          10,
-          8.5,
-          9.8,
-          10.2,
-          11.7,
-          9.1,
-          8.4,
-          9.7,
-          12.3,
-          11.4,
-          10.9,
-          9.6
-        ]);
+        return (
+          [
+            '1',
+            '3',
+            '5',
+            '7',
+            '9',
+            '11',
+            '13',
+            '15',
+            '17',
+            '19',
+            '21',
+            '23',
+            '25',
+            '27',
+            '29'
+          ],
+          [
+            8,
+            9,
+            7.5,
+            10,
+            8.5,
+            9.8,
+            10.2,
+            11.7,
+            9.1,
+            8.4,
+            9.7,
+            12.3,
+            11.4,
+            10.9,
+            9.6
+          ]
+        );
       case ElecRange.year:
-        return ([
-          'J',
-          'F',
-          'M',
-          'A',
-          'M',
-          'J',
-          'J',
-          'A',
-          'S',
-          'O',
-          'N',
-          'D'
-        ], [
-          280,
-          255,
-          230,
-          210,
-          240,
-          300,
-          350,
-          360,
-          290,
-          260,
-          240,
-          310
-        ]);
+        return (
+          [
+            'J',
+            'F',
+            'M',
+            'A',
+            'M',
+            'J',
+            'J',
+            'A',
+            'S',
+            'O',
+            'N',
+            'D'
+          ],
+          [
+            280,
+            255,
+            230,
+            210,
+            240,
+            300,
+            350,
+            360,
+            290,
+            260,
+            240,
+            310
+          ]
+        );
     }
   }
 
@@ -144,19 +155,25 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
   double _previousPeriodTotal(ElecRange r) =>
       r == ElecRange.week ? 64 : r == ElecRange.month ? 285 : 3250;
 
-  String _rangeLabel(ElecRange r) =>
-      r == ElecRange.week ? 'This Week' : r == ElecRange.month ? 'This Month' : 'This Year';
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
     final (labels, values) = _series(_range);
     final totalKwh = _sum(values);
     final prev = _previousPeriodTotal(_range);
     final pct = prev == 0 ? 0.0 : ((totalKwh - prev) / prev) * 100.0;
-    final estWon = _estimateWon(_range == ElecRange.year ? totalKwh / 12 : totalKwh);
+    final estWon =
+        _estimateWon(_range == ElecRange.year ? totalKwh / 12 : totalKwh);
     final projectedMonth =
         (_range == ElecRange.month) ? (totalKwh / values.length) * 30.0 : null;
+
+    final String rangeLabel = switch (_range) {
+      ElecRange.week => l10n.electricityThisWeek,
+      ElecRange.month => l10n.electricityThisMonth,
+      ElecRange.year => l10n.electricityThisYear,
+    };
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -167,8 +184,10 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
           icon: Icon(Icons.arrow_back_ios_new, color: cs.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Electricity Usage',
-            style: _ts(context, 20, fw: FontWeight.w700, color: cs.onSurface)),
+        title: Text(
+          l10n.electricityTitle,
+          style: _ts(context, 20, fw: FontWeight.w700, color: cs.onSurface),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -187,24 +206,33 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(_rangeLabel(_range),
-                        style: _ts(context, 16, fw: FontWeight.w700, color: cs.primary)),
+                    Text(
+                      rangeLabel,
+                      style: _ts(
+                        context,
+                        16,
+                        fw: FontWeight.w700,
+                        color: cs.primary,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
                           child: _KpiTile(
-                            title: 'Usage',
+                            title: l10n.electricityUsageKpiTitle,
                             value: '${totalKwh.toStringAsFixed(0)} kWh',
-                            sub: 'Estimate only',
+                            sub: l10n.electricityUsageKpiSub,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _KpiTile(
-                            title: 'Est. Bill',
+                            title: l10n.electricityBillKpiTitle,
                             value: '₩${estWon.toStringAsFixed(0)}',
-                            sub: _range == ElecRange.year ? 'avg/month' : 'estimate',
+                            sub: _range == ElecRange.year
+                                ? l10n.electricityBillKpiSubYear
+                                : l10n.electricityBillKpiSubOther,
                           ),
                         ),
                       ],
@@ -214,12 +242,13 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                       children: [
                         Icon(
                           pct >= 0 ? Icons.trending_up : Icons.trending_down,
-                          color: pct >= 0 ? Colors.redAccent : Colors.green,
+                          color:
+                              pct >= 0 ? Colors.redAccent : Colors.green,
                           size: 18,
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          '${pct >= 0 ? 'Up' : 'Down'} ${pct.abs().toStringAsFixed(1)}% vs last period',
+                          '${pct >= 0 ? l10n.electricityTrendUp : l10n.electricityTrendDown} ${pct.abs().toStringAsFixed(1)}% ${l10n.electricityVsLastPeriod}',
                           style: _ts(context, 13, color: cs.onSurface),
                         ),
                         const Spacer(),
@@ -234,12 +263,14 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                               _ToggleChip(
                                 label: 'kWh',
                                 selected: !_showCost,
-                                onTap: () => setState(() => _showCost = false),
+                                onTap: () =>
+                                    setState(() => _showCost = false),
                               ),
                               _ToggleChip(
                                 label: '₩',
                                 selected: _showCost,
-                                onTap: () => setState(() => _showCost = true),
+                                onTap: () =>
+                                    setState(() => _showCost = true),
                               ),
                             ],
                           ),
@@ -249,8 +280,12 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                     if (projectedMonth != null) ...[
                       const SizedBox(height: 8),
                       Text(
-                        'Projection: ~${projectedMonth.toStringAsFixed(0)} kWh (₩${_estimateWon(projectedMonth).toStringAsFixed(0)})',
-                        style: _ts(context, 13, color: cs.onSurfaceVariant),
+                        '${l10n.electricityProjectionPrefix} ~${projectedMonth.toStringAsFixed(0)} kWh (₩${_estimateWon(projectedMonth).toStringAsFixed(0)})',
+                        style: _ts(
+                          context,
+                          13,
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ],
@@ -281,21 +316,31 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _loadingAvg
-                          ? Text('Fetching backend average for Jan 2025…',
-                              style: _ts(context, 13))
+                          ? Text(
+                              l10n.electricityBackendLoading,
+                              style: _ts(context, 13),
+                            )
                           : (_avgKwh == null)
-                              ? Text('No backend average available.',
-                                  style: _ts(context, 13))
+                              ? Text(
+                                  l10n.electricityBackendNone,
+                                  style: _ts(context, 13),
+                                )
                               : Text(
-                                  'Backend Avg (Jan 2025): ${_avgKwh!.toStringAsFixed(2)} $_avgUnit',
-                                  style: _ts(context, 14, fw: FontWeight.w700),
+                                  '${l10n.electricityBackendLabel} ${_avgKwh!.toStringAsFixed(2)} $_avgUnit',
+                                  style: _ts(
+                                    context,
+                                    14,
+                                    fw: FontWeight.w700,
+                                  ),
                                 ),
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton.icon(
-                      onPressed: _loadingAvg ? null : _loadAverageForJanuary2025,
+                      onPressed: _loadingAvg
+                          ? null
+                          : _loadAverageForJanuary2025,
                       icon: const Icon(Icons.refresh, size: 18),
-                      label: const Text('Refresh'),
+                      label: Text(l10n.electricityRefresh),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: cs.primary,
                         side: BorderSide(color: cs.primary),
@@ -311,12 +356,21 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _RangeButton('Week', _range == ElecRange.week,
-                      () => setState(() => _range = ElecRange.week)),
-                  _RangeButton('Month', _range == ElecRange.month,
-                      () => setState(() => _range = ElecRange.month)),
-                  _RangeButton('Year', _range == ElecRange.year,
-                      () => setState(() => _range = ElecRange.year)),
+                  _RangeButton(
+                    l10n.electricityRangeWeekButton,
+                    _range == ElecRange.week,
+                    () => setState(() => _range = ElecRange.week),
+                  ),
+                  _RangeButton(
+                    l10n.electricityRangeMonthButton,
+                    _range == ElecRange.month,
+                    () => setState(() => _range = ElecRange.month),
+                  ),
+                  _RangeButton(
+                    l10n.electricityRangeYearButton,
+                    _range == ElecRange.year,
+                    () => setState(() => _range = ElecRange.year),
+                  ),
                 ],
               ),
 
@@ -333,7 +387,10 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Usage Chart', style: _ts(context, 16, fw: FontWeight.w700)),
+                    Text(
+                      l10n.electricityUsageChartTitle,
+                      style: _ts(context, 16, fw: FontWeight.w700),
+                    ),
                     const SizedBox(height: 12),
                     SizedBox(
                       height: 220,
@@ -361,10 +418,10 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
         gridData: FlGridData(show: true, drawVerticalLine: false),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
-          topTitles: AxisTitles(
+          topTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          rightTitles: AxisTitles(
+          rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
           leftTitles: AxisTitles(
@@ -374,7 +431,8 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
               getTitlesWidget: (val, _) {
                 // show only every 5 units (0,5,10,15,...) to avoid overlap
                 if (val % 5 != 0) return const SizedBox.shrink();
-                return Text(val.toInt().toString(), style: _ts(context, 11));
+                return Text(val.toInt().toString(),
+                    style: _ts(context, 11));
               },
             ),
           ),
@@ -384,7 +442,9 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
               reservedSize: 24,
               getTitlesWidget: (val, _) {
                 final i = val.toInt();
-                if (i < 0 || i >= labels.length) return const SizedBox.shrink();
+                if (i < 0 || i >= labels.length) {
+                  return const SizedBox.shrink();
+                }
                 return Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: Text(labels[i], style: _ts(context, 10)),
@@ -420,10 +480,10 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
       LineChartData(
         gridData: FlGridData(show: true, drawVerticalLine: false),
         titlesData: FlTitlesData(
-          topTitles: AxisTitles(
+          topTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
-          rightTitles: AxisTitles(
+          rightTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
           leftTitles: AxisTitles(
@@ -432,7 +492,8 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
               reservedSize: 30,
               getTitlesWidget: (val, _) {
                 if (val % 50 != 0) return const SizedBox.shrink();
-                return Text(val.toInt().toString(), style: _ts(context, 11));
+                return Text(val.toInt().toString(),
+                    style: _ts(context, 11));
               },
             ),
           ),
@@ -442,7 +503,9 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
               reservedSize: 24,
               getTitlesWidget: (val, _) {
                 final i = val.toInt();
-                if (i < 0 || i >= labels.length) return const SizedBox.shrink();
+                if (i < 0 || i >= labels.length) {
+                  return const SizedBox.shrink();
+                }
                 return Text(labels[i], style: _ts(context, 10));
               },
             ),
@@ -508,7 +571,11 @@ class _KpiTile extends StatelessWidget {
   final String title;
   final String value;
   final String sub;
-  const _KpiTile({required this.title, required this.value, required this.sub});
+  const _KpiTile({
+    required this.title,
+    required this.value,
+    required this.sub,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -539,8 +606,11 @@ class _ToggleChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _ToggleChip(
-      {required this.label, required this.selected, required this.onTap});
+  const _ToggleChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

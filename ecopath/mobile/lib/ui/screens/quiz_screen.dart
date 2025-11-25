@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import '../../util/survey_storage.dart';
 import '../../util/life_storage.dart';
+import 'package:ecopath/core/progress_tracker.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -136,7 +137,8 @@ class _QuizScreenState extends State<QuizScreen> {
   //                   FETCH QUIZ
   // =====================================================
   Future<void> _fetchQuiz() async {
-    const apiUrl = 'https://almost-enhancements-phys-doe.trycloudflare.com/quiz';
+    const apiUrl =
+        'https://pos-guitar-pick-his.trycloudflare.com/quiz';
     final surveyData = await SurveyStorage.load();
 
     final payload = {
@@ -350,6 +352,9 @@ class _QuizScreenState extends State<QuizScreen> {
   Future<void> _showWinDialog() async {
     final cs = Theme.of(context).colorScheme;
 
+    // Capture score at end of session (because Play Again resets _score)
+    final int finalScore = _score;
+
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -363,7 +368,7 @@ class _QuizScreenState extends State<QuizScreen> {
             Image.asset('assets/images/wingirl.png', width: 160),
             const SizedBox(height: 12),
             Text(
-              "You scored $_score points!",
+              "You scored $finalScore points!",
               style: TextStyle(color: cs.onSurface),
             ),
           ],
@@ -384,6 +389,14 @@ class _QuizScreenState extends State<QuizScreen> {
         ],
       ),
     );
+
+    // 🎁 After dialog is closed → grant reward for this quiz session
+    if (finalScore > 0) {
+      ProgressTracker.instance.rewardFromGame(
+        points: finalScore,
+        gameName: 'Quiz',
+      );
+    }
   }
 
   // OUT OF LIVES (no more plays)

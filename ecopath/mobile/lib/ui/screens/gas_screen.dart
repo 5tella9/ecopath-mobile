@@ -1,6 +1,7 @@
 // lib/ui/screens/gas_screen.dart
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 
 enum GasRange { m1, m6, y1 }
 enum GasUnit { m3, kwh }
@@ -29,10 +30,26 @@ class _GasScreenState extends State<GasScreen> {
       case GasRange.m1:
         return (['W1', 'W2', 'W3', 'W4'], [8, 12, 10, 9]);
       case GasRange.m6:
-        return (['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'], [42, 38, 31, 29, 33, 40]);
+        return (
+          ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+          [42, 38, 31, 29, 33, 40]
+        );
       case GasRange.y1:
         return (
-          ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+          [
+            'Nov',
+            'Dec',
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct'
+          ],
           [55, 59, 61, 58, 49, 42, 40, 36, 30, 32, 37, 44]
         );
     }
@@ -77,8 +94,16 @@ class _GasScreenState extends State<GasScreen> {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final cs = t.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final (labels, values) = _series(_range);
     final maxY = _safeMaxY(values);
+
+    // pick trend subtitle by range
+    final String trendSubtitle = switch (_range) {
+      GasRange.m1 => l10n.gasUsageTrendSubtitle4w,
+      GasRange.m6 => l10n.gasUsageTrendSubtitle6m,
+      GasRange.y1 => l10n.gasUsageTrendSubtitle12m,
+    };
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -87,7 +112,7 @@ class _GasScreenState extends State<GasScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Gas',
+          l10n.gasTitle,
           style: t.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
@@ -100,7 +125,7 @@ class _GasScreenState extends State<GasScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Track your monthly gas usage\nand estimate your carbon impact.",
+              l10n.gasIntro,
               style: t.textTheme.titleMedium?.copyWith(
                 color: cs.onSurface,
                 fontWeight: FontWeight.w700,
@@ -109,25 +134,35 @@ class _GasScreenState extends State<GasScreen> {
             ),
             const SizedBox(height: 14),
 
+            // ---- QUICK CONVERTER ----
             _Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _HeaderRow(
                     icon: Icons.local_gas_station_rounded,
-                    title: 'Quick Converter',
-                    subtitle: 'Enter your latest reading to convert to CO₂e',
+                    title: l10n.gasQuickConverterTitle,
+                    subtitle: l10n.gasQuickConverterSubtitle,
                   ),
                   const SizedBox(height: 12),
-                  _UnitToggle(value: _unit, onChanged: (u) => setState(() => _unit = u)),
+                  _UnitToggle(
+                    value: _unit,
+                    onChanged: (u) => setState(() => _unit = u),
+                  ),
                   const SizedBox(height: 12),
 
+                  // usage input
                   TextField(
                     controller: _readingCtl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
-                      labelText: _unit == GasUnit.m3 ? 'Gas used (m³)' : 'Gas used (kWh)',
-                      hintText: _unit == GasUnit.m3 ? 'e.g. 42.5' : 'e.g. 120.0',
+                      labelText: _unit == GasUnit.m3
+                          ? l10n.gasReadingLabelM3
+                          : l10n.gasReadingLabelKwh,
+                      hintText: _unit == GasUnit.m3
+                          ? l10n.gasReadingHintM3
+                          : l10n.gasReadingHintKwh,
                       filled: true,
                       fillColor: cs.surfaceContainerLowest,
                       border: OutlineInputBorder(
@@ -138,15 +173,17 @@ class _GasScreenState extends State<GasScreen> {
                   ),
                   const SizedBox(height: 10),
 
+                  // rate input
                   TextField(
                     controller: _rateCtl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
                       labelText: _unit == GasUnit.m3
-                          ? 'Optional: Rate per m³ (₩)'
-                          : 'Optional: Rate per kWh (₩)',
-                      hintText: 'e.g. 92.5',
-                      helperText: 'If set, we’ll also estimate this month’s bill.',
+                          ? l10n.gasRateLabelM3
+                          : l10n.gasRateLabelKwh,
+                      hintText: l10n.gasRateHint,
+                      helperText: l10n.gasRateHelper,
                       filled: true,
                       fillColor: cs.surfaceContainerLowest,
                       border: OutlineInputBorder(
@@ -162,7 +199,7 @@ class _GasScreenState extends State<GasScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _convertToCO2,
                       icon: const Icon(Icons.swap_horiz_rounded),
-                      label: const Text('Convert'),
+                      label: Text(l10n.gasConvertButton),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: cs.primary,
                         foregroundColor: cs.onPrimary,
@@ -170,7 +207,8 @@ class _GasScreenState extends State<GasScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                        textStyle:
+                            const TextStyle(fontWeight: FontWeight.w700),
                       ),
                     ),
                   ),
@@ -179,24 +217,31 @@ class _GasScreenState extends State<GasScreen> {
             ),
 
             const SizedBox(height: 12),
+
+            // ---- RESULT ----
             _Card(
-              child: _ResultBlock(co2Kg: _co2ResultKg, bill: _billResult, unit: _unit),
+              child: _ResultBlock(
+                co2Kg: _co2ResultKg,
+                bill: _billResult,
+                unit: _unit,
+              ),
             ),
+
             const SizedBox(height: 16),
 
+            // ---- USAGE TREND ----
             _Card(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _HeaderRow(
                     icon: Icons.show_chart_rounded,
-                    title: 'Usage Trend',
-                    subtitle: _range == GasRange.m1
-                        ? 'Last 4 weeks'
-                        : _range == GasRange.m6
-                            ? 'Last 6 months'
-                            : 'Last 12 months',
-                    trailing: _RangeChips(value: _range, onChanged: (r) => setState(() => _range = r)),
+                    title: l10n.gasUsageTrendTitle,
+                    subtitle: trendSubtitle,
+                    trailing: _RangeChips(
+                      value: _range,
+                      onChanged: (r) => setState(() => _range = r),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   AspectRatio(
@@ -207,17 +252,27 @@ class _GasScreenState extends State<GasScreen> {
                         LineChartData(
                           minY: 0,
                           maxY: maxY,
-                          gridData: FlGridData(show: true, drawVerticalLine: false),
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: false,
+                          ),
                           titlesData: FlTitlesData(
-                            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            topTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: const AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
                             leftTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 reservedSize: 36,
                                 getTitlesWidget: (v, meta) => Text(
                                   v.toStringAsFixed(0),
-                                  style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: cs.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
                             ),
@@ -226,11 +281,19 @@ class _GasScreenState extends State<GasScreen> {
                                 showTitles: true,
                                 getTitlesWidget: (v, meta) {
                                   final idx = v.toInt();
-                                  if (idx < 0 || idx >= labels.length) return const SizedBox.shrink();
+                                  if (idx < 0 || idx >= labels.length) {
+                                    return const SizedBox.shrink();
+                                  }
                                   return Padding(
-                                    padding: const EdgeInsets.only(top: 6.0),
-                                    child: Text(labels[idx],
-                                        style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant)),
+                                    padding:
+                                        const EdgeInsets.only(top: 6.0),
+                                    child: Text(
+                                      labels[idx],
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                    ),
                                   );
                                 },
                               ),
@@ -257,7 +320,9 @@ class _GasScreenState extends State<GasScreen> {
                                   ],
                                 ),
                               ),
-                              gradient: LinearGradient(colors: [cs.primary, cs.tertiary]),
+                              gradient: LinearGradient(
+                                colors: [cs.primary, cs.tertiary],
+                              ),
                             ),
                           ],
                         ),
@@ -268,12 +333,19 @@ class _GasScreenState extends State<GasScreen> {
                   const Divider(height: 24),
                   Row(
                     children: [
-                      Icon(Icons.info_outline_rounded, size: 18, color: cs.onSurfaceVariant),
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 18,
+                        color: cs.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Tip: Switch units to match your bill. Trends update automatically.',
-                          style: TextStyle(fontSize: 12.5, color: cs.onSurfaceVariant),
+                          l10n.gasTipText,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
                       ),
                     ],
@@ -337,7 +409,10 @@ class _HeaderRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          decoration: BoxDecoration(shape: BoxShape.circle, color: cs.surfaceContainerHighest),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: cs.surfaceContainerHighest,
+          ),
           padding: const EdgeInsets.all(10),
           child: Icon(icon, color: cs.primary),
         ),
@@ -346,14 +421,22 @@ class _HeaderRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: t.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w800, color: cs.onSurface)),
+              Text(
+                title,
+                style: t.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                ),
+              ),
               if (subtitle != null) ...[
                 const SizedBox(height: 2),
-                Text(subtitle!,
-                    style: t.textTheme.bodyMedium
-                        ?.copyWith(color: cs.onSurfaceVariant, height: 1.2)),
+                Text(
+                  subtitle!,
+                  style: t.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                    height: 1.2,
+                  ),
+                ),
               ],
             ],
           ),
@@ -372,18 +455,30 @@ class _UnitToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return SegmentedButton<GasUnit>(
-      segments: const [
-        ButtonSegment(value: GasUnit.m3, label: Text('m³')),
-        ButtonSegment(value: GasUnit.kwh, label: Text('kWh')),
+      segments: [
+        ButtonSegment(
+          value: GasUnit.m3,
+          label: Text('m³'),
+        ),
+        ButtonSegment(
+          value: GasUnit.kwh,
+          label: const Text('kWh'),
+        ),
       ],
       selected: {value},
       onSelectionChanged: (s) => onChanged(s.first),
       style: ButtonStyle(
-        backgroundColor: WidgetStateProperty.all(cs.surfaceContainerLowest),
-        side: WidgetStateProperty.all(BorderSide(color: cs.outlineVariant)),
+        backgroundColor:
+            WidgetStateProperty.all(cs.surfaceContainerLowest),
+        side: WidgetStateProperty.all(
+          BorderSide(color: cs.outlineVariant),
+        ),
         shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
     );
@@ -395,19 +490,29 @@ class _ResultBlock extends StatelessWidget {
   final double? bill;
   final GasUnit unit;
 
-  const _ResultBlock({required this.co2Kg, required this.bill, required this.unit});
+  const _ResultBlock({
+    required this.co2Kg,
+    required this.bill,
+    required this.unit,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     final hasData = co2Kg != null;
+
+    final co2Helper = unit == GasUnit.m3
+        ? l10n.gasResultCo2HelperM3
+        : l10n.gasResultCo2HelperKwh;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _HeaderRow(
           icon: Icons.eco_rounded,
-          title: 'Result',
-          subtitle: 'Your estimated carbon footprint and optional bill estimate',
+          title: l10n.gasResultTitle,
+          subtitle: l10n.gasResultSubtitle,
         ),
         const SizedBox(height: 12),
         if (!hasData)
@@ -416,15 +521,15 @@ class _ResultBlock extends StatelessWidget {
           Column(
             children: [
               _MetricTile(
-                label: 'CO₂e',
+                label: l10n.gasResultCo2Label,
                 value: '${co2Kg!.toStringAsFixed(2)} kg',
-                helper: 'Based on your input in ${unit == GasUnit.m3 ? "m³" : "kWh"}.',
+                helper: co2Helper,
               ),
               const SizedBox(height: 10),
               _MetricTile(
-                label: 'Estimated Bill',
+                label: l10n.gasResultBillLabel,
                 value: bill == null ? '—' : '₩${_formatMoney(bill!)}',
-                helper: 'Set your rate to see a bill estimate.',
+                helper: l10n.gasResultBillHelper,
               ),
             ],
           ),
@@ -448,7 +553,11 @@ class _MetricTile extends StatelessWidget {
   final String label;
   final String value;
   final String helper;
-  const _MetricTile({required this.label, required this.value, required this.helper});
+  const _MetricTile({
+    required this.label,
+    required this.value,
+    required this.helper,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -465,17 +574,31 @@ class _MetricTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: TextStyle(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600)),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: cs.onSurfaceVariant,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(value,
-                    style: TextStyle(
-                        color: cs.onSurface, fontSize: 20, fontWeight: FontWeight.w800)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: cs.onSurface,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(helper, style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12)),
+                Text(
+                  helper,
+                  style: TextStyle(
+                    color: cs.onSurfaceVariant,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -492,6 +615,7 @@ class _EmptyHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
@@ -504,7 +628,7 @@ class _EmptyHint extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'No result yet. Enter a reading above and tap Convert.',
+              l10n.gasResultEmpty,
               style: TextStyle(color: cs.onSurfaceVariant),
             ),
           ),
@@ -522,6 +646,8 @@ class _RangeChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
     Widget chip(String label, GasRange v) {
       final selected = value == v;
       return ChoiceChip(
@@ -536,7 +662,9 @@ class _RangeChips extends StatelessWidget {
         backgroundColor: cs.surfaceContainerLowest,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: selected ? cs.primary : cs.outlineVariant),
+          side: BorderSide(
+            color: selected ? cs.primary : cs.outlineVariant,
+          ),
         ),
         visualDensity: VisualDensity.compact,
       );
@@ -545,9 +673,9 @@ class _RangeChips extends StatelessWidget {
     return Wrap(
       spacing: 6,
       children: [
-        chip('1M', GasRange.m1),
-        chip('6M', GasRange.m6),
-        chip('1Y', GasRange.y1),
+        chip(l10n.gasRange1M, GasRange.m1),
+        chip(l10n.gasRange6M, GasRange.m6),
+        chip(l10n.gasRange1Y, GasRange.y1),
       ],
     );
   }

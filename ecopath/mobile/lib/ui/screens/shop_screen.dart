@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecopath/core/progress_tracker.dart';
+import 'mybag_screen.dart'; // for BagItem + globalBagInventory
 
 class BagRule {
   final String colorName;        // e.g. "Yellow Bag"
@@ -26,8 +28,6 @@ class ShopScreen extends StatefulWidget {
 }
 
 class _ShopScreenState extends State<ShopScreen> {
-  int userPoints = 2440;
-
   String? _selectedRegion;   // e.g. "Seoul"
   String? _selectedDistrict; // e.g. "Gangnam-gu", "Cheonan-si Dongnam-gu"
 
@@ -174,7 +174,8 @@ class _ShopScreenState extends State<ShopScreen> {
       result.add(pinkGeneral);
     }
     // Pink food: Cheonan-si (Dongnam-gu/Seobuk-gu)
-    final isCheonan = region == "Chungcheongnam-do" && district.startsWith("Cheonan-si ");
+    final isCheonan =
+        region == "Chungcheongnam-do" && district.startsWith("Cheonan-si ");
     if (isCheonan) {
       result.add(pinkFood);
     }
@@ -191,7 +192,9 @@ class _ShopScreenState extends State<ShopScreen> {
     if (region == "Chungcheongnam-do" && district == "Asan-si") {
       result.add(yellowFood);
     }
-    if (region == "Seoul" && district != "Seocho-gu" && district != "Gwangjin-gu") {
+    if (region == "Seoul" &&
+        district != "Seocho-gu" &&
+        district != "Gwangjin-gu") {
       result.add(yellowFood);
     }
 
@@ -236,7 +239,9 @@ class _ShopScreenState extends State<ShopScreen> {
 
   bool _shouldAllowWhiteBag(String region, String district) {
     // Exclusions for white general
-    if (region == "Gyeonggi-do" && district.contains("Seongnam-si ")) return false;
+    if (region == "Gyeonggi-do" && district.contains("Seongnam-si ")) {
+      return false;
+    }
     if (region == "Gyeonggi-do" && district == "Hanam-si") return false;
     if (region == "Gyeonggi-do" && district == "Pyeongtaek-si") return false;
     if (region == "Gwangju" && district == "Gwangsan-gu") return false;
@@ -256,29 +261,50 @@ class _ShopScreenState extends State<ShopScreen> {
   }
 
   Future<void> _tryBuy(int index, List<BagRule> visibleBags) async {
+    final tracker = ProgressTracker.instance;
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     final cost = _calcCostPoints(index, visibleBags);
+    final currentPoints = tracker.totalPoints; // same source as GamesScreen
 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF00221C),
+        backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Confirm Purchase',
-          style: GoogleFonts.lato(color: Colors.white, fontWeight: FontWeight.w600),
+          style: textTheme.titleMedium?.copyWith(
+            color: cs.onSurface,
+            fontWeight: FontWeight.w600,
+            fontFamily: GoogleFonts.lato().fontFamily,
+          ),
         ),
         content: Text(
-          'Are you sure to buy the plastic bag?',
-          style: GoogleFonts.lato(color: Colors.white70, fontSize: 14),
+          'Are you sure you want to buy this plastic bag?',
+          style: GoogleFonts.lato(
+            color: cs.onSurface.withOpacity(0.8),
+            fontSize: 14,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('No', style: GoogleFonts.lato(color: Colors.white70)),
+            child: Text(
+              'No',
+              style: GoogleFonts.lato(color: cs.onSurface.withOpacity(0.8)),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Yes', style: GoogleFonts.lato(color: Colors.white)),
+            child: Text(
+              'Yes',
+              style: GoogleFonts.lato(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -286,24 +312,34 @@ class _ShopScreenState extends State<ShopScreen> {
 
     if (confirm != true) return;
 
-    if (cost > userPoints) {
+    if (cost > currentPoints) {
       await showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: const Color(0xFF00221C),
+          backgroundColor: cs.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
             'Not enough points',
-            style: GoogleFonts.lato(color: Colors.white, fontWeight: FontWeight.w600),
+            style: textTheme.titleMedium?.copyWith(
+              color: cs.onSurface,
+              fontWeight: FontWeight.w600,
+              fontFamily: GoogleFonts.lato().fontFamily,
+            ),
           ),
           content: Text(
-            'You only have $userPoints pts.',
-            style: GoogleFonts.lato(color: Colors.white70, fontSize: 14),
+            'You only have $currentPoints pts.',
+            style: GoogleFonts.lato(
+              color: cs.onSurface.withOpacity(0.8),
+              fontSize: 14,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('OK', style: GoogleFonts.lato(color: Colors.white)),
+              child: Text(
+                'OK',
+                style: GoogleFonts.lato(color: cs.primary),
+              ),
             ),
           ],
         ),
@@ -311,27 +347,51 @@ class _ShopScreenState extends State<ShopScreen> {
       return;
     }
 
-    setState(() {
-      userPoints -= cost;
-    });
+    // ✅ Deduct points using shared tracker (stays in sync with games)
+    tracker.spendPoints(cost);
+    setState(() {});
+
+    // Add to global MyBag inventory
+    final bagRule = visibleBags[index];
+    final prefix = bagRule.wasteType == 'Food Waste' ? 'FW' : 'GW';
+    final millis = DateTime.now().millisecondsSinceEpoch;
+    final barcode = '$prefix-$millis';
+
+    globalBagInventory.add(
+      BagItem(
+        type: '${bagRule.colorName} • ${bagRule.wasteType}',
+        imagePath: bagRule.assetPath,
+        barcode: barcode,
+      ),
+    );
 
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF00221C),
+        backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Purchase Complete',
-          style: GoogleFonts.lato(color: Colors.white, fontWeight: FontWeight.w600),
+          style: textTheme.titleMedium?.copyWith(
+            color: cs.onSurface,
+            fontWeight: FontWeight.w600,
+            fontFamily: GoogleFonts.lato().fontFamily,
+          ),
         ),
         content: Text(
-          "You bought the bag!\nCheck it in 'My Plastic Bags'.",
-          style: GoogleFonts.lato(color: Colors.white70, fontSize: 14),
+          "You bought the bag!\nCheck it in 'My Bags'.",
+          style: GoogleFonts.lato(
+            color: cs.onSurface.withOpacity(0.8),
+            fontSize: 14,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('OK', style: GoogleFonts.lato(color: Colors.white)),
+            child: Text(
+              'OK',
+              style: GoogleFonts.lato(color: cs.primary),
+            ),
           ),
         ],
       ),
@@ -349,7 +409,9 @@ class _ShopScreenState extends State<ShopScreen> {
       ..addAll(List<int>.filled(currentBags.length, 1)); // default 1
   }
 
-  Widget _buildHeaderBar() {
+  Widget _buildHeaderBar(BuildContext context, int userPoints) {
+    final cs = Theme.of(context).colorScheme;
+
     return Row(
       children: [
         InkWell(
@@ -358,11 +420,15 @@ class _ShopScreenState extends State<ShopScreen> {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF00362B),
+              color: cs.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white24, width: 1),
+              border: Border.all(color: cs.outline.withOpacity(0.3), width: 1),
             ),
-            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18),
+            child: Icon(
+              Icons.arrow_back_ios_new,
+              color: cs.onSurface,
+              size: 18,
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -370,7 +436,7 @@ class _ShopScreenState extends State<ShopScreen> {
           child: Text(
             'Shop',
             style: GoogleFonts.lato(
-              color: Colors.white,
+              color: cs.onBackground,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
@@ -379,18 +445,21 @@ class _ShopScreenState extends State<ShopScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF00362B),
+            color: cs.primary,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white24, width: 1),
+            border: Border.all(color: cs.onPrimary.withOpacity(0.2), width: 1),
           ),
           child: Row(
             children: [
-              const Icon(Icons.stars, size: 18, color: Colors.white),
+              Icon(Icons.stars, size: 18, color: cs.onPrimary),
               const SizedBox(width: 6),
               Text(
                 '$userPoints pts',
                 style: GoogleFonts.lato(
-                  color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                  color: cs.onPrimary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -399,7 +468,9 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     final regionItems = _regions;
     final districtItems = _selectedRegion == null
         ? <String>[]
@@ -411,10 +482,12 @@ class _ShopScreenState extends State<ShopScreen> {
         Text(
           'Choose your area',
           style: GoogleFonts.lato(
-            color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+            color: cs.onBackground,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
         ),
         const SizedBox(height: 8),
-
         Row(
           children: [
             Expanded(
@@ -447,27 +520,33 @@ class _ShopScreenState extends State<ShopScreen> {
             ),
           ],
         ),
-
         const SizedBox(height: 12),
-
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFF3A2A00),
+            color: cs.errorContainer,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFFFC107), width: 1),
+            border: Border.all(color: cs.onErrorContainer.withOpacity(0.6), width: 1),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.warning_rounded, color: Color(0xFFFFC107), size: 20),
+              Icon(
+                Icons.warning_rounded,
+                color: cs.onErrorContainer,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Each Korean city/구 prints its own bag color. '
                   'Pick your exact district first.',
-                  style: GoogleFonts.lato(color: Colors.white, fontSize: 12, height: 1.4),
+                  style: GoogleFonts.lato(
+                    color: cs.onErrorContainer,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ],
@@ -477,27 +556,32 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  Widget _buildSizeDropdown(int index) {
+  Widget _buildSizeDropdown(BuildContext context, int index) {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF00362B),
+        color: cs.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white24, width: 1),
+        border: Border.all(color: cs.outline.withOpacity(0.3), width: 1),
       ),
       child: DropdownButton<int>(
         value: _selectedSizeL[index],
-        dropdownColor: const Color(0xFF00221C),
+        dropdownColor: cs.surfaceVariant,
         underline: const SizedBox.shrink(),
-        iconEnabledColor: Colors.white,
+        iconEnabledColor: cs.onSurface,
         isExpanded: false,
-        style: GoogleFonts.lato(color: Colors.white),
+        style: GoogleFonts.lato(color: cs.onSurface),
         items: _sizeOptions
             .map((sz) => DropdownMenuItem<int>(
                   value: sz,
                   child: Text(
                     '${sz}L',
-                    style: GoogleFonts.lato(color: Colors.white, fontSize: 14),
+                    style: GoogleFonts.lato(
+                      color: cs.onSurface,
+                      fontSize: 14,
+                    ),
                   ),
                 ))
             .toList(),
@@ -509,30 +593,43 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  Widget _qtyBtn({required IconData icon, required VoidCallback onTap}) {
+  Widget _qtyBtn({
+    required BuildContext context,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.all(8),
         color: Colors.transparent,
-        child: Icon(icon, color: Colors.white, size: 18),
+        child: Icon(
+          icon,
+          color: cs.onSurface,
+          size: 18,
+        ),
       ),
     );
   }
 
-  Widget _buildQuantitySelector(int index) {
+  Widget _buildQuantitySelector(BuildContext context, int index) {
+    final cs = Theme.of(context).colorScheme;
     final qty = _quantity[index];
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF00362B),
+        color: cs.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white24, width: 1),
+        border: Border.all(color: cs.outline.withOpacity(0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           _qtyBtn(
+            context: context,
             icon: Icons.remove,
             onTap: () {
               setState(() {
@@ -545,10 +642,14 @@ class _ShopScreenState extends State<ShopScreen> {
             child: Text(
               '$qty',
               style: GoogleFonts.lato(
-                color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+                color: cs.onSurface,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
             ),
           ),
           _qtyBtn(
+            context: context,
             icon: Icons.add,
             onTap: () {
               setState(() {
@@ -561,7 +662,12 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  Widget _buildBagCard(int index, List<BagRule> visibleBags) {
+  Widget _buildBagCard(
+    BuildContext context,
+    int index,
+    List<BagRule> visibleBags,
+  ) {
+    final cs = Theme.of(context).colorScheme;
     final bag = visibleBags[index];
     final cost = _calcCostPoints(index, visibleBags);
 
@@ -569,11 +675,15 @@ class _ShopScreenState extends State<ShopScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF00362B),
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white24, width: 1),
-        boxShadow: const [
-          BoxShadow(color: Colors.black54, blurRadius: 12, offset: Offset(0, 6)),
+        border: Border.all(color: cs.outline.withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: cs.shadow.withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
         ],
       ),
       child: Column(
@@ -588,7 +698,7 @@ class _ShopScreenState extends State<ShopScreen> {
                 height: 64,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: Colors.black.withOpacity(0.2),
+                  color: cs.surfaceVariant.withOpacity(0.4),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Image.asset(bag.assetPath, fit: BoxFit.contain),
@@ -603,12 +713,18 @@ class _ShopScreenState extends State<ShopScreen> {
                     Text(
                       bag.colorName,
                       style: GoogleFonts.lato(
-                        color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       bag.wasteType,
-                      style: GoogleFonts.lato(color: Colors.white70, fontSize: 13),
+                      style: GoogleFonts.lato(
+                        color: cs.onSurface.withOpacity(0.7),
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -621,11 +737,17 @@ class _ShopScreenState extends State<ShopScreen> {
                   Text(
                     '$cost pts',
                     style: GoogleFonts.lato(
-                      color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+                      color: cs.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
                   ),
                   Text(
                     '(${_quantity[index]}x ${_selectedSizeL[index]}L)',
-                    style: GoogleFonts.lato(color: Colors.white54, fontSize: 12),
+                    style: GoogleFonts.lato(
+                      color: cs.onSurface.withOpacity(0.6),
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -641,9 +763,15 @@ class _ShopScreenState extends State<ShopScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Bag Size', style: GoogleFonts.lato(color: Colors.white70, fontSize: 12)),
+                    Text(
+                      'Bag Size',
+                      style: GoogleFonts.lato(
+                        color: cs.onSurface.withOpacity(0.7),
+                        fontSize: 12,
+                      ),
+                    ),
                     const SizedBox(height: 6),
-                    _buildSizeDropdown(index),
+                    _buildSizeDropdown(context, index),
                   ],
                 ),
               ),
@@ -652,9 +780,15 @@ class _ShopScreenState extends State<ShopScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Quantity', style: GoogleFonts.lato(color: Colors.white70, fontSize: 12)),
+                    Text(
+                      'Quantity',
+                      style: GoogleFonts.lato(
+                        color: cs.onSurface.withOpacity(0.7),
+                        fontSize: 12,
+                      ),
+                    ),
                     const SizedBox(height: 6),
-                    _buildQuantitySelector(index),
+                    _buildQuantitySelector(context, index),
                   ],
                 ),
               ),
@@ -663,20 +797,25 @@ class _ShopScreenState extends State<ShopScreen> {
 
           const SizedBox(height: 16),
 
-          // buy
+          // buy (UNCHANGED as you asked)
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF00221C),
+                backgroundColor: cs.primary,
+                foregroundColor: cs.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               onPressed: () => _tryBuy(index, visibleBags),
               child: Text(
                 'Buy',
-                style: GoogleFonts.lato(fontWeight: FontWeight.w700, fontSize: 16),
+                style: GoogleFonts.lato(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
@@ -685,30 +824,46 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  Widget _buildBagListSection() {
+  Widget _buildBagListSection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final visibleBags = _getVisibleBags();
 
     if (_loadingAddresses) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
-        child: Text('Loading locations…',
-            style: GoogleFonts.lato(color: Colors.white54, fontSize: 14)),
+        child: Text(
+          'Loading locations…',
+          style: GoogleFonts.lato(
+            color: cs.onBackground.withOpacity(0.6),
+            fontSize: 14,
+          ),
+        ),
       );
     }
 
     if (_selectedRegion == null || _selectedDistrict == null) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
-        child: Text('Select your city / province and district.',
-            style: GoogleFonts.lato(color: Colors.white54, fontSize: 14)),
+        child: Text(
+          'Select your city / province and district.',
+          style: GoogleFonts.lato(
+            color: cs.onBackground.withOpacity(0.6),
+            fontSize: 14,
+          ),
+        ),
       );
     }
 
     if (visibleBags.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
-        child: Text('No bag info for this district yet.',
-            style: GoogleFonts.lato(color: Colors.white54, fontSize: 14)),
+        child: Text(
+          'No bag info for this district yet.',
+          style: GoogleFonts.lato(
+            color: cs.onBackground.withOpacity(0.6),
+            fontSize: 14,
+          ),
+        ),
       );
     }
 
@@ -721,29 +876,33 @@ class _ShopScreenState extends State<ShopScreen> {
     return Column(
       children: List.generate(
         visibleBags.length,
-        (i) => _buildBagCard(i, visibleBags),
+        (i) => _buildBagCard(context, i, visibleBags),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    const bgColor = Color(0xFF00221C);
+    final cs = Theme.of(context).colorScheme;
+    final tracker = ProgressTracker.instance;
+    final currentPoints = tracker.totalPoints;
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: cs.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeaderBar(),
+              _buildHeaderBar(context, currentPoints),
               const SizedBox(height: 24),
-              _buildFilters(),
+              _buildFilters(context),
               const SizedBox(height: 24),
               Expanded(
-                child: SingleChildScrollView(child: _buildBagListSection()),
+                child: SingleChildScrollView(
+                  child: _buildBagListSection(context),
+                ),
               ),
             ],
           ),
@@ -770,32 +929,41 @@ class _FilterDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = GoogleFonts.lato(color: Colors.white, fontSize: 14);
+    final cs = Theme.of(context).colorScheme;
+    final textStyle = GoogleFonts.lato(color: cs.onSurface, fontSize: 14);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.lato(color: Colors.white70, fontSize: 12)),
+        Text(
+          label,
+          style: GoogleFonts.lato(
+            color: cs.onSurface.withOpacity(0.7),
+            fontSize: 12,
+          ),
+        ),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF00362B),
+            color: cs.surface,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white24, width: 1),
+            border: Border.all(color: cs.outline.withOpacity(0.3), width: 1),
           ),
           child: DropdownButton<T>(
             value: value,
-            dropdownColor: const Color(0xFF00221C),
+            dropdownColor: cs.surfaceVariant,
             underline: const SizedBox.shrink(),
             isExpanded: true,
-            iconEnabledColor: Colors.white,
+            iconEnabledColor: cs.onSurface,
             style: textStyle,
             items: items
-                .map((opt) => DropdownMenuItem<T>(
-                      value: opt,
-                      child: Text('$opt', style: textStyle),
-                    ))
+                .map(
+                  (opt) => DropdownMenuItem<T>(
+                    value: opt,
+                    child: Text('$opt', style: textStyle),
+                  ),
+                )
                 .toList(),
             onChanged: onChanged,
           ),

@@ -1,5 +1,6 @@
 // lib/ui/screens/trash_sort_game_screen.dart
-// ✔ Updated with tilt controls + smooth motion
+// ✔ Updated: integrated with ProgressTracker (energy + rewards + notifications)
+// ✔ Uses global energy + rewardFromGame for notifications
 
 import 'dart:async';
 import 'dart:math';
@@ -7,9 +8,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:ecopath/core/progress_tracker.dart';
 
 class TrashSortGameScreen extends StatefulWidget {
-  final int initialEnergy;
+  final int initialEnergy; // kept for compatibility, but we now use global energy
 
   const TrashSortGameScreen({super.key, required this.initialEnergy});
 
@@ -63,18 +65,19 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
   late Animation<double> _fallAnimation;
   double _fallDurationMs = 4000;
 
-  // ---- NEW: Tilt Movement ----
+  // Tilt Movement
   StreamSubscription<AccelerometerEvent>? _accelSub;
-
-  double _trashX = 0;             // Current horizontal offset
-  double _velocityX = 0;          // Smoothed horizontal velocity
-  double _accelFactor = 0.02;     // Affect on velocity
-  double _friction = 0.90;        // Smooth movement
+  double _trashX = 0;
+  double _velocityX = 0;
+  double _accelFactor = 0.02;
+  double _friction = 0.90;
 
   @override
   void initState() {
     super.initState();
-    _energy = widget.initialEnergy;
+
+    // Use global energy as real source of truth
+    _energy = ProgressTracker.instance.energy;
 
     // Trash items
     _items = [
@@ -133,7 +136,7 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
 
   void _pickNextItem() {
     _currentItem = _items[_rand.nextInt(_items.length)];
-    _trashX = 0;    // reset to center
+    _trashX = 0;
     _velocityX = 0;
   }
 
@@ -143,32 +146,33 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
     _accelSub = accelerometerEvents.listen((event) {
       if (_phase != _GamePhase.playing) return;
 
-      // event.x → left/right tilt, low-pass smoothing
       double ax = event.x;
-
-      // Invert and scale for natural movement
       _velocityX += (-ax) * _accelFactor;
-
-      // Apply friction
       _velocityX *= _friction;
     });
   }
 
   void _updateTiltPhysics() {
-    _trashX += _velocityX * 10; // convert velocity to movement
-
-    // Clamp to safe screen range
+    _trashX += _velocityX * 10;
     _trashX = _trashX.clamp(-120.0, 120.0);
   }
 
   // ----------------- Start & countdown -----------------
   void _onStartPressed() {
-    if (_energy < 5) {
-      setState(() => _phase = _GamePhase.energyError);
+    final tracker = ProgressTracker.instance;
+
+    // Need 5 energy to play
+    if (tracker.energy < 5) {
+      setState(() {
+        _energy = tracker.energy;
+        _phase = _GamePhase.energyError;
+      });
       return;
     }
 
-    _energy -= 5;
+    // Spend global energy
+    tracker.spendEnergy(5);
+    _energy = tracker.energy;
 
     setState(() {
       _points = 0;
@@ -222,6 +226,15 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
   void _onGameOver() {
     _fallController.stop();
     _accelSub?.cancel();
+
+    // ✅ Grant global rewards + push notifications
+    if (_points > 0) {
+      ProgressTracker.instance.rewardFromGame(
+        points: _points,
+        gameName: 'Trash Sort',
+      );
+    }
+
     setState(() => _phase = _GamePhase.finished);
   }
 
@@ -231,15 +244,17 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
 
   // ---- Evaluate trash when it reaches bottom ----
   void _evaluateTrashLanding() {
-    final binSize = 1; // simplified bin width evaluation by ± zones
-
     // Convert tilt position (-120 to 120) to bin index 0–3
     int binIndex;
-
-    if (_trashX < -60) binIndex = 0;
-    else if (_trashX < 0) binIndex = 1;
-    else if (_trashX < 60) binIndex = 2;
-    else binIndex = 3;
+    if (_trashX < -60) {
+      binIndex = 0;
+    } else if (_trashX < 0) {
+      binIndex = 1;
+    } else if (_trashX < 60) {
+      binIndex = 2;
+    } else {
+      binIndex = 3;
+    }
 
     final binType = [
       _TrashBinType.others,
@@ -251,9 +266,8 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
     _onBinAutoSelect(binIndex, binType);
   }
 
-  // Auto-triggered when trash reaches bottom
   void _onBinAutoSelect(int index, _TrashBinType type) {
-    if (_phase != _GamePhase.playing) return;
+    if (_phase != _GamePhase.playing || _currentItem == null) return;
 
     final correct = type == _currentItem!.type;
 
@@ -299,18 +313,18 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
 
   Future<bool> _confirmQuit() async {
     return await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Quit game?'),
-        content: const Text('Do you want to quit the game?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Quit')),
-        ],
-      ),
-    ) ??
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('Quit game?'),
+            content: const Text('Do you want to quit the game?'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Quit')),
+            ],
+          ),
+        ) ??
         false;
   }
 
@@ -345,8 +359,12 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
   }
 
   void _playAgain() {
-    if (_energy < 5) {
-      setState(() => _phase = _GamePhase.energyError);
+    final tracker = ProgressTracker.instance;
+    if (tracker.energy < 5) {
+      setState(() {
+        _energy = tracker.energy;
+        _phase = _GamePhase.energyError;
+      });
       return;
     }
     _onStartPressed();
@@ -374,7 +392,6 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
             Positioned.fill(
               child: Container(color: Colors.black.withOpacity(0.04)),
             ),
-
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -405,11 +422,12 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 12),
-                  Text('Tilt phone to sort!', style: GoogleFonts.alike(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text(
+                    'Tilt phone to sort!',
+                    style: GoogleFonts.alike(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+                  ),
                   const SizedBox(height: 8),
-
                   Expanded(
                     child: LayoutBuilder(
                       builder: (_, constraints) {
@@ -435,7 +453,6 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                       },
                     ),
                   ),
-
                   SizedBox(
                     height: 190,
                     child: Row(
@@ -449,7 +466,6 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                     ),
                   ),
                   const SizedBox(height: 8),
-
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
@@ -468,7 +484,6 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                 ],
               ),
             ),
-
             if (_phase == _GamePhase.intro) _buildIntroOverlay(),
             if (_phase == _GamePhase.preCountdown) _buildCountdownOverlay(),
             if (_phase == _GamePhase.paused) _buildPausedOverlay(),
@@ -523,7 +538,10 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
               if (showFeedback)
                 Positioned(
                   top: -12,
-                  child: Text(feedbackText, style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: feedbackColor)),
+                  child: Text(
+                    feedbackText,
+                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: feedbackColor),
+                  ),
                 ),
             ],
           ),
@@ -532,7 +550,7 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
     );
   }
 
-  // --- overlays identical to your original ---
+  // --- overlays identical to before ---
 
   Widget _buildIntroOverlay() {
     return Container(
@@ -550,11 +568,11 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                 const SizedBox(height: 12),
                 Text(
                   'Tilt your phone left/right to guide the falling trash.\n'
-                      'When it reaches the bottom, it automatically sorts into a bin.\n\n'
-                      '• Bin 1: others (glass, foam, vinyl, wood)\n'
-                      '• Bin 2: plastic\n'
-                      '• Bin 3: metal\n'
-                      '• Bin 4: paper\n',
+                  'When it reaches the bottom, it automatically sorts into a bin.\n\n'
+                  '• Bin 1: others (glass, foam, vinyl, wood)\n'
+                  '• Bin 2: plastic\n'
+                  '• Bin 3: metal\n'
+                  '• Bin 4: paper\n',
                   textAlign: TextAlign.left,
                   style: GoogleFonts.alike(fontSize: 14),
                 ),
@@ -650,9 +668,11 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
               const SizedBox(height: 8),
               Text('Nice work!', style: GoogleFonts.alike(fontSize: 16)),
               const SizedBox(height: 12),
-              Text('Points: $_points\nXP: $_xp',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.w700)),
+              Text(
+                'Points: $_points\nXP: $_xp',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [

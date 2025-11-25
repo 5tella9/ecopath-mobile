@@ -124,9 +124,9 @@
   "addPhotoButton": "Add Photo",
   "postButton": "Post",
 
-    "gamesTitle": "Play & Earn",
+  "gamesTitle": "Play & Earn",
 
-  "levelPrefix": "Level",
+   "levelPrefix": "Level",
 
     "pointsSuffix": "pts",
 
@@ -165,8 +165,105 @@
   "weekdayShortWed": "W",
   "weekdayShortThu": "T",
   "weekdayShortFri": "F",
-  "weekdayShortSat": "S"
+  "weekdayShortSat": "S",
 
+  "electricityTitle": "Electricity Usage",
+  "electricityThisWeek": "This Week",
+  "electricityThisMonth": "This Month",
+  "electricityThisYear": "This Year",
 
+  "electricityUsageKpiTitle": "Usage",
+  "electricityUsageKpiSub": "Estimate only",
+  "electricityBillKpiTitle": "Est. Bill",
+  "electricityBillKpiSubYear": "avg/month",
+  "electricityBillKpiSubOther": "estimate",
+
+  "electricityTrendUp": "Up",
+  "electricityTrendDown": "Down",
+  "electricityVsLastPeriod": "vs last period",
+
+  "electricityBackendLoading": "Fetching backend average for Jan 2025…",
+  "electricityBackendNone": "No backend average available.",
+  "electricityBackendLabel": "Backend Avg (Jan 2025):",
+  "electricityRefresh": "Refresh",
+
+  "electricityRangeWeekButton": "Week",
+  "electricityRangeMonthButton": "Month",
+  "electricityRangeYearButton": "Year",
+
+  "electricityUsageChartTitle": "Usage Chart",
+  "electricityProjectionPrefix": "Projection:",
+
+    "gasTitle": "Gas",
+  "gasIntro": "Track your monthly gas usage\nand estimate your carbon impact.",
+
+  "gasQuickConverterTitle": "Quick Converter",
+  "gasQuickConverterSubtitle": "Enter your latest reading to convert to CO₂e",
+
+  "gasReadingLabelM3": "Gas used (m³)",
+  "gasReadingLabelKwh": "Gas used (kWh)",
+  "gasReadingHintM3": "e.g. 42.5",
+  "gasReadingHintKwh": "e.g. 120.0",
+
+  "gasRateLabelM3": "Optional: Rate per m³ (₩)",
+  "gasRateLabelKwh": "Optional: Rate per kWh (₩)",
+  "gasRateHint": "e.g. 92.5",
+  "gasRateHelper": "If set, we’ll also estimate this month’s bill.",
+
+  "gasConvertButton": "Convert",
+
+  "gasResultTitle": "Result",
+  "gasResultSubtitle": "Your estimated carbon footprint and optional bill estimate",
+  "gasResultEmpty": "No result yet. Enter a reading above and tap Convert.",
+
+  "gasResultCo2Label": "CO₂e",
+  "gasResultCo2HelperM3": "Based on your input in m³.",
+  "gasResultCo2HelperKwh": "Based on your input in kWh.",
+  "gasResultBillLabel": "Estimated Bill",
+  "gasResultBillHelper": "Set your rate to see a bill estimate.",
+
+  "gasUsageTrendTitle": "Usage Trend",
+  "gasUsageTrendSubtitle4w": "Last 4 weeks",
+  "gasUsageTrendSubtitle6m": "Last 6 months",
+  "gasUsageTrendSubtitle12m": "Last 12 months",
+
+  "gasTipText": "Tip: Switch units to match your bill. Trends update automatically.",
+
+  "gasRange1M": "1M",
+  "gasRange6M": "6M",
+  "gasRange1Y": "1Y",
+
+    "notiTruckTitle": "Notify Truck",
+  "notiTruckHeader": "Report Mass Trash Situation",
+  "notiTruckDescription": "Fill in the details so the truck team can come and clean the area.",
+
+  "notiTruckLocationLabel": "Location",
+  "notiTruckLocationHint": "e.g. Sejong Univ back gate, near CU store",
+
+  "notiTruckPhotoLabel": "Photo (optional)",
+  "notiTruckPhotoCamera": "Take Photo",
+  "notiTruckPhotoGallery": "Gallery",
+
+  "notiTruckNoteLabel": "Note (optional)",
+  "notiTruckNoteHint": "e.g. Smell is very bad, trash is scattered all over the street…",
+
+  "notiTruckRegisterButton": "Register",
+
+  "notiTruckSnackLocationMissing": "Please enter a location.",
+
+  "notiTruckDialogTitle": "Successfully notified!",
+  "notiTruckDialogMessage": "Your report has been sent. Thank you for helping keep your area clean!",
+  "notiTruckDialogDone": "Done",
+
+      "bagWhite": "White Bag",
+  "bagGreen": "Green Bag",
+  "bagBlue": "Blue Bag",
+  "bagPink": "Pink Bag",
+  "bagYellow": "Yellow Bag",
+  "bagPurple": "Purple Bag",
+  "bagOrange": "Orange Bag",
+
+  "wasteGeneral": "General Waste",
+  "wasteFood": "Food Waste"
 
 }

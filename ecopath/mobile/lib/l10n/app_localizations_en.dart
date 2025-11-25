@@ -367,4 +367,226 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get weekdayShortSat => 'S';
+
+  @override
+  String get electricityTitle => 'Electricity Usage';
+
+  @override
+  String get electricityThisWeek => 'This Week';
+
+  @override
+  String get electricityThisMonth => 'This Month';
+
+  @override
+  String get electricityThisYear => 'This Year';
+
+  @override
+  String get electricityUsageKpiTitle => 'Usage';
+
+  @override
+  String get electricityUsageKpiSub => 'Estimate only';
+
+  @override
+  String get electricityBillKpiTitle => 'Est. Bill';
+
+  @override
+  String get electricityBillKpiSubYear => 'avg/month';
+
+  @override
+  String get electricityBillKpiSubOther => 'estimate';
+
+  @override
+  String get electricityTrendUp => 'Up';
+
+  @override
+  String get electricityTrendDown => 'Down';
+
+  @override
+  String get electricityVsLastPeriod => 'vs last period';
+
+  @override
+  String get electricityBackendLoading => 'Fetching backend average for Jan 2025…';
+
+  @override
+  String get electricityBackendNone => 'No backend average available.';
+
+  @override
+  String get electricityBackendLabel => 'Backend Avg (Jan 2025):';
+
+  @override
+  String get electricityRefresh => 'Refresh';
+
+  @override
+  String get electricityRangeWeekButton => 'Week';
+
+  @override
+  String get electricityRangeMonthButton => 'Month';
+
+  @override
+  String get electricityRangeYearButton => 'Year';
+
+  @override
+  String get electricityUsageChartTitle => 'Usage Chart';
+
+  @override
+  String get electricityProjectionPrefix => 'Projection:';
+
+  @override
+  String get gasTitle => 'Gas';
+
+  @override
+  String get gasIntro => 'Track your monthly gas usage\nand estimate your carbon impact.';
+
+  @override
+  String get gasQuickConverterTitle => 'Quick Converter';
+
+  @override
+  String get gasQuickConverterSubtitle => 'Enter your latest reading to convert to CO₂e';
+
+  @override
+  String get gasReadingLabelM3 => 'Gas used (m³)';
+
+  @override
+  String get gasReadingLabelKwh => 'Gas used (kWh)';
+
+  @override
+  String get gasReadingHintM3 => 'e.g. 42.5';
+
+  @override
+  String get gasReadingHintKwh => 'e.g. 120.0';
+
+  @override
+  String get gasRateLabelM3 => 'Optional: Rate per m³ (₩)';
+
+  @override
+  String get gasRateLabelKwh => 'Optional: Rate per kWh (₩)';
+
+  @override
+  String get gasRateHint => 'e.g. 92.5';
+
+  @override
+  String get gasRateHelper => 'If set, we’ll also estimate this month’s bill.';
+
+  @override
+  String get gasConvertButton => 'Convert';
+
+  @override
+  String get gasResultTitle => 'Result';
+
+  @override
+  String get gasResultSubtitle => 'Your estimated carbon footprint and optional bill estimate';
+
+  @override
+  String get gasResultEmpty => 'No result yet. Enter a reading above and tap Convert.';
+
+  @override
+  String get gasResultCo2Label => 'CO₂e';
+
+  @override
+  String get gasResultCo2HelperM3 => 'Based on your input in m³.';
+
+  @override
+  String get gasResultCo2HelperKwh => 'Based on your input in kWh.';
+
+  @override
+  String get gasResultBillLabel => 'Estimated Bill';
+
+  @override
+  String get gasResultBillHelper => 'Set your rate to see a bill estimate.';
+
+  @override
+  String get gasUsageTrendTitle => 'Usage Trend';
+
+  @override
+  String get gasUsageTrendSubtitle4w => 'Last 4 weeks';
+
+  @override
+  String get gasUsageTrendSubtitle6m => 'Last 6 months';
+
+  @override
+  String get gasUsageTrendSubtitle12m => 'Last 12 months';
+
+  @override
+  String get gasTipText => 'Tip: Switch units to match your bill. Trends update automatically.';
+
+  @override
+  String get gasRange1M => '1M';
+
+  @override
+  String get gasRange6M => '6M';
+
+  @override
+  String get gasRange1Y => '1Y';
+
+  @override
+  String get notiTruckTitle => 'Notify Truck';
+
+  @override
+  String get notiTruckHeader => 'Report Mass Trash Situation';
+
+  @override
+  String get notiTruckDescription => 'Fill in the details so the truck team can come and clean the area.';
+
+  @override
+  String get notiTruckLocationLabel => 'Location';
+
+  @override
+  String get notiTruckLocationHint => 'e.g. Sejong Univ back gate, near CU store';
+
+  @override
+  String get notiTruckPhotoLabel => 'Photo (optional)';
+
+  @override
+  String get notiTruckPhotoCamera => 'Take Photo';
+
+  @override
+  String get notiTruckPhotoGallery => 'Gallery';
+
+  @override
+  String get notiTruckNoteLabel => 'Note (optional)';
+
+  @override
+  String get notiTruckNoteHint => 'e.g. Smell is very bad, trash is scattered all over the street…';
+
+  @override
+  String get notiTruckRegisterButton => 'Register';
+
+  @override
+  String get notiTruckSnackLocationMissing => 'Please enter a location.';
+
+  @override
+  String get notiTruckDialogTitle => 'Successfully notified!';
+
+  @override
+  String get notiTruckDialogMessage => 'Your report has been sent. Thank you for helping keep your area clean!';
+
+  @override
+  String get notiTruckDialogDone => 'Done';
+
+  @override
+  String get bagWhite => 'White Bag';
+
+  @override
+  String get bagGreen => 'Green Bag';
+
+  @override
+  String get bagBlue => 'Blue Bag';
+
+  @override
+  String get bagPink => 'Pink Bag';
+
+  @override
+  String get bagYellow => 'Yellow Bag';
+
+  @override
+  String get bagPurple => 'Purple Bag';
+
+  @override
+  String get bagOrange => 'Orange Bag';
+
+  @override
+  String get wasteGeneral => 'General Waste';
+
+  @override
+  String get wasteFood => 'Food Waste';
 }

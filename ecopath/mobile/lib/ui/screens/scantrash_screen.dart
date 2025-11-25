@@ -129,7 +129,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
     }
 
     const String apiUrl =
-        "https://almost-enhancements-phys-doe.trycloudflare.com/predict";
+        "https://pos-guitar-pick-his.trycloudflare.com/predict";
 
     try {
       final bytes = await photo.readAsBytes();
@@ -164,7 +164,11 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
 
     setState(() => pointsEarned += 15);
 
-    ProgressTracker.instance.addPointsAndXp(15);
+    // ✅ Use game reward API so points + XP + notifications are handled
+    ProgressTracker.instance.rewardFromGame(
+      points: 15,
+      gameName: 'Scan Trash',
+    );
 
     showModalBottomSheet(
       context: context,

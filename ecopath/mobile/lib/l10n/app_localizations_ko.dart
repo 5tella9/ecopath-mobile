@@ -367,4 +367,226 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get weekdayShortSat => '토';
+
+  @override
+  String get electricityTitle => '전기 사용량';
+
+  @override
+  String get electricityThisWeek => '이번 주';
+
+  @override
+  String get electricityThisMonth => '이번 달';
+
+  @override
+  String get electricityThisYear => '올해';
+
+  @override
+  String get electricityUsageKpiTitle => '사용량';
+
+  @override
+  String get electricityUsageKpiSub => '대략적인 추정치';
+
+  @override
+  String get electricityBillKpiTitle => '예상 요금';
+
+  @override
+  String get electricityBillKpiSubYear => '월 평균';
+
+  @override
+  String get electricityBillKpiSubOther => '추정치';
+
+  @override
+  String get electricityTrendUp => '증가';
+
+  @override
+  String get electricityTrendDown => '감소';
+
+  @override
+  String get electricityVsLastPeriod => '이전 기간 대비';
+
+  @override
+  String get electricityBackendLoading => '백엔드에서 2025년 1월 평균을 가져오는 중…';
+
+  @override
+  String get electricityBackendNone => '백엔드 평균 데이터를 가져올 수 없어요.';
+
+  @override
+  String get electricityBackendLabel => '백엔드 평균 (2025년 1월):';
+
+  @override
+  String get electricityRefresh => '새로고침';
+
+  @override
+  String get electricityRangeWeekButton => '주간';
+
+  @override
+  String get electricityRangeMonthButton => '월간';
+
+  @override
+  String get electricityRangeYearButton => '연간';
+
+  @override
+  String get electricityUsageChartTitle => '사용량 차트';
+
+  @override
+  String get electricityProjectionPrefix => '예상치:';
+
+  @override
+  String get gasTitle => '도시가스';
+
+  @override
+  String get gasIntro => '월별 가스 사용량을 확인하고\n탄소 영향을 추정해 보세요.';
+
+  @override
+  String get gasQuickConverterTitle => '간편 변환기';
+
+  @override
+  String get gasQuickConverterSubtitle => '최근 사용량을 입력해서 CO₂e로 변환해요.';
+
+  @override
+  String get gasReadingLabelM3 => '가스 사용량 (m³)';
+
+  @override
+  String get gasReadingLabelKwh => '가스 사용량 (kWh)';
+
+  @override
+  String get gasReadingHintM3 => '예: 42.5';
+
+  @override
+  String get gasReadingHintKwh => '예: 120.0';
+
+  @override
+  String get gasRateLabelM3 => '선택: 1m³당 요금 (₩)';
+
+  @override
+  String get gasRateLabelKwh => '선택: 1kWh당 요금 (₩)';
+
+  @override
+  String get gasRateHint => '예: 92.5';
+
+  @override
+  String get gasRateHelper => '입력하면 이번 달 예상 요금도 계산해 드려요.';
+
+  @override
+  String get gasConvertButton => '변환';
+
+  @override
+  String get gasResultTitle => '결과';
+
+  @override
+  String get gasResultSubtitle => '예상 탄소 배출량과 선택 요금 추정치';
+
+  @override
+  String get gasResultEmpty => '아직 결과가 없어요. 위에 값을 입력하고 ‘변환’을 눌러 주세요.';
+
+  @override
+  String get gasResultCo2Label => 'CO₂e';
+
+  @override
+  String get gasResultCo2HelperM3 => '입력한 단위 m³ 기준으로 계산했어요.';
+
+  @override
+  String get gasResultCo2HelperKwh => '입력한 단위 kWh 기준으로 계산했어요.';
+
+  @override
+  String get gasResultBillLabel => '예상 요금';
+
+  @override
+  String get gasResultBillHelper => '요금을 추정하려면 단가를 입력해 주세요.';
+
+  @override
+  String get gasUsageTrendTitle => '사용량 추이';
+
+  @override
+  String get gasUsageTrendSubtitle4w => '최근 4주';
+
+  @override
+  String get gasUsageTrendSubtitle6m => '최근 6개월';
+
+  @override
+  String get gasUsageTrendSubtitle12m => '최근 12개월';
+
+  @override
+  String get gasTipText => '팁: 고지서 단위와 동일하게 설정하면 추이를 더 쉽게 볼 수 있어요.';
+
+  @override
+  String get gasRange1M => '1개월';
+
+  @override
+  String get gasRange6M => '6개월';
+
+  @override
+  String get gasRange1Y => '1년';
+
+  @override
+  String get notiTruckTitle => '수거차 알리기';
+
+  @override
+  String get notiTruckHeader => '쓰레기 대량 발생 신고';
+
+  @override
+  String get notiTruckDescription => '수거차 팀이 출동할 수 있도록 위치와 상황을 알려 주세요.';
+
+  @override
+  String get notiTruckLocationLabel => '위치';
+
+  @override
+  String get notiTruckLocationHint => '예: 세종대 정문 뒤 CU 편의점 근처';
+
+  @override
+  String get notiTruckPhotoLabel => '사진 (선택)';
+
+  @override
+  String get notiTruckPhotoCamera => '사진 찍기';
+
+  @override
+  String get notiTruckPhotoGallery => '갤러리';
+
+  @override
+  String get notiTruckNoteLabel => '메모 (선택)';
+
+  @override
+  String get notiTruckNoteHint => '예: 냄새가 심하고 길에 쓰레기가 많이 흩어져 있어요.';
+
+  @override
+  String get notiTruckRegisterButton => '등록';
+
+  @override
+  String get notiTruckSnackLocationMissing => '위치를 입력해 주세요.';
+
+  @override
+  String get notiTruckDialogTitle => '성공적으로 알렸어요!';
+
+  @override
+  String get notiTruckDialogMessage => '신고가 전송되었어요. 깨끗한 동네를 위해 도와주셔서 감사합니다.';
+
+  @override
+  String get notiTruckDialogDone => '완료';
+
+  @override
+  String get bagWhite => '백색 봉투';
+
+  @override
+  String get bagGreen => '초록색 봉투';
+
+  @override
+  String get bagBlue => '파란색 봉투';
+
+  @override
+  String get bagPink => '분홍색 봉투';
+
+  @override
+  String get bagYellow => '노란색 봉투';
+
+  @override
+  String get bagPurple => '보라색 봉투';
+
+  @override
+  String get bagOrange => '주황색 봉투';
+
+  @override
+  String get wasteGeneral => '일반 쓰레기';
+
+  @override
+  String get wasteFood => '음식물 쓰레기';
 }

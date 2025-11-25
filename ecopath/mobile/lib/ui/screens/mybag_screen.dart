@@ -2,6 +2,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Shared model for a bag the user owns (from Shop).
+class BagItem {
+  final String type;
+  final String imagePath;
+  final String barcode;
+
+  BagItem({
+    required this.type,
+    required this.imagePath,
+    required this.barcode,
+  });
+}
+
+/// Global inventory that ShopScreen will add to,
+/// and MyBagScreen will display.
+final List<BagItem> globalBagInventory = [];
+
 class MyBagScreen extends StatefulWidget {
   const MyBagScreen({super.key});
 
@@ -10,31 +27,9 @@ class MyBagScreen extends StatefulWidget {
 }
 
 class _MyBagScreenState extends State<MyBagScreen> {
-  // Simple model for a bag
-  final List<_BagItem> _bags = const [
-    _BagItem(
-      type: 'General waste',
-      imagePath: 'assets/images/bluebag.png',
-      barcode: 'GW-2025-0001',
-    ),
-    _BagItem(
-      type: 'Food waste',
-      imagePath: 'assets/images/greenbag.png',
-      barcode: 'FW-2025-0102',
-    ),
-    _BagItem(
-      type: 'Campus bag',
-      imagePath: 'assets/images/purplebag.png',
-      barcode: 'CB-2025-0304',
-    ),
-    _BagItem(
-      type: 'General waste',
-      imagePath: 'assets/images/whitebag.png',
-      barcode: 'GW-2025-0506',
-    ),
-  ];
+  BagItem? _selectedBag;
 
-  _BagItem? _selectedBag;
+  List<BagItem> get _bags => globalBagInventory;
 
   TextStyle _titleStyle(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -184,7 +179,7 @@ class _MyBagScreenState extends State<MyBagScreen> {
     );
   }
 
-  Widget _buildBarcodeOverlay(BuildContext context, _BagItem bag) {
+  Widget _buildBarcodeOverlay(BuildContext context, BagItem bag) {
     final cs = Theme.of(context).colorScheme;
 
     return Positioned.fill(
@@ -275,7 +270,7 @@ class _MyBagScreenState extends State<MyBagScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Simple "barcode" stripes – now flex-based, no overflow
+          // Simple "barcode" stripes – flex-based
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -312,16 +307,4 @@ class _MyBagScreenState extends State<MyBagScreen> {
       ),
     );
   }
-}
-
-class _BagItem {
-  final String type;
-  final String imagePath;
-  final String barcode;
-
-  const _BagItem({
-    required this.type,
-    required this.imagePath,
-    required this.barcode,
-  });
 }

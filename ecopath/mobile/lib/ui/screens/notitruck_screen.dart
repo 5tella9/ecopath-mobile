@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 
 class NotiTruckScreen extends StatefulWidget {
   const NotiTruckScreen({super.key});
@@ -52,9 +53,11 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
   }
 
   void _submit() {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_locationController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a location.')),
+        SnackBar(content: Text(l10n.notiTruckSnackLocationMissing)),
       );
       return;
     }
@@ -64,13 +67,24 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
     showDialog(
       context: context,
       builder: (ctx) {
+        final cs = Theme.of(context).colorScheme;
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Successfully notified!'),
-          content: const Text(
-            'Your report has been sent. Thank you for helping keep your area clean!',
+          title: Text(
+            l10n.notiTruckDialogTitle,
+            style: GoogleFonts.alike(
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
+          ),
+          content: Text(
+            l10n.notiTruckDialogMessage,
+            style: GoogleFonts.alike(
+              fontSize: 14,
+              color: cs.onSurface,
+            ),
           ),
           actions: [
             TextButton(
@@ -78,7 +92,7 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
                 Navigator.of(ctx).pop(); // close dialog
                 Navigator.of(context).pop(); // go back to Features screen
               },
-              child: const Text('Done'),
+              child: Text(l10n.notiTruckDialogDone),
             ),
           ],
         );
@@ -118,6 +132,7 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: cs.background,
@@ -130,7 +145,7 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Notify Truck',
+          l10n.notiTruckTitle,
           style: GoogleFonts.alike(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -146,12 +161,12 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Report Mass Trash Situation',
+                l10n.notiTruckHeader,
                 style: _titleStyle(context),
               ),
               const SizedBox(height: 8),
               Text(
-                'Fill in the details so the truck team can come and clean the area.',
+                l10n.notiTruckDescription,
                 style: GoogleFonts.alike(
                   fontSize: 13,
                   color: cs.onBackground.withOpacity(0.7),
@@ -164,8 +179,8 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
                 controller: _locationController,
                 decoration: _inputDecoration(
                   context,
-                  'Location',
-                  hint: 'e.g. Sejong Univ back gate, near CU store',
+                  l10n.notiTruckLocationLabel,
+                  hint: l10n.notiTruckLocationHint,
                 ),
                 textInputAction: TextInputAction.next,
               ),
@@ -173,7 +188,7 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
 
               // Photo buttons
               Text(
-                'Photo (optional)',
+                l10n.notiTruckPhotoLabel,
                 style: _labelStyle(context),
               ),
               const SizedBox(height: 8),
@@ -183,7 +198,7 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _pickImage(ImageSource.camera),
                       icon: const Icon(Icons.photo_camera),
-                      label: const Text('Take Photo'),
+                      label: Text(l10n.notiTruckPhotoCamera),
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -196,7 +211,7 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _pickImage(ImageSource.gallery),
                       icon: const Icon(Icons.photo_library),
-                      label: const Text('Gallery'),
+                      label: Text(l10n.notiTruckPhotoGallery),
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -235,9 +250,8 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
                 controller: _noteController,
                 decoration: _inputDecoration(
                   context,
-                  'Note (optional)',
-                  hint:
-                      'e.g. Smell is very bad, trash is scattered all over the street…',
+                  l10n.notiTruckNoteLabel,
+                  hint: l10n.notiTruckNoteHint,
                   maxLines: 4,
                 ),
                 maxLines: 4,
@@ -253,7 +267,9 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
                     backgroundColor: cs.primary,
                     foregroundColor: cs.onPrimary,
                     padding: const EdgeInsets.symmetric(
-                        vertical: 14, horizontal: 24),
+                      vertical: 14,
+                      horizontal: 24,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -262,7 +278,7 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  child: const Text('Register'),
+                  child: Text(l10n.notiTruckRegisterButton),
                 ),
               ),
             ],

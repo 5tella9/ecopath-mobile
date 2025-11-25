@@ -14,6 +14,7 @@ import 'core/notification_service.dart';
 import 'ui/root_shell.dart';
 import 'ui/screens/intro_screen.dart';
 import 'ui/screens/survey_flow.dart';
+import 'ui/screens/intro_loading_screen.dart'; // <-- NEW
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +50,7 @@ class EcoPathRoot extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       // *********** LOCALIZATION SETTINGS ***********
-      locale: langCtrl.locale,                         // <-- User-selected language
+      locale: langCtrl.locale, // <-- User-selected language
       supportedLocales: const [
         Locale('en'),
         Locale('ko'),
@@ -66,6 +67,7 @@ class EcoPathRoot extends StatelessWidget {
 
       theme: AppTheme.themeOf(themeCtrl.themeId, dark: themeCtrl.isDark),
 
+      // ⬅️ KEEP your original intro flow as start
       home: const IntroScreen(),
 
       onGenerateRoute: (settings) {
@@ -80,6 +82,12 @@ class EcoPathRoot extends StatelessWidget {
         if (settings.name == '/survey') {
           return MaterialPageRoute(
             builder: (_) => const SurveyFlow(),
+            settings: settings,
+          );
+        }
+        if (settings.name == '/intro-loading') {
+          return MaterialPageRoute(
+            builder: (_) => const IntroLoadingScreen(),
             settings: settings,
           );
         }

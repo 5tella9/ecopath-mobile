@@ -21,7 +21,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _goToDashboard() {
-    Navigator.of(context).pushReplacementNamed('/root');
+    // After login, show intro-style loading page.
+    Navigator.of(context).pushReplacementNamed('/intro-loading');
   }
 
   @override
@@ -123,27 +124,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 children: [
                                   const SizedBox(height: 24),
 
-                                  GestureDetector(
-                                    onTap: () {
-                                      // TODO: forgot password flow
-                                    },
-                                    child: Text(
-                                      'Forget password',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black.withOpacity(0.9),
-                                        decoration: TextDecoration.underline,
-                                        decorationColor:
-                                            Colors.black.withOpacity(0.9),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-
                                   const SizedBox(height: 16),
 
-                                  // "Next" button -> DASHBOARD
+                                  // "Next" button -> IntroLoadingScreen -> DASHBOARD
                                   SizedBox(
                                     width: double.infinity,
                                     child: TextButton(
@@ -152,9 +135,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                         backgroundColor:
                                             MaterialStateProperty.resolveWith<
                                                 Color>((states) {
-                                          // pressed -> dark green, otherwise base color
-                                          if (states
-                                              .contains(MaterialState.pressed)) {
+                                          if (states.contains(
+                                              MaterialState.pressed)) {
                                             return buttonPressed;
                                           }
                                           return buttonBase;

@@ -814,6 +814,450 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'S'**
   String get weekdayShortSat;
+
+  /// No description provided for @electricityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity Usage'**
+  String get electricityTitle;
+
+  /// No description provided for @electricityThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get electricityThisWeek;
+
+  /// No description provided for @electricityThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get electricityThisMonth;
+
+  /// No description provided for @electricityThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'This Year'**
+  String get electricityThisYear;
+
+  /// No description provided for @electricityUsageKpiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage'**
+  String get electricityUsageKpiTitle;
+
+  /// No description provided for @electricityUsageKpiSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate only'**
+  String get electricityUsageKpiSub;
+
+  /// No description provided for @electricityBillKpiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Est. Bill'**
+  String get electricityBillKpiTitle;
+
+  /// No description provided for @electricityBillKpiSubYear.
+  ///
+  /// In en, this message translates to:
+  /// **'avg/month'**
+  String get electricityBillKpiSubYear;
+
+  /// No description provided for @electricityBillKpiSubOther.
+  ///
+  /// In en, this message translates to:
+  /// **'estimate'**
+  String get electricityBillKpiSubOther;
+
+  /// No description provided for @electricityTrendUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Up'**
+  String get electricityTrendUp;
+
+  /// No description provided for @electricityTrendDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Down'**
+  String get electricityTrendDown;
+
+  /// No description provided for @electricityVsLastPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'vs last period'**
+  String get electricityVsLastPeriod;
+
+  /// No description provided for @electricityBackendLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching backend average for Jan 2025…'**
+  String get electricityBackendLoading;
+
+  /// No description provided for @electricityBackendNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No backend average available.'**
+  String get electricityBackendNone;
+
+  /// No description provided for @electricityBackendLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend Avg (Jan 2025):'**
+  String get electricityBackendLabel;
+
+  /// No description provided for @electricityRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get electricityRefresh;
+
+  /// No description provided for @electricityRangeWeekButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get electricityRangeWeekButton;
+
+  /// No description provided for @electricityRangeMonthButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get electricityRangeMonthButton;
+
+  /// No description provided for @electricityRangeYearButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get electricityRangeYearButton;
+
+  /// No description provided for @electricityUsageChartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Chart'**
+  String get electricityUsageChartTitle;
+
+  /// No description provided for @electricityProjectionPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Projection:'**
+  String get electricityProjectionPrefix;
+
+  /// No description provided for @gasTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas'**
+  String get gasTitle;
+
+  /// No description provided for @gasIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your monthly gas usage\nand estimate your carbon impact.'**
+  String get gasIntro;
+
+  /// No description provided for @gasQuickConverterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Converter'**
+  String get gasQuickConverterTitle;
+
+  /// No description provided for @gasQuickConverterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your latest reading to convert to CO₂e'**
+  String get gasQuickConverterSubtitle;
+
+  /// No description provided for @gasReadingLabelM3.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas used (m³)'**
+  String get gasReadingLabelM3;
+
+  /// No description provided for @gasReadingLabelKwh.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas used (kWh)'**
+  String get gasReadingLabelKwh;
+
+  /// No description provided for @gasReadingHintM3.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 42.5'**
+  String get gasReadingHintM3;
+
+  /// No description provided for @gasReadingHintKwh.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 120.0'**
+  String get gasReadingHintKwh;
+
+  /// No description provided for @gasRateLabelM3.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: Rate per m³ (₩)'**
+  String get gasRateLabelM3;
+
+  /// No description provided for @gasRateLabelKwh.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional: Rate per kWh (₩)'**
+  String get gasRateLabelKwh;
+
+  /// No description provided for @gasRateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 92.5'**
+  String get gasRateHint;
+
+  /// No description provided for @gasRateHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'If set, we’ll also estimate this month’s bill.'**
+  String get gasRateHelper;
+
+  /// No description provided for @gasConvertButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert'**
+  String get gasConvertButton;
+
+  /// No description provided for @gasResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get gasResultTitle;
+
+  /// No description provided for @gasResultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your estimated carbon footprint and optional bill estimate'**
+  String get gasResultSubtitle;
+
+  /// No description provided for @gasResultEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No result yet. Enter a reading above and tap Convert.'**
+  String get gasResultEmpty;
+
+  /// No description provided for @gasResultCo2Label.
+  ///
+  /// In en, this message translates to:
+  /// **'CO₂e'**
+  String get gasResultCo2Label;
+
+  /// No description provided for @gasResultCo2HelperM3.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your input in m³.'**
+  String get gasResultCo2HelperM3;
+
+  /// No description provided for @gasResultCo2HelperKwh.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your input in kWh.'**
+  String get gasResultCo2HelperKwh;
+
+  /// No description provided for @gasResultBillLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Bill'**
+  String get gasResultBillLabel;
+
+  /// No description provided for @gasResultBillHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Set your rate to see a bill estimate.'**
+  String get gasResultBillHelper;
+
+  /// No description provided for @gasUsageTrendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Trend'**
+  String get gasUsageTrendTitle;
+
+  /// No description provided for @gasUsageTrendSubtitle4w.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 4 weeks'**
+  String get gasUsageTrendSubtitle4w;
+
+  /// No description provided for @gasUsageTrendSubtitle6m.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 6 months'**
+  String get gasUsageTrendSubtitle6m;
+
+  /// No description provided for @gasUsageTrendSubtitle12m.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 12 months'**
+  String get gasUsageTrendSubtitle12m;
+
+  /// No description provided for @gasTipText.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Switch units to match your bill. Trends update automatically.'**
+  String get gasTipText;
+
+  /// No description provided for @gasRange1M.
+  ///
+  /// In en, this message translates to:
+  /// **'1M'**
+  String get gasRange1M;
+
+  /// No description provided for @gasRange6M.
+  ///
+  /// In en, this message translates to:
+  /// **'6M'**
+  String get gasRange6M;
+
+  /// No description provided for @gasRange1Y.
+  ///
+  /// In en, this message translates to:
+  /// **'1Y'**
+  String get gasRange1Y;
+
+  /// No description provided for @notiTruckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify Truck'**
+  String get notiTruckTitle;
+
+  /// No description provided for @notiTruckHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Mass Trash Situation'**
+  String get notiTruckHeader;
+
+  /// No description provided for @notiTruckDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in the details so the truck team can come and clean the area.'**
+  String get notiTruckDescription;
+
+  /// No description provided for @notiTruckLocationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get notiTruckLocationLabel;
+
+  /// No description provided for @notiTruckLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Sejong Univ back gate, near CU store'**
+  String get notiTruckLocationHint;
+
+  /// No description provided for @notiTruckPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo (optional)'**
+  String get notiTruckPhotoLabel;
+
+  /// No description provided for @notiTruckPhotoCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get notiTruckPhotoCamera;
+
+  /// No description provided for @notiTruckPhotoGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get notiTruckPhotoGallery;
+
+  /// No description provided for @notiTruckNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get notiTruckNoteLabel;
+
+  /// No description provided for @notiTruckNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Smell is very bad, trash is scattered all over the street…'**
+  String get notiTruckNoteHint;
+
+  /// No description provided for @notiTruckRegisterButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get notiTruckRegisterButton;
+
+  /// No description provided for @notiTruckSnackLocationMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a location.'**
+  String get notiTruckSnackLocationMissing;
+
+  /// No description provided for @notiTruckDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully notified!'**
+  String get notiTruckDialogTitle;
+
+  /// No description provided for @notiTruckDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your report has been sent. Thank you for helping keep your area clean!'**
+  String get notiTruckDialogMessage;
+
+  /// No description provided for @notiTruckDialogDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get notiTruckDialogDone;
+
+  /// No description provided for @bagWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'White Bag'**
+  String get bagWhite;
+
+  /// No description provided for @bagGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green Bag'**
+  String get bagGreen;
+
+  /// No description provided for @bagBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue Bag'**
+  String get bagBlue;
+
+  /// No description provided for @bagPink.
+  ///
+  /// In en, this message translates to:
+  /// **'Pink Bag'**
+  String get bagPink;
+
+  /// No description provided for @bagYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow Bag'**
+  String get bagYellow;
+
+  /// No description provided for @bagPurple.
+  ///
+  /// In en, this message translates to:
+  /// **'Purple Bag'**
+  String get bagPurple;
+
+  /// No description provided for @bagOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange Bag'**
+  String get bagOrange;
+
+  /// No description provided for @wasteGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General Waste'**
+  String get wasteGeneral;
+
+  /// No description provided for @wasteFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food Waste'**
+  String get wasteFood;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

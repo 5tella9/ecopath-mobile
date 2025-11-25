@@ -1,6 +1,7 @@
 // lib/core/progress_tracker.dart
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:ecopath/ui/screens/notifications_screen.dart';
 
 class ProgressTracker extends ChangeNotifier {
   ProgressTracker._internal();
@@ -47,6 +48,8 @@ class ProgressTracker extends ChangeNotifier {
 
   void _recalculateEnergy() {
     if (_lastEnergyUpdate == null) return;
+
+    final prevEnergy = _energy;
     if (_energy >= maxEnergy) return;
 
     final now = DateTime.now();
@@ -61,6 +64,11 @@ class ProgressTracker extends ChangeNotifier {
     _energy = min(maxEnergy, _energy + gained);
     _lastEnergyUpdate =
         _lastEnergyUpdate!.add(Duration(minutes: gained * 30));
+
+    // 🔔 Energy became full
+    if (prevEnergy < maxEnergy && _energy == maxEnergy) {
+      NotificationCenter.I.pushEnergyFull(maxEnergy);
+    }
   }
 
   /// Spend some energy. Clamped to 0. Also updates the base timestamp for regen.
@@ -72,13 +80,17 @@ class ProgressTracker extends ChangeNotifier {
     notifyListeners();
   }
 
-  // -------- XP / POINTS API --------
+  // -------- XP / POINTS API (generic) --------
+
+  /// Add points (used when user earns points).
+  /// Negative values are ignored on purpose.
   void addPoints(int amount) {
     if (amount <= 0) return;
     _totalPoints += amount;
     notifyListeners();
   }
 
+  /// Add XP (used when user earns XP not tied to games).
   void addXp(int amount) {
     if (amount <= 0) return;
     _currentXp += amount;
@@ -86,12 +98,16 @@ class ProgressTracker extends ChangeNotifier {
     while (_currentXp >= _xpToNext) {
       _currentXp -= _xpToNext;
       _level += 1;
+
+      // 🔔 Level up notification (even for non-game XP)
+      NotificationCenter.I.pushLevelUp(newLevel: _level);
+
       _xpToNext = max(_xpToNext + 20, (_xpToNext * 1.2).round());
     }
     notifyListeners();
   }
 
-  /// Convenience for rewards where points == xp.
+  /// Convenience for rewards where points == xp (non-game).
   void addPointsAndXp(int amount) {
     if (amount <= 0) return;
     _totalPoints += amount;
@@ -100,15 +116,63 @@ class ProgressTracker extends ChangeNotifier {
     while (_currentXp >= _xpToNext) {
       _currentXp -= _xpToNext;
       _level += 1;
+
+      // 🔔 Level up notification
+      NotificationCenter.I.pushLevelUp(newLevel: _level);
+
       _xpToNext = max(_xpToNext + 20, (_xpToNext * 1.2).round());
     }
+    notifyListeners();
+  }
+
+  /// Spend points (for shop purchases, etc.).
+  /// Returns true if the user had enough points and the spend succeeded.
+  bool spendPoints(int amount) {
+    if (amount <= 0) return false;
+    if (amount > _totalPoints) return false;
+
+    _totalPoints -= amount;
+    notifyListeners();
+    return true;
+  }
+
+  /// 🎮 GAME REWARD:
+  /// Use this when a *game* grants points (quiz, scan trash, recycle, etc.)
+  /// so that we can show game notification + handle XP + level-up.
+  void rewardFromGame({
+    required int points,
+    required String gameName,
+  }) {
+    if (points <= 0) return;
+
+    _totalPoints += points;
+    _currentXp += points;
+
+    // 🔔 Game points notification
+    NotificationCenter.I.pushGamePoints(
+      gameName: gameName,
+      points: points,
+    );
+
+    // Level up loop with notifications
+    while (_currentXp >= _xpToNext) {
+      _currentXp -= _xpToNext;
+      _level += 1;
+
+      NotificationCenter.I.pushLevelUp(newLevel: _level);
+
+      _xpToNext = max(_xpToNext + 20, (_xpToNext * 1.2).round());
+    }
+
     notifyListeners();
   }
 
   /// Used by Daily Challenges (todo_screen.dart)
   void completeMission({required int points}) {
     _progressDone += 1;
-    addPoints(points);
+
+    // Treat daily challenges as a "game" source for notifications
+    rewardFromGame(points: points, gameName: 'Daily Challenge');
   }
 
   // -------- RANK (for Dashboard / Games / Community) --------
@@ -117,7 +181,17 @@ class ProgressTracker extends ChangeNotifier {
 
   void setRank(int value) {
     if (value <= 0) return;
+    if (value == _rank) return;
+
+    final old = _rank;
     _rank = value;
+
+    // 🔔 Rank change notification for leaderboard
+    NotificationCenter.I.pushRankChanged(
+      oldRank: old,
+      newRank: _rank,
+    );
+
     notifyListeners();
   }
 }

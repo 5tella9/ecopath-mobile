@@ -188,7 +188,12 @@ class _RecycleScreenState extends State<RecycleScreen> {
     tracker.spendEnergy(_energyCost);
 
     final int earnedPoints = _previewPoints;
-    tracker.addPoints(earnedPoints);
+
+    // ✅ Use game reward API so points + XP + notifications are handled
+    tracker.rewardFromGame(
+      points: earnedPoints,
+      gameName: 'Recycle',
+    );
 
     // Log recycle history (for Profile calendar)
     RecycleHistory.instance.addRecycle(DateTime.now(), earnedPoints);
