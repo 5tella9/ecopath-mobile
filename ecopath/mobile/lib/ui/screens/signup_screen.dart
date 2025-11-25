@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'login_screen.dart'; // make sure this path is correct
+import 'login_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/userProvider.dart';
+import '../../models/user.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -35,7 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Widget? suffix,
   }) {
     return InputDecoration(
-      // override dark theme for textfields
+      // ↓↓↓ these two lines override the dark InputDecorationTheme
       filled: true,
       fillColor: Colors.white,
       hintText: hint,
@@ -65,13 +68,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _onSignUpPressed() {
     if (_formKey.currentState?.validate() ?? false) {
-      debugPrint('Sign up with:');
-      debugPrint('Name: ${_nameController.text}');
-      debugPrint('Email: ${_emailController.text}');
-      debugPrint('Password: ${_pwController.text}');
-      // TODO: call backend signup here later
-
-      // ✅ AFTER SIGN UP → GO TO SURVEY FLOW
+      final user = User(
+        fullName: _nameController.text,
+        email: _emailController.text,
+      );
+      Provider.of<UserProvider>(context, listen: false).setUser(user);
       Navigator.pushReplacementNamed(context, '/survey');
     }
   }
