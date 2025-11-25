@@ -207,11 +207,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Full name
-                      Text("Full name", style: _labelStyle(context)),
+                      Text("username", style: _labelStyle(context)),
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _nameController,
-                        decoration: _inputDecoration(hint: "Your name"),
+                        decoration: _inputDecoration(hint: "uniquename"),
                         style: GoogleFonts.alike(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,

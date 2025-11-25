@@ -16,8 +16,7 @@ class _AccountScreenState extends State<AccountScreen> {
   String _fullAddress =
       'Sejong Univ Dorm 204, Gunja-dong, Gwangjin-gu, Seoul';
 
-  String _authProvider = 'google';
-  String _authAccount = 'snow@gmail.com';
+  // removed _authProvider and _authAccount since Sign-in Method section is gone
 
   final _usernameCtrl = TextEditingController();
   final _dobCtrl = TextEditingController();
@@ -193,6 +192,12 @@ class _AccountScreenState extends State<AccountScreen> {
     if (confirmDelete == true && mounted) {
       Navigator.of(context, rootNavigator: true).pop();
     }
+  }
+
+  void _onTapLogout() {
+    // TODO: change '/login' to your actual login route if different
+    Navigator.of(context, rootNavigator: true)
+        .pushNamedAndRemoveUntil('/login', (route) => false);
   }
 
   Future<void> _openDatePicker() async {
@@ -380,8 +385,10 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _infoRowDob() {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
-    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
+    final labelStyle =
+        theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    final valueStyle = theme.textTheme.bodyMedium
+        ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
 
     if (_isEditing) {
       return _LinedRow(
@@ -406,7 +413,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  icon: Icon(Icons.calendar_today_outlined, size: 20, color: cs.primary),
+                  icon: Icon(Icons.calendar_today_outlined,
+                      size: 20, color: cs.primary),
                   onPressed: _openDatePicker,
                 ),
               ],
@@ -431,8 +439,10 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _infoRowAddress() {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
-    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
+    final labelStyle =
+        theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    final valueStyle = theme.textTheme.bodyMedium
+        ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
 
     if (_isEditing) {
       return _LinedRow(
@@ -468,53 +478,6 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Widget _signInMethodRow() {
-    final cs = Theme.of(context).colorScheme;
-    String label;
-    String assetPath;
-
-    switch (_authProvider) {
-      case 'google':
-        label = 'Google';
-        assetPath = 'assets/icons/google.svg';
-        break;
-      case 'facebook':
-        label = 'Facebook';
-        assetPath = 'assets/icons/fb.svg';
-        break;
-      case 'instagram':
-        label = 'Instagram';
-        assetPath = 'assets/icons/insta.svg';
-        break;
-      default:
-        label = 'Email';
-        assetPath = 'assets/icons/mailb.svg';
-        break;
-    }
-
-    return _LinedRow(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Sign-in Method", style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              SvgPicture.asset(assetPath, width: 20, height: 20),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  "$label  ($_authAccount)",
-                  style: TextStyle(color: cs.onSurface, fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildMainCard() {
     final theme = Theme.of(context);
     return Padding(
@@ -531,9 +494,35 @@ class _AccountScreenState extends State<AccountScreen> {
             _infoRowDob(),
             const _InnerDivider(),
             _infoRowAddress(),
-            const _InnerDivider(),
-            _signInMethodRow(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+      child: GestureDetector(
+        onTap: _onTapLogout,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: cs.primary,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Center(
+            child: Text(
+              "Log out",
+              style: TextStyle(
+                color: cs.onPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -556,7 +545,11 @@ class _AccountScreenState extends State<AccountScreen> {
           child: Center(
             child: Text(
               "Delete Account",
-              style: TextStyle(color: cs.error, fontSize: 14, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: cs.error,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -577,6 +570,7 @@ class _AccountScreenState extends State<AccountScreen> {
               _buildHeaderBar(context),
               _sectionTitle("Your Info"),
               _buildMainCard(),
+              _buildLogoutButton(),
               _buildDeleteButton(),
             ],
           ),
