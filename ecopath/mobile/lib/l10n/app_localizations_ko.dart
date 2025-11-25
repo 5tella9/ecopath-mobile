@@ -564,29 +564,35 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notiTruckDialogDone => '완료';
 
   @override
-  String get bagWhite => '백색 봉투';
+  String get bagWhite => 'White Bag';
 
   @override
-  String get bagGreen => '초록색 봉투';
+  String get bagGreen => 'Green Bag';
 
   @override
-  String get bagBlue => '파란색 봉투';
+  String get bagBlue => 'Blue Bag';
 
   @override
-  String get bagPink => '분홍색 봉투';
+  String get bagPink => 'Pink Bag';
 
   @override
-  String get bagYellow => '노란색 봉투';
+  String get bagYellow => 'Yellow Bag';
 
   @override
-  String get bagPurple => '보라색 봉투';
+  String get bagPurple => 'Purple Bag';
 
   @override
-  String get bagOrange => '주황색 봉투';
+  String get bagOrange => 'Orange Bag';
 
   @override
   String get wasteGeneral => '일반 쓰레기';
 
   @override
   String get wasteFood => '음식물 쓰레기';
+
+  @override
+  String get notificationsTitle => '알림';
+
+  @override
+  String get notificationsEmpty => '아직 알림이 없어요.\n게임을 하거나 재활용, 챌린지를 완료하면 알림이 쌓여요!';
 }

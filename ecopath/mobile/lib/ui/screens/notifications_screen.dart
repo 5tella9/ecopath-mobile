@@ -1,6 +1,7 @@
 // lib/ui/screens/notification_screen.dart
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 
 enum NotificationKind { game, shop, community, reminder }
 
@@ -174,6 +175,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final paddingTop = MediaQuery.of(context).padding.top;
     final cs = Theme.of(context).colorScheme;
     final items = _center.items;
+    final t = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -183,12 +185,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           slivers: [
             SliverToBoxAdapter(child: _Header(paddingTop: paddingTop)),
             if (items.isEmpty)
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.all(24.0),
                   child: Text(
-                    'No notifications yet.\nPlay games, recycle, or complete challenges to earn some!',
+                    t.notificationsEmpty,
                     textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          height: 1.3,
+                        ),
                   ),
                 ),
               )
@@ -216,6 +222,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final t = AppLocalizations.of(context)!;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, paddingTop + 20, 20, 12),
@@ -246,7 +253,7 @@ class _Header extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Notifications',
+                t.notificationsTitle,
                 style: tt.displaySmall?.copyWith(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,

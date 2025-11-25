@@ -8,13 +8,14 @@ import 'package:timezone/timezone.dart' as tz;
 
 import 'theme/app_theme.dart';
 import 'theme/theme_controller.dart';
-import 'theme/language_controller.dart';  // <-- ADD THIS
+import 'theme/language_controller.dart';
 import 'core/notification_service.dart';
 
 import 'ui/root_shell.dart';
-import 'ui/screens/intro_screen.dart';
+// import 'ui/screens/intro_screen.dart'; // ❌ not used as home anymore
 import 'ui/screens/survey_flow.dart';
-import 'ui/screens/intro_loading_screen.dart'; // <-- NEW
+import 'ui/screens/intro_loading_screen.dart';
+import 'ui/screens/signup_screen.dart'; // ✅ new home
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +27,10 @@ void main() async {
   // Language
   final languageController = LanguageController();
   await languageController.load();
+
+  // (If you still use timezone + notifications somewhere, keep these)
+  tz.initializeTimeZones();
+  await NotificationService().init();
 
   runApp(
     MultiProvider(
@@ -50,7 +55,7 @@ class EcoPathRoot extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       // *********** LOCALIZATION SETTINGS ***********
-      locale: langCtrl.locale, // <-- User-selected language
+      locale: langCtrl.locale,
       supportedLocales: const [
         Locale('en'),
         Locale('ko'),
@@ -61,14 +66,14 @@ class EcoPathRoot extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      onGenerateTitle: (context) =>
-          AppLocalizations.of(context)!.appTitle,
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       // **********************************************
 
       theme: AppTheme.themeOf(themeCtrl.themeId, dark: themeCtrl.isDark),
 
-      // ⬅️ KEEP your original intro flow as start
-      home: const IntroScreen(),
+      // ⬅️ NEW USER FLOW STARTS HERE
+      // When app opens (for now) → SignUpScreen first
+      home: const SignUpScreen(),
 
       onGenerateRoute: (settings) {
         if (settings.name == '/root') {
@@ -88,6 +93,12 @@ class EcoPathRoot extends StatelessWidget {
         if (settings.name == '/intro-loading') {
           return MaterialPageRoute(
             builder: (_) => const IntroLoadingScreen(),
+            settings: settings,
+          );
+        }
+        if (settings.name == '/signup') {
+          return MaterialPageRoute(
+            builder: (_) => const SignUpScreen(),
             settings: settings,
           );
         }

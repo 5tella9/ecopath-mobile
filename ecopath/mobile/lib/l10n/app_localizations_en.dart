@@ -589,4 +589,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wasteFood => 'Food Waste';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsEmpty => 'No notifications yet.\nPlay games, recycle, or complete challenges to earn some!';
 }

@@ -4,11 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_fonts/google_fonts.dart';
 
-// ⬅️ ADD THIS IMPORT so we can navigate to signup
-import 'package:ecopath/ui/screens/signup_screen.dart';
-import 'dart:convert';
-import 'package:flutter/material.dart';
 import '../../util/survey_storage.dart';
+
 /* -------------------- MODEL -------------------- */
 class SurveyData {
   SurveyData();
@@ -36,23 +33,23 @@ class SurveyData {
   bool wantsNotifications = true;
 
   String toJson() => json.encode({
-    'name': name,
-    'dateOfBirth': dateOfBirth,
-    'gender': gender,
-    'sido': sido,
-    'sigungu': sigungu,
-    'dong': dong,
-    'detail': detail,
-    'houseType': houseType,
-    'livingWith': livingWith,
-    'ecoGoals': ecoGoals,
-    'hasElectricBill': hasElectricBill,
-    'hasGasBill': hasGasBill,
-    'electricProvider': electricProvider,
-    'gasProvider': gasProvider,
-    'wantsQuizzes': wantsQuizzes,
-    'wantsNotifications': wantsNotifications,
-  });
+        'name': name,
+        'dateOfBirth': dateOfBirth,
+        'gender': gender,
+        'sido': sido,
+        'sigungu': sigungu,
+        'dong': dong,
+        'detail': detail,
+        'houseType': houseType,
+        'livingWith': livingWith,
+        'ecoGoals': ecoGoals,
+        'hasElectricBill': hasElectricBill,
+        'hasGasBill': hasGasBill,
+        'electricProvider': electricProvider,
+        'gasProvider': gasProvider,
+        'wantsQuizzes': wantsQuizzes,
+        'wantsNotifications': wantsNotifications,
+      });
 
   factory SurveyData.fromJson(String source) {
     final map = json.decode(source);
@@ -130,7 +127,7 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
     _steps = [
       () => _WelcomePage(onNext: _next),
       () => _NameStep(data: data, onNext: _next),
-      () => _DobStep(data: data, onNext: _next), // <-- DOB step
+      () => _DobStep(data: data, onNext: _next),
       () => _GenderStep(data: data, onNext: _next),
       () => _AddressStep(
             data: data,
@@ -156,13 +153,10 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
       () => _FinishStep(
             data: data,
             onFinish: () async {
+              // ✅ Save and go to intro loading screen
               await SurveyStorage.save(data);
-              // ⬇️ GO TO SIGN UP SCREEN INSTEAD OF /root
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (_) => const SignUpScreen(),
-                ),
-              );
+              if (!mounted) return;
+              Navigator.of(context).pushReplacementNamed('/intro-loading');
             },
           ),
     ];
@@ -244,8 +238,6 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
                       else
                         const SizedBox(width: 40, height: 40),
                       const Spacer(),
-                      // 🔁 REPLACED TEXT WITH LOGO IMAGE
-                      // Make sure assets/images/ecopath.png is listed in pubspec.yaml
                       Image.asset(
                         'assets/images/ecopath.png',
                         height: 60,
@@ -321,10 +313,6 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
 }
 
 /* -------------------- WELCOME INTERSTITIAL -------------------- */
-// Animation order:
-//   1) image
-//   2) text
-//   3) next button
 class _WelcomePage extends StatefulWidget {
   final VoidCallback onNext;
   const _WelcomePage({required this.onNext});
@@ -954,7 +942,6 @@ class _LivingWithStep extends StatelessWidget {
       '2 people',
       '3 people',
       '4+ people',
-      
     ];
 
     return Column(
@@ -987,7 +974,7 @@ class _GoalsStepState extends State<_GoalsStep> {
   final goals = [
     'Reduce electricity use',
     'Reduce gas use',
-    'Dispose trash properly', 
+    'Dispose trash properly',
     'Recycle more',
     'Cut food waste',
     'Use public transit more',
@@ -1190,7 +1177,6 @@ class _FinishStep extends StatelessWidget {
 
         const SizedBox(height: 24),
 
-        // Outro mascot / girl
         Center(
           child: Image.asset(
             'assets/images/outro.png',

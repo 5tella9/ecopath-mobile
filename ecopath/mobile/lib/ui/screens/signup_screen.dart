@@ -35,10 +35,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Widget? suffix,
   }) {
     return InputDecoration(
-      // ↓↓↓ these two lines override the dark InputDecorationTheme
+      // override dark theme for textfields
       filled: true,
-      fillColor: Colors.white, // always light textbox
-
+      fillColor: Colors.white,
       hintText: hint,
       hintStyle: GoogleFonts.alike(
         fontSize: 14,
@@ -70,7 +69,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       debugPrint('Name: ${_nameController.text}');
       debugPrint('Email: ${_emailController.text}');
       debugPrint('Password: ${_pwController.text}');
-      // TODO: call backend signup
+      // TODO: call backend signup here later
+
+      // ✅ AFTER SIGN UP → GO TO SURVEY FLOW
+      Navigator.pushReplacementNamed(context, '/survey');
     }
   }
 

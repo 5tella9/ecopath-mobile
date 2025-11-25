@@ -264,6 +264,10 @@
   "bagOrange": "Orange Bag",
 
   "wasteGeneral": "General Waste",
-  "wasteFood": "Food Waste"
+  "wasteFood": "Food Waste",
+
+  "notificationsTitle": "Notifications",
+  "notificationsEmpty": "No notifications yet.\nPlay games, recycle, or complete challenges to earn some!"
+
 
 }

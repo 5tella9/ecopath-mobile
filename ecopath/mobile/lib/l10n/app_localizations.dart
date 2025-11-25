@@ -1258,6 +1258,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Food Waste'**
   String get wasteFood;
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet.\nPlay games, recycle, or complete challenges to earn some!'**
+  String get notificationsEmpty;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

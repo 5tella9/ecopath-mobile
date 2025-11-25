@@ -86,14 +86,7 @@ class FeaturesScreen extends StatelessWidget {
                       bubbleTone: _Tone.tertiary,
                       onTap: () => _open(context, const CarbonScreen()),
                     ),
-                    _FeatureCard(
-                      title: l10n.featureTrashTitle,
-                      subtitle: l10n.featureTrashSubtitle,
-                      iconPath: 'assets/images/tracker.png',
-                      bubbleTone: _Tone.secondary,
-                      onTap: () =>
-                          _open(context, const _TrashRecyclingScreen()),
-                    ),
+                   
                     _FeatureCard(
                       title: l10n.featureShopTitle,
                       subtitle: l10n.featureShopSubtitle,
@@ -266,34 +259,34 @@ class _FeatureCard extends StatelessWidget {
 /// Simple stub page for Trash & Recycling
 /// ----------------------
 
-class _TrashRecyclingScreen extends StatelessWidget {
-  const _TrashRecyclingScreen();
+//class _TrashRecyclingScreen extends StatelessWidget {
+ // const _TrashRecyclingScreen();
 
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    final cs = t.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
+ // @override
+  //Widget build(BuildContext context) {
+   // final t = Theme.of(context);
+    //final cs = t.colorScheme;
+    //final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        title: Text(l10n.trashRecyclingTitle, style: t.textTheme.titleMedium),
-      ),
-      body: _StubBody(
-        iconPath: 'assets/images/tracker.png',
-        bubbleTone: _Tone.secondary,
-        title: l10n.trashRecyclingTitle,
-        lines: [
-          l10n.trashRecyclingLine1,
-          l10n.trashRecyclingLine2,
-          l10n.trashRecyclingLine3,
-        ],
-      ),
-    );
-  }
-}
+    //return Scaffold(
+      //backgroundColor: cs.surface,
+      //appBar: AppBar(
+        //backgroundColor: cs.surface,
+        //title: Text(l10n.trashRecyclingTitle, style: t.textTheme.titleMedium),
+      //),
+      //body: _StubBody(
+        //iconPath: 'assets/images/tracker.png',
+        //bubbleTone: _Tone.secondary,
+        //title: l10n.trashRecyclingTitle,
+        //lines: [
+          //l10n.trashRecyclingLine1,
+          //l10n.trashRecyclingLine2,
+          //l10n.trashRecyclingLine3,
+        //],
+      //),
+    //);
+  //}
+//}
 
 class _StubBody extends StatelessWidget {
   final String iconPath;
