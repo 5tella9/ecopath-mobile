@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:provider/provider.dart';
+import '../../providers/userProvider.dart';
 import '../../util/survey_storage.dart';
 
 /* -------------------- MODEL -------------------- */
@@ -152,12 +153,16 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
       () => _QuizNotifyStep(data: data, onNext: _next),
       () => _FinishStep(
             data: data,
-            onFinish: () async {
-              // ✅ Save and go to intro loading screen
-              await SurveyStorage.save(data);
-              if (!mounted) return;
-              Navigator.of(context).pushReplacementNamed('/intro-loading');
-            },
+        onFinish: () async {
+          await SurveyStorage.save(data);
+
+          // 🟢 Update user in Provider
+          final userProvider = Provider.of<UserProvider>(context, listen: false);
+          await userProvider.updateFromSurvey(data);  // <-- ADD THIS
+
+          if (!mounted) return;
+          Navigator.of(context).pushReplacementNamed('/intro-loading');
+        },
           ),
     ];
 
