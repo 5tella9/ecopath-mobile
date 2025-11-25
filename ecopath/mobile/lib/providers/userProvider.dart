@@ -64,5 +64,19 @@ class UserProvider with ChangeNotifier {
     await prefs.setString('user', jsonEncode(_user!.toJson()));
   }
 
+  void updateAvatar(String image, String bg) {
+    if (_user != null) {
+      _user!.profileImage = image;      // 👈 UPDATE HERE
+      _user!.avatarBackground = bg;     // Keep background if needed
+      save();                       // Persist data
+      notifyListeners();
+    }
+  }
+
+  Future<void> save() async {
+    if (_user == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', jsonEncode(_user!.toJson()));
+  }
 
 }

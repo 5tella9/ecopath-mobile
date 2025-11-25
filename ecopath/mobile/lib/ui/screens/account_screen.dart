@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import '../../providers/userProvider.dart';
+
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -9,15 +12,15 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+
+  String _username = '';
+  String _dob = '';
+  String _fullAddress = '';
+  String _email = '';
+
+
   bool _isEditing = false;
 
-  String _username = 'eco_snow';
-  String _dob = '2003/07/15';
-  String _fullAddress =
-      'Sejong Univ Dorm 204, Gunja-dong, Gwangjin-gu, Seoul';
-
-  String _authProvider = 'google';
-  String _authAccount = 'snow@gmail.com';
 
   final _usernameCtrl = TextEditingController();
   final _dobCtrl = TextEditingController();
@@ -29,7 +32,20 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   void initState() {
     super.initState();
-    _syncControllersFromState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<UserProvider>().user;
+
+      if (user != null) {
+        setState(() {
+          _username = user.fullName ?? '';
+          _dob = user.birthDate ?? '';
+          _fullAddress = user?.location?.city ?? '';
+          _email = user.email ?? '';
+        });
+        _syncControllersFromState();
+      }
+    });
   }
 
   void _syncControllersFromState() {
@@ -468,52 +484,7 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Widget _signInMethodRow() {
-    final cs = Theme.of(context).colorScheme;
-    String label;
-    String assetPath;
 
-    switch (_authProvider) {
-      case 'google':
-        label = 'Google';
-        assetPath = 'assets/icons/google.svg';
-        break;
-      case 'facebook':
-        label = 'Facebook';
-        assetPath = 'assets/icons/fb.svg';
-        break;
-      case 'instagram':
-        label = 'Instagram';
-        assetPath = 'assets/icons/insta.svg';
-        break;
-      default:
-        label = 'Email';
-        assetPath = 'assets/icons/mailb.svg';
-        break;
-    }
-
-    return _LinedRow(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Sign-in Method", style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              SvgPicture.asset(assetPath, width: 20, height: 20),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  "$label  ($_authAccount)",
-                  style: TextStyle(color: cs.onSurface, fontSize: 14, fontWeight: FontWeight.w500),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildMainCard() {
     final theme = Theme.of(context);
@@ -532,7 +503,6 @@ class _AccountScreenState extends State<AccountScreen> {
             const _InnerDivider(),
             _infoRowAddress(),
             const _InnerDivider(),
-            _signInMethodRow(),
           ],
         ),
       ),
@@ -566,6 +536,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<UserProvider>().user;
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
