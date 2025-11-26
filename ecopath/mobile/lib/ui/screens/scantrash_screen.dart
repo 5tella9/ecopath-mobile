@@ -147,7 +147,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
 
         String wasteType = WasteType.values
             .firstWhere(
-              (e) => e.name.toLowerCase() == (result['item'] ?? '').toLowerCase(),
+              (e) => e.name.toLowerCase() == (result['WasteType'] ?? '').toLowerCase(),
           orElse: () => WasteType.GeneralWaste, // fallback 🚀
         )
             .name;
