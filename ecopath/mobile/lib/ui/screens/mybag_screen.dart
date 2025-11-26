@@ -1,6 +1,7 @@
 // lib/ui/screens/mybag_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 
 /// Shared model for a bag the user owns (from Shop).
 class BagItem {
@@ -60,9 +61,10 @@ class _MyBagScreenState extends State<MyBagScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: cs.background, // dynamic with your theme
+      backgroundColor: cs.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -88,7 +90,7 @@ class _MyBagScreenState extends State<MyBagScreen> {
           ),
         ),
         title: Text(
-          'My Bags',
+          loc.myBagsTitle,
           style: _titleStyle(context),
         ),
         centerTitle: true,
@@ -103,10 +105,12 @@ class _MyBagScreenState extends State<MyBagScreen> {
   }
 
   Widget _buildMainContent(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     if (_bags.isEmpty) {
       return Center(
         child: Text(
-          "You don't have any bags yet.\nExchange your points in the shop to get bags!",
+          loc.myBagsEmptyMessage,
           textAlign: TextAlign.center,
           style: _hintStyle(context),
         ),
@@ -160,7 +164,7 @@ class _MyBagScreenState extends State<MyBagScreen> {
                       Text(bag.type, style: _labelStyle(context)),
                       const SizedBox(height: 4),
                       Text(
-                        'Tap to view barcode',
+                        loc.myBagsTapToViewBarcode,
                         style: _hintStyle(context),
                       ),
                     ],
@@ -181,6 +185,7 @@ class _MyBagScreenState extends State<MyBagScreen> {
 
   Widget _buildBarcodeOverlay(BuildContext context, BagItem bag) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Positioned.fill(
       child: GestureDetector(
@@ -193,7 +198,7 @@ class _MyBagScreenState extends State<MyBagScreen> {
           color: cs.scrim.withOpacity(0.6),
           child: Center(
             child: GestureDetector(
-              onTap: () {}, // prevent tap from closing when tapping the card
+              onTap: () {}, // prevent closing on card tap
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
@@ -238,7 +243,7 @@ class _MyBagScreenState extends State<MyBagScreen> {
                     _buildFakeBarcodeBox(context, bag.barcode),
                     const SizedBox(height: 10),
                     Text(
-                      'Show this barcode when you use this bag.',
+                      loc.myBagsShowBarcodeInstruction,
                       textAlign: TextAlign.center,
                       style: _hintStyle(context),
                     ),
@@ -270,7 +275,6 @@ class _MyBagScreenState extends State<MyBagScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Simple "barcode" stripes – flex-based
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {

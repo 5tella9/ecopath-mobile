@@ -8,7 +8,8 @@ import 'termsofservice_screen.dart';
 import 'privacypolicy_screen.dart';
 import 'feedback_screen.dart';
 import 'account_screen.dart';
-import 'theme_screen.dart'; // Theme settings
+import 'theme_screen.dart'; 
+import 'help_center_screen.dart';
 
 import 'package:ecopath/theme/language_controller.dart';
 import 'package:ecopath/l10n/app_localizations.dart';
@@ -213,7 +214,11 @@ class SettingsScreen extends StatelessWidget {
                       _RowItem(
                         icon: 'assets/icons/helpcenter.svg',
                         label: l10n.helpCenter,
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const HelpCenterScreen()),
+                          );
+                        },
                       ),
                       const _RowDivider(),
                       _RowItem(

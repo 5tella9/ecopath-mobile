@@ -267,7 +267,433 @@
   "wasteFood": "Food Waste",
 
   "notificationsTitle": "Notifications",
-  "notificationsEmpty": "No notifications yet.\nPlay games, recycle, or complete challenges to earn some!"
+  "notificationsEmpty": "No notifications yet.\nPlay games, recycle, or complete challenges to earn some!",
+   
+    "accountTitle": "Account Setting",
+  "edit": "Edit",
+  "done": "Done",
+  "cancel": "Cancel",
+  "apply": "Apply",
+  "ok": "OK",
+  "yes": "Yes",
+  "no": "No",
+
+    "accountTitle": "Account Setting",
+  "edit": "Edit",
+  "done": "Done",
+  "cancel": "Cancel",
+  "apply": "Apply",
+  "ok": "OK",
+  "yes": "Yes",
+  "no": "No",
+
+    "accountSettingTitle": "Account Setting",
+  "accountYourInfoTitle": "Your Info",
+  "accountFieldUsername": "Username",
+  "accountFieldDob": "Date of Birth (yyyy/mm/dd)",
+  "accountFieldAddress": "Address",
+  "accountEdit": "Edit",
+  "accountDone": "Done",
+  "accountLogout": "Log out",
+  "accountDelete": "Delete Account",
+
+  "accountConfirmSaveTitle": "Are you sure you want to save?",
+  "accountConfirmSaveCancel": "Cancel",
+  "accountConfirmSaveDone": "Done",
+  "accountSavedTitle": "Successfully Saved!",
+
+  "accountDeleteDialogTitle": "Do you want to delete your account?\nIt will disappear permanently.",
+  "accountDeleteNo": "No",
+  "accountDeleteYes": "Yes",
+
+  "accountAddressSelectTitle": "Select Address",
+  "accountAddressSidoLabel": "Sido / Province",
+  "accountAddressCityLabel": "City / Gu / Gun",
+  "accountAddressDetailLabel": "Detail (optional)",
+  "accountAddressDetailHint": "Building, room number, etc.",
+  "accountAddressApply": "Apply",
+  "accountAddressTapToSelect": "Tap to select address",
+
+  "accountUsernameTaken": "username is already taken",
+  "accountUsernameValid": "username is valid to use",
+
+    "myBagsTitle": "My Bags",
+  "myBagsEmptyMessage": "You don't have any bags yet.\nExchange your points in the shop to get bags!",
+  "myBagsTapToViewBarcode": "Tap to view barcode",
+  "myBagsShowBarcodeInstruction": "Show this barcode when you use this bag.",
+
+    "privacySection1Title": "1. Introduction",
+  "privacySection1Body": "EcoPath is committed to protecting your privacy. This Privacy Policy explains what data we collect, how we use it, and the choices you have. By using EcoPath, you agree to this Policy.",
+
+  "privacySection2Title": "2. Information We Collect",
+  "privacySection2Body": "• Personal Information: such as your name, email address, or profile data (only if you provide them voluntarily).\n• App Activity: achievements, points, challenges joined, basic usage analytics.\n• Device Data: app version, OS, language, crash diagnostics.\n• Optional Inputs: feedback messages, images you upload within features.\n• Location (Optional): only if you enable features that require it.",
+
+  "privacySection3Title": "3. How We Use Your Information",
+  "privacySection3Body": "• Provide and maintain core features (profiles, points).\n• Improve app performance, safety, and reliability.\n• Track and display your environmental progress, challenges, and achievements.\n• Personalize non-sensitive content such as streak reminders.\n• Communicate important updates, security notices, or policy changes.\n• Comply with legal obligations.",
+
+  "privacySection4Title": "4. Sharing & Transfers",
+  "privacySection4Body": "We do not sell your personal data. We may share limited data with service providers who help us operate the app (e.g., analytics, crash reporting) under confidentiality agreements. We may disclose information if required by law or to protect our rights, users, or the public.",
+
+  "privacySection5Title": "5. Data Retention",
+  "privacySection5Body": "We retain your data for as long as your account is active or as needed to provide services. You may request deletion; some records may be kept to meet legal or security requirements.",
+
+  "privacySection6Title": "6. Your Choices & Rights",
+  "privacySection6Body": "• Access & Update: edit profile details in-app.\n• Delete: request account deletion from Settings or by contacting us.\n• Notifications: toggle reminders and notifications in Settings.\n• Permissions: manage device-level permissions (e.g., location, camera).",
+
+  "privacySection7Title": "7. Children’s Privacy",
+  "privacySection7Body": "EcoPath is not directed to children under the age where parental consent is required by local law. If we learn that we collected data from such a child without consent, we will delete it.",
+
+  "privacySection8Title": "8. Security",
+  "privacySection8Body": "We use reasonable technical and organizational measures to protect your information. However, no method of transmission or storage is completely secure.",
+
+  "privacySection9Title": "9. International Use",
+  "privacySection9Body": "Your information may be processed in countries other than your own. We take steps to ensure appropriate safeguards in line with applicable laws.",
+
+  "privacySection10Title": "10. Changes to This Policy",
+  "privacySection10Body": "We may update this Policy from time to time. We will notify you of material changes by in-app notice or other means. Your continued use of EcoPath after changes indicates acceptance.",
+
+  "privacySection11Title": "11. Contact Us",
+  "privacySection11Body": "If you have questions or requests about this Policy or your data, please contact our team via the Feedback section in Settings or mail via info@ecopath.site.",
+
+    "helpCenterSection1Title": "1. What is EcoPath?",
+  "helpCenterSection1Body": "EcoPath is a gamified sustainability app. It helps you track your electricity, gas, and waste habits while playing mini games, completing eco-challenges, and earning points and XP.",
+
+  "helpCenterSection2Title": "2. Getting Started",
+  "helpCenterSection2Bullet1": "Sign up with your basic information and create your account.",
+  "helpCenterSection2Bullet2": "Complete the Eco Survey to tell us about your home, energy usage, and eco goals.",
+  "helpCenterSection2Bullet3": "After the survey, tap Start EcoPath to enter the main dashboard.",
+
+  "helpCenterSection3Title": "3. Dashboard Overview",
+  "helpCenterSection3Body": "The dashboard shows your daily eco summary and quick access to main features.",
+  "helpCenterSection3Bullet1": "Electricity & Gas cards – view your recent usage and trends (kWh / m³ and cost).",
+  "helpCenterSection3Bullet2": "Carbon footprint – see an estimate of your CO₂ impact based on your data.",
+  "helpCenterSection3Bullet3": "Daily goals – quick tasks to stay on track with your eco habits.",
+  "helpCenterSection3Bullet4": "Energy bar – shows how much energy you have left to play games today.",
+  "helpCenterSection3Bullet5": "Shortcuts – open Games, Community, Shop, and My Plastic Bag.",
+
+  "helpCenterSection4Title": "4. Energy, XP & Points",
+  "helpCenterSection4Bullet1": "Energy is used when you play certain games or activities.",
+  "helpCenterSection4Bullet2": "XP (experience points) helps you level up your EcoPath profile.",
+  "helpCenterSection4Bullet3": "Eco points can be used to unlock rewards in the Shop.",
+  "helpCenterSection4Bullet4": "You can refill energy gradually over time or by completing specific daily missions (if enabled).",
+
+  "helpCenterSection5Title": "5. Games & Activities",
+  "helpCenterSection5Body": "Games make sustainability more fun. You can access them from the Games tab or shortcuts.",
+  "helpCenterSection5Bullet1": "Quiz – answer eco-questions and learn new tips. Correct answers give XP and points.",
+  "helpCenterSection5Bullet2": "ScanTrash – use your camera to scan trash and identify the correct bin (where available).",
+  "helpCenterSection5Bullet3": "Recycle / Photo Proof – upload a photo of your recycling action to earn rewards (follow the rules shown on the screen).",
+  "helpCenterSection5Bullet4": "Trash Sorting Game – move trash into the right bin. Great for kids and families.",
+  "helpCenterSection5Bullet5": "To-Do / Daily Missions – complete small eco tasks to earn points and sometimes bonus chests.",
+
+  "helpCenterSection6Title": "6. Community",
+  "helpCenterSection6Bullet1": "See posts and tips from other EcoPath users (if your region supports Community).",
+  "helpCenterSection6Bullet2": "Share your own eco actions with photos and short captions.",
+  "helpCenterSection6Bullet3": "Use respectful language. No spam, harmful content, or personal attacks.",
+  "helpCenterSection6Bullet4": "Do not share sensitive personal information such as full address or phone number.",
+
+  "helpCenterSection7Title": "7. Shop & My Plastic Bag",
+  "helpCenterSection7Bullet1": "Use your eco points to redeem rewards such as local trash bags or other eco items (availability may differ by region).",
+  "helpCenterSection7Bullet2": "Check item details carefully: size (L), color, and district rules.",
+  "helpCenterSection7Bullet3": "After you redeem a bag, it appears in My Plastic Bag (MyBags) with barcode and details so you can track what you own.",
+  "helpCenterSection7Bullet4": "Always follow your city’s official trash sorting and bag rules.",
+
+  "helpCenterSection8Title": "8. Settings",
+  "helpCenterSection8Bullet1": "Account – edit your profile, avatar, and basic info.",
+  "helpCenterSection8Bullet2": "Premium – view or manage extra features if your account supports them.",
+  "helpCenterSection8Bullet3": "Theme – switch between light and dark mode and other visual themes.",
+  "helpCenterSection8Bullet4": "Language – choose your preferred language for the app.",
+  "helpCenterSection8Bullet5": "My Plastic Bag – manage the bags you have redeemed or added.",
+
+  "helpCenterSection9Title": "9. Notifications",
+  "helpCenterSection9Bullet1": "Turn eco reminders on or off in Settings or during the survey.",
+  "helpCenterSection9Bullet2": "EcoPath may send reminders about daily missions, streaks, and important updates.",
+  "helpCenterSection9Bullet3": "You can also manage notification permissions from your device settings.",
+
+  "helpCenterSection10Title": "10. Data & Privacy",
+  "helpCenterSection10Bullet1": "EcoPath only collects data needed to provide and improve the service (see Privacy Policy).",
+  "helpCenterSection10Bullet2": "You can request account or data deletion from Settings or by contacting our team.",
+  "helpCenterSection10Bullet3": "For full details, read the Privacy Policy and Terms of Service in the Help & Feedback section.",
+
+  "helpCenterSection11Title": "11. Frequently Asked Questions",
+  "helpCenterSection11Bullet1": "Why can’t I play a game? → You may not have enough energy or the feature might be unavailable in your region.",
+  "helpCenterSection11Bullet2": "Why is my data empty? → Make sure you finished the survey or connected your meter or entered your readings.",
+  "helpCenterSection11Bullet3": "How do I change my language? → Go to Settings → Language.",
+  "helpCenterSection11Bullet4": "How do I report a bug? → Use Feedback in Settings or contact us using the email shown there.",
+
+  "helpCenterLastUpdated": "Last updated: 2025",
+
+    "termsLastUpdated": "Last updated: Oct 14, 2025",
+
+  "termsSection1Title": "1. Agreement to Terms",
+  "termsSection1Body": "By creating an account or using EcoPath, you agree to be bound by these Terms. If you do not agree, do not use the Service.",
+
+  "termsSection2Title": "2. Who May Use EcoPath",
+  "termsSection2Body": "You must be at least 13 years old (or the minimum age required in your country) to use the Service. If you are under 18, you represent that you have parental consent.",
+
+  "termsSection3Title": "3. Your Account & Security",
+  "termsSection3Body": "You are responsible for maintaining the confidentiality of your credentials and for all activities that occur under your account. Notify us of any unauthorized use.",
+
+  "termsSection4Title": "4. Acceptable Use",
+  "termsSection4Body": "Do not misuse EcoPath. For example, do not: (a) break the law; (b) reverse engineer, scrape, or overload our systems; (c) upload malware; (d) harass others; or (e) attempt to gain unauthorized access to any part of the Service.",
+
+  "termsSection5Title": "5. Content & Licenses",
+  "termsSection5Body": "You own the content you submit. You grant EcoPath a worldwide, non-exclusive, royalty-free license to host, store, process, and display your content solely to operate and improve the Service.",
+
+  "termsSection6Title": "6. Virtual Points & Rewards",
+  "termsSection6Body": "Points, badges, or rewards have no cash value and are not transferable. We may modify or terminate reward programs at any time.",
+
+  "termsSection7Title": "7. Third-Party Services",
+  "termsSection7Body": "EcoPath may link to or integrate third-party services (e.g., maps, payment, authentication). Those services are governed by their own terms and policies.",
+
+  "termsSection8Title": "8. Privacy",
+  "termsSection8Body": "Please see our Privacy Policy to understand how we collect, use, and share information.",
+
+  "termsSection9Title": "9. Disclaimers",
+  "termsSection9Body": "EcoPath is provided “as is” and “as available.” We disclaim all warranties to the extent permitted by law, including implied warranties of merchantability, fitness for a particular purpose, and non-infringement.",
+
+  "termsSection10Title": "10. Limitation of Liability",
+  "termsSection10Body": "To the maximum extent permitted by law, EcoPath and its affiliates will not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenue.",
+
+  "termsSection11Title": "11. Termination",
+  "termsSection11Body": "We may suspend or terminate your access at any time if you breach these Terms or if required by law. You may stop using the Service at any time.",
+
+  "termsSection12Title": "12. Changes to These Terms",
+  "termsSection12Body": "We may update these Terms from time to time. We will post the updated version in the app. Your continued use after changes means you accept the new Terms.",
+
+  "termsSection13Title": "13. Contact Us",
+  "termsSection13Body": "If you have questions about these Terms, contact the EcoPath team via the Feedback section in Settings or mail via info@ecopath.site.",
+
+    "carbonTitle": "Carbon Footprint",
+
+  "carbonIntroTitle": "Monthly footprint check",
+  "carbonIntroBody": "Pick how much trash you made this month.\nFor plastic, choose bag size:\n• Low  = 1L–5L\n• Medium = 10L / 20L\n• High = 30L+",
+
+  "carbonMonthlyTrashTitle": "Your monthly trash",
+  "carbonMonthlyTrashBody": "Tell us how much you threw away this month.\nWe’ll turn that into CO₂.",
+
+  "carbonGlassLabel": "Glass",
+  "carbonGlassDesc": "Bottles, jars, broken glass containers.",
+
+  "carbonPlasticLabel": "Plastic (bag volume)",
+  "carbonPlasticDesc": "Choose based on bag size in liters.\nLow : 1L–5L\nMedium : 10L / 20L\nHigh : 30L+",
+
+  "carbonMetalLabel": "Metal",
+  "carbonMetalDesc": "Cans, tins, aluminum packaging.",
+
+  "carbonCardboardLabel": "Cardboard",
+  "carbonCardboardDesc": "Delivery boxes, packaging board.",
+
+  "carbonPaperLabel": "Paper",
+  "carbonPaperDesc": "Receipts, tissues, office paper, etc.",
+
+  "carbonGeneralLabel": "General Waste",
+  "carbonGeneralDesc": "Regular trash (municipal solid waste).\nStuff that can’t be recycled.",
+
+  "carbonBioLabel": "Bio / Organic",
+  "carbonBioDesc": "Food waste, peels, leftovers, compostable scraps.",
+
+  "carbonTrendTitle": "Your Trend",
+  "carbonTrendRange4w": "Last 4 weeks",
+  "carbonTrendRange6m": "Last 6 months",
+  "carbonTrendRange12m": "Last 12 months",
+
+  "carbonSummaryTitle": "Your CO₂ estimate this month",
+  "carbonSummaryBody": "Lower number = lower impact. Try reducing general waste and plastic first 💚",
+  "carbonSummaryValueSuffix": "kg CO₂e",
+
+  "carbonServerPanelTitle": "Server Carbon Footprint",
+  "carbonServerPanelErrorPrefix": "Error:",
+  "carbonServerElectricity": "Electricity",
+  "carbonServerGas": "Gas",
+  "carbonServerWaste": "Waste",
+  "carbonServerTotal": "Total",
+  "carbonServerFetchButton": "Fetch from server",
+  "carbonServerFetchingButton": "Fetching…",
+  "carbonServerUnitKg": "kg",
+
+  "carbonLevelNone": "None",
+  "carbonLevelLow": "Low",
+  "carbonLevelMedium": "Medium",
+  "carbonLevelHigh": "High",
+
+    "shopTitle": "Shop",
+  "shopChooseAreaTitle": "Choose your area",
+  "shopRegionLabel": "City / Province",
+  "shopDistrictLabel": "Neighborhood / District",
+  "shopWarningText": "Each Korean city/gu prints its own bag color. Pick your exact district first.",
+  "shopLoadingLocations": "Loading locations…",
+  "shopSelectAreaHint": "Select your city / province and district.",
+  "shopNoBagInfo": "No bag info for this district yet.",
+
+  "shopBagSizeLabel": "Bag Size",
+  "shopQuantityLabel": "Quantity",
+  "shopBuyButton": "Buy",
+
+  "shopConfirmTitle": "Confirm Purchase",
+  "shopConfirmBody": "Are you sure you want to buy this plastic bag?",
+  "shopConfirmNo": "No",
+  "shopConfirmYes": "Yes",
+
+  "shopNotEnoughTitle": "Not enough points",
+    "shopNotEnoughBody": "You only have {points} pts.",
+  "@shopNotEnoughBody": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
 
 
+  "shopPurchaseCompleteTitle": "Purchase Complete",
+  "shopPurchaseCompleteBody": "You bought the bag!\nCheck it in 'My Bags'.",
+
+  "ecoEducationTitle": "Eco Education",
+"ecoEducationTabBeginner": "Beginner",
+"ecoEducationTabIntermediate": "Intermediate",
+"ecoEducationTabAdvanced": "Advanced",
+
+"ecoEducationLevelBeginnerHeading": "Start here: Learn the bins in Korea 🇰🇷",
+"ecoEducationLevelIntermediateHeading": "Go deeper: Learn rules & edge cases",
+"ecoEducationLevelAdvancedHeading": "Eco expert: Systems & lifestyle",
+
+"ecoEducationSectionInfographics": "Infographics",
+"ecoEducationSectionEcoTip": "Eco Tip of the Day",
+"ecoEducationSectionMythFact": "Myth vs Fact",
+
+"ecoEducationHintTapCards": "Tap each card to reveal more.",
+
+"ecoEducationBinSectionAllowed": "What belongs here",
+"ecoEducationBinSectionNotAllowed": "Do NOT put these here",
+"ecoEducationBinSectionTipsKorea": "Tips (Korea context)",
+
+"ecoEducationExtraKoreaNote": "Note: In Korea, food waste and general waste are usually separated into different bags or containers (e.g., food waste bin, pay-as-you-throw volume-rate plastic bags). Your apartment or neighborhood may post detailed rules on the notice board or recycling area.",
+
+"ecoEducationInfographicsComingSoon": "Infographics coming soon.",
+"ecoEducationTipsComingSoon": "Tips coming soon.",
+"ecoEducationMythsComingSoon": "Myths & facts coming soon.",
+
+"ecoEducationTipShuffleTooltip": "Shuffle tip",
+
+
+  "feedbackTitle": "Feedback",
+  "feedbackEmail": "Your email address",
+  "feedbackSubject": "Subject",
+  "feedbackDescription": "Description",
+  "feedbackSubmit": "Submit",
+  "feedbackThankYou": "Thank you for your feedback!",
+  "feedbackEmailError": "Please enter your email",
+  "feedbackEmailInvalid": "Please enter a valid email",
+  "feedbackSubjectError": "Please enter a subject",
+  "feedbackDescriptionError": "Please describe the issue or feedback",
+  
+  
+  "recycleTitle": "Recycle",
+  "recycleHeaderTitle": "Recycle to earn points",
+  "recycleHeaderSubtitle": "Upload proof of your recycling. Each mission costs {energyCost} energy.",
+  "@recycleHeaderSubtitle": {
+    "placeholders": {
+      "energyCost": {
+        "type": "int"
+      }
+    }
+  },
+
+  "recycleTakePhoto": "Take a photo",
+  "recycleChooseFromGallery": "Choose from gallery",
+
+  "recycleNotEnoughEnergyTitle": "Not enough energy",
+  "recycleNotEnoughEnergyBody": "You need {required} energy to recycle.\nCurrent energy: {current}",
+  "@recycleNotEnoughEnergyBody": {
+    "placeholders": {
+      "required": { "type": "int" },
+      "current": { "type": "int" }
+    }
+  },
+  "recycleNotEnoughEnergyQuit": "Quit",
+
+  "recycleValidationChooseCategory": "Please choose what you recycled.",
+  "recycleValidationAddDescription": "Please add a short description.",
+  "recycleValidationAddPhoto": "Please upload a photo as proof.",
+
+  "recycleSuccessTitle": "Nice job! ♻️",
+  "recycleSuccessBody": "You earned {points} points for recycling.\nThis will show up in your Recycle History on the Profile page.",
+  "@recycleSuccessBody": {
+    "placeholders": {
+      "points": { "type": "int" }
+    }
+  },
+  "recycleSuccessBackButton": "Back to Games",
+
+  "recycleInstructionsButton": "Instructions",
+  "recycleCompleteMissionTitle": "Complete your recycling mission",
+
+  "recycleStep1Title": "Step 1 • What did you recycle?",
+  "recycleStep2Title": "Step 2 • Add a short note",
+  "recycleStep3Title": "Step 3 • Upload a photo",
+  "recycleStep2Hint": "e.g. 3 plastic bottles and 2 cans",
+  "recycleStep3Hint": "Tap to take or choose a photo\nas proof of your recycling",
+
+  "recycleQtyTitle": "How many items?",
+  "recycleQtySubtitle": "Move the slider to estimate how many items you recycled.",
+  "recycleEstimatedRewardTitle": "Estimated reward",
+  "recycleSubmitButton": "Recycle & claim points",
+
+  "recycleCategoryPlastic": "Plastic",
+  "recycleCategoryPaper": "Paper",
+  "recycleCategoryMetal": "Metal",
+  "recycleCategoryGlass": "Glass",
+  "recycleCategoryEwaste": "E-waste",
+  "recycleCategoryOther": "Other",
+
+  "recycleInstrTitle": "Disposal of recyclable items (Korea)",
+  "recycleInstrIntro": "The main principle for recyclables is often described as the Four Keys: Empty, Rinse, Separate, Don't mix.",
+  "recycleInstrRule1": "Empty contents and make items as clean as possible.",
+  "recycleInstrRule2": "Rinse and dry bottles, cans and containers.",
+  "recycleInstrRule3": "Separate by material such as paper, cans and metals, glass, plastics, vinyl and styrofoam.",
+  "recycleInstrRule4": "Do not mix food waste or non-recyclable items into recycling bins.",
+  "recycleInstrWhatGoesWhere": "What goes where?",
+
+  "recyclePaperTitle": "Paper (종이)",
+  "recyclePaperPrep": "Flatten and stack newspapers, cardboard boxes and magazines. Remove tape, labels and plastic wrap.",
+  "recyclePaperDisposal": "Tie them with string or place neatly in a paper/cardboard box or paper recycling bin.",
+
+  "recyclePaperPackTitle": "Paper packs / cups (종이팩, 종이컵)",
+  "recyclePaperPackPrep": "Empty contents, rinse them clean and flatten. Keep them separate from normal paper.",
+  "recyclePaperPackDisposal": "Place them in a separate pack or cup collection box or bin if provided.",
+
+  "recycleCansMetalsTitle": "Cans & metals (캔/고철)",
+  "recycleCansMetalsPrep": "Empty and rinse. Puncture spray cans or butane canisters in a well-ventilated area. Remove lids and labels and flatten if possible.",
+  "recycleCansMetalsDisposal": "Place them in the designated metal or can recycling bin.",
+
+  "recycleGlassTitle": "Glass bottles (병)",
+  "recycleGlassPrep": "Empty and rinse glass bottles. Remove metal or plastic caps and dispose of caps by their own material. Broken glass is usually not recyclable.",
+  "recycleGlassDisposal": "Place whole bottles in the designated glass bin. Wrap broken glass safely and follow your district rules for non-flammable or general waste.",
+
+  "recyclePlasticsTitle": "Plastics (플라스틱)",
+  "recyclePlasticsPrep": "Empty, rinse clean and remove all labels, stickers and caps. Compress bottles to reduce volume.",
+  "recyclePlasticsDisposal": "Place in the designated plastics bin, which may be divided into PET bottles and other plastics.",
+
+  "recycleVinylTitle": "Vinyl / plastic film (비닐류)",
+  "recycleVinylPrep": "Only clean and dry items such as plastic bags, snack wrappers and bubble wrap. If they are dirty or have food that cannot be washed off, treat them as general waste.",
+  "recycleVinylDisposal": "Collect them in a transparent or semi-transparent plastic bag or place them in the vinyl or film bin if available.",
+
+  "recycleStyrofoamTitle": "Styrofoam (스티로폼)",
+  "recycleStyrofoamPrep": "Remove tape, labels and stickers. Styrofoam must be clean and dry. Food-stained or very dirty styrofoam should go to general waste.",
+  "recycleStyrofoamDisposal": "Place in the designated styrofoam bin or a transparent or semi-transparent plastic bag if your building uses one.",
+
+  "recycleInstrBagsTitle": "Standard bags for non-recyclable waste",
+  "recycleBagGeneralTitle": "General waste (일반 쓰레기 봉투)",
+  "recycleBagGeneralPrep": "Used for items that cannot be recycled or are too dirty to clean.",
+  "recycleBagGeneralDisposal": "Bag color varies by district, such as white, light blue or yellow/orange. Use the standard general-waste bag required in your area.",
+  "recycleBagFoodTitle": "Food waste (음식물 쓰레기 봉투)",
+  "recycleBagFoodPrep": "Used only for food scraps and liquids that count as food waste.",
+  "recycleBagFoodDisposal": "Often collected in special food-waste bags, which can be yellow, pink or light green depending on the district.",
+
+  "recycleInstrGotIt": "Got it"
 }
+
+
+
+
+

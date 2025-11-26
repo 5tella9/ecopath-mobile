@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecopath/l10n/app_localizations.dart'; // ✅ add this
 
 class EducationScreen extends StatefulWidget {
   const EducationScreen({super.key});
@@ -44,6 +45,7 @@ class _EducationScreenState extends State<EducationScreen>
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final cs = t.colorScheme;
+    final l = AppLocalizations.of(context)!; // ✅ localization
 
     return DefaultTabController(
       length: 3,
@@ -54,7 +56,7 @@ class _EducationScreenState extends State<EducationScreen>
           elevation: 0,
           centerTitle: true,
           title: Text(
-            'Eco Education',
+            l.ecoEducationTitle, // ✅ 'Eco Education'
             style: GoogleFonts.alike(
               fontSize: 22,
               fontWeight: FontWeight.w800,
@@ -73,10 +75,10 @@ class _EducationScreenState extends State<EducationScreen>
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
-            tabs: const [
-              Tab(text: 'Beginner'),
-              Tab(text: 'Intermediate'),
-              Tab(text: 'Advanced'),
+            tabs: [
+              Tab(text: l.ecoEducationTabBeginner),     // ✅ Beginner / 초급
+              Tab(text: l.ecoEducationTabIntermediate), // ✅ Intermediate / 중급
+              Tab(text: l.ecoEducationTabAdvanced),     // ✅ Advanced / 고급
             ],
           ),
         ),
@@ -95,37 +97,37 @@ class _EducationScreenState extends State<EducationScreen>
 
   Widget _buildLevelContent(BuildContext context, _Level level) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
+
+    final String levelHeading = switch (level) {
+      _Level.beginner => l.ecoEducationLevelBeginnerHeading,
+      _Level.intermediate => l.ecoEducationLevelIntermediateHeading,
+      _Level.advanced => l.ecoEducationLevelAdvancedHeading,
+    };
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle(
-            context,
-            switch (level) {
-              _Level.beginner => 'Start here: Learn the bins in Korea 🇰🇷',
-              _Level.intermediate => 'Go deeper: Learn rules & edge cases',
-              _Level.advanced => 'Eco expert: Systems & lifestyle',
-            },
-          ),
+          _sectionTitle(context, levelHeading),
           const SizedBox(height: 8),
           _buildBinGuideRow(context, level),
           const SizedBox(height: 20),
-          _sectionTitle(context, 'Infographics'),
+          _sectionTitle(context, l.ecoEducationSectionInfographics),
           const SizedBox(height: 8),
           _buildInfographicCarousel(context, level),
           const SizedBox(height: 20),
-          _sectionTitle(context, 'Eco Tip of the Day'),
+          _sectionTitle(context, l.ecoEducationSectionEcoTip),
           const SizedBox(height: 8),
           _buildEcoTipCard(context, level),
           const SizedBox(height: 20),
-          _sectionTitle(context, 'Myth vs Fact'),
+          _sectionTitle(context, l.ecoEducationSectionMythFact),
           const SizedBox(height: 8),
           _buildMythFactList(context, level),
           const SizedBox(height: 8),
           Text(
-            'Tap each card to reveal more.',
+            l.ecoEducationHintTapCards,
             style: GoogleFonts.alike(
               fontSize: 12,
               color: cs.onSurface.withOpacity(0.6),
@@ -237,6 +239,7 @@ class _EducationScreenState extends State<EducationScreen>
   void _showBinDetailsModal(
       BuildContext context, _Level level, _BinInfo bin) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
     final details = _getBinDetails(level, bin.id);
 
     showModalBottomSheet(
@@ -311,7 +314,7 @@ class _EducationScreenState extends State<EducationScreen>
                       context,
                       icon: Icons.check_circle_rounded,
                       iconColor: Colors.greenAccent.shade400,
-                      title: 'What belongs here',
+                      title: l.ecoEducationBinSectionAllowed,
                       bullets: details.allowed,
                     ),
                   if (details.notAllowed.isNotEmpty) const SizedBox(height: 12),
@@ -320,7 +323,7 @@ class _EducationScreenState extends State<EducationScreen>
                       context,
                       icon: Icons.close_rounded,
                       iconColor: Colors.redAccent.shade200,
-                      title: 'Do NOT put these here',
+                      title: l.ecoEducationBinSectionNotAllowed,
                       bullets: details.notAllowed,
                     ),
                   if (details.tips.isNotEmpty) const SizedBox(height: 12),
@@ -329,7 +332,7 @@ class _EducationScreenState extends State<EducationScreen>
                       context,
                       icon: Icons.lightbulb_rounded,
                       iconColor: cs.primary,
-                      title: 'Tips (Korea context)',
+                      title: l.ecoEducationBinSectionTipsKorea,
                       bullets: details.tips,
                     ),
                   const SizedBox(height: 16),
@@ -396,6 +399,7 @@ class _EducationScreenState extends State<EducationScreen>
 
   Widget _buildExtraKoreaInfo(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 4),
@@ -405,10 +409,7 @@ class _EducationScreenState extends State<EducationScreen>
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        'Note: In Korea, food waste and general waste are usually separated into '
-        'different bags or containers (e.g., food waste bin, pay-as-you-throw '
-        'volume-rate plastic bags). Your apartment or neighborhood may post '
-        'detailed rules on the notice board or recycling area.',
+        l.ecoEducationExtraKoreaNote,
         style: GoogleFonts.alike(
           fontSize: 12,
           color: cs.onSurface.withOpacity(0.8),
@@ -422,11 +423,12 @@ class _EducationScreenState extends State<EducationScreen>
 
   Widget _buildInfographicCarousel(BuildContext context, _Level level) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
     final data = _infographics[level] ?? [];
 
     if (data.isEmpty) {
       return Text(
-        'Infographics coming soon.',
+        l.ecoEducationInfographicsComingSoon,
         style: GoogleFonts.alike(
           fontSize: 13,
           color: cs.onSurface.withOpacity(0.6),
@@ -554,11 +556,12 @@ class _EducationScreenState extends State<EducationScreen>
 
   Widget _buildEcoTipCard(BuildContext context, _Level level) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
     final tips = _ecoTips[level] ?? [];
 
     if (tips.isEmpty) {
       return Text(
-        'Tips coming soon.',
+        l.ecoEducationTipsComingSoon,
         style: GoogleFonts.alike(
           fontSize: 13,
           color: cs.onSurface.withOpacity(0.6),
@@ -596,7 +599,7 @@ class _EducationScreenState extends State<EducationScreen>
           ),
           const SizedBox(width: 8),
           IconButton(
-            tooltip: 'Shuffle tip',
+            tooltip: l.ecoEducationTipShuffleTooltip,
             icon: const Icon(Icons.refresh_rounded, size: 20),
             color: cs.onSurface.withOpacity(0.8),
             onPressed: () {
@@ -615,11 +618,12 @@ class _EducationScreenState extends State<EducationScreen>
 
   Widget _buildMythFactList(BuildContext context, _Level level) {
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
     final items = _myths[level] ?? [];
 
     if (items.isEmpty) {
       return Text(
-        'Myths & facts coming soon.',
+        l.ecoEducationMythsComingSoon,
         style: GoogleFonts.alike(
           fontSize: 13,
           color: cs.onSurface.withOpacity(0.6),

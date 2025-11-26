@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecopath/core/progress_tracker.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 import 'mybag_screen.dart'; // for BagItem + globalBagInventory
 
 class BagRule {
@@ -28,14 +29,20 @@ class ShopScreen extends StatefulWidget {
 }
 
 class _ShopScreenState extends State<ShopScreen> {
-  String? _selectedRegion;   // e.g. "Seoul"
-  String? _selectedDistrict; // e.g. "Gangnam-gu", "Cheonan-si Dongnam-gu"
+  String? _selectedRegion;   // region ID, e.g. "Seoul"
+  String? _selectedDistrict; // district ID, e.g. "Gangnam-gu"
 
   bool _loadingAddresses = true;
 
-  // Populated from assets/data/kr_address.json
+  // Region IDs list
   List<String> _regions = [];
+
+  // Map of regionId -> list of districtIds
   Map<String, List<String>> _districtsByRegion = {};
+
+  // Localized names loaded from kr_address.json
+  Map<String, _LocaleName> _regionNames = {};
+  Map<String, Map<String, _LocaleName>> _districtNames = {};
 
   // Per-card UI state
   final List<int> _selectedSizeL = [];
@@ -107,35 +114,70 @@ class _ShopScreenState extends State<ShopScreen> {
   Future<void> _loadAddressData() async {
     try {
       final raw = await rootBundle.loadString('assets/data/kr_address.json');
-      final decoded = jsonDecode(raw);
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
 
-      final Map<String, dynamic> map =
-          decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
+      final List<dynamic> regionsJson = decoded['regions'] ?? [];
 
-      final regions = <String>[];
+      final regions = <String>[]; // region IDs
       final districtsByRegion = <String, List<String>>{};
+      final regionNames = <String, _LocaleName>{};
+      final districtNames = <String, Map<String, _LocaleName>>{};
 
-      map.forEach((regionName, districtsDynamic) {
-        regions.add(regionName.toString());
-        final list = <String>[];
-        if (districtsDynamic is List) {
-          for (final d in districtsDynamic) {
-            list.add(d.toString());
-          }
+      for (final regionRaw in regionsJson) {
+        final region = regionRaw as Map<String, dynamic>;
+        final regionId = (region['id'] ?? region['en']) as String;
+        final regionEn = (region['en'] ?? regionId) as String;
+        final regionKo = (region['ko'] ?? regionEn) as String;
+
+        regions.add(regionId);
+        regionNames[regionId] =
+            _LocaleName(en: regionEn, ko: regionKo);
+
+        final List<dynamic> districtList = region['districts'] ?? [];
+        final parsedDistrictIds = <String>[];
+        final districtMap = <String, _LocaleName>{};
+
+        for (final dRaw in districtList) {
+          final d = dRaw as Map<String, dynamic>;
+          final districtId = (d['id'] ?? d['en']) as String;
+          final districtEn = (d['en'] ?? districtId) as String;
+          final districtKo = (d['ko'] ?? districtEn) as String;
+
+          parsedDistrictIds.add(districtId);
+          districtMap[districtId] =
+              _LocaleName(en: districtEn, ko: districtKo);
         }
-        districtsByRegion[regionName.toString()] = list;
-      });
+
+        districtsByRegion[regionId] = parsedDistrictIds;
+        districtNames[regionId] = districtMap;
+      }
 
       regions.sort();
 
       setState(() {
         _regions = regions;
         _districtsByRegion = districtsByRegion;
+        _regionNames = regionNames;
+        _districtNames = districtNames;
         _loadingAddresses = false;
       });
     } catch (e) {
+      print("KR address load error: $e");
       setState(() => _loadingAddresses = false);
     }
+  }
+
+  String _displayRegionName(String id, Locale locale) {
+    final n = _regionNames[id];
+    if (n == null) return id;
+    return n.forLocale(locale);
+  }
+
+  String _displayDistrictName(String regionId, String districtId, Locale locale) {
+    final r = _districtNames[regionId];
+    final n = r?[districtId];
+    if (n == null) return districtId;
+    return n.forLocale(locale);
   }
 
   // --------------------- CORE BAG LOGIC ---------------------
@@ -264,6 +306,7 @@ class _ShopScreenState extends State<ShopScreen> {
     final tracker = ProgressTracker.instance;
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final loc = AppLocalizations.of(context)!;
 
     final cost = _calcCostPoints(index, visibleBags);
     final currentPoints = tracker.totalPoints; // same source as GamesScreen
@@ -274,7 +317,7 @@ class _ShopScreenState extends State<ShopScreen> {
         backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Confirm Purchase',
+          loc.shopConfirmTitle,
           style: textTheme.titleMedium?.copyWith(
             color: cs.onSurface,
             fontWeight: FontWeight.w600,
@@ -282,7 +325,7 @@ class _ShopScreenState extends State<ShopScreen> {
           ),
         ),
         content: Text(
-          'Are you sure you want to buy this plastic bag?',
+          loc.shopConfirmBody,
           style: GoogleFonts.lato(
             color: cs.onSurface.withOpacity(0.8),
             fontSize: 14,
@@ -292,14 +335,14 @@ class _ShopScreenState extends State<ShopScreen> {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'No',
+              loc.shopConfirmNo,
               style: GoogleFonts.lato(color: cs.onSurface.withOpacity(0.8)),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Yes',
+              loc.shopConfirmYes,
               style: GoogleFonts.lato(
                 color: cs.primary,
                 fontWeight: FontWeight.w600,
@@ -319,7 +362,7 @@ class _ShopScreenState extends State<ShopScreen> {
           backgroundColor: cs.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
-            'Not enough points',
+            loc.shopNotEnoughTitle,
             style: textTheme.titleMedium?.copyWith(
               color: cs.onSurface,
               fontWeight: FontWeight.w600,
@@ -327,7 +370,7 @@ class _ShopScreenState extends State<ShopScreen> {
             ),
           ),
           content: Text(
-            'You only have $currentPoints pts.',
+            loc.shopNotEnoughBody(currentPoints),
             style: GoogleFonts.lato(
               color: cs.onSurface.withOpacity(0.8),
               fontSize: 14,
@@ -371,7 +414,7 @@ class _ShopScreenState extends State<ShopScreen> {
         backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Purchase Complete',
+          loc.shopPurchaseCompleteTitle,
           style: textTheme.titleMedium?.copyWith(
             color: cs.onSurface,
             fontWeight: FontWeight.w600,
@@ -379,7 +422,7 @@ class _ShopScreenState extends State<ShopScreen> {
           ),
         ),
         content: Text(
-          "You bought the bag!\nCheck it in 'My Bags'.",
+          loc.shopPurchaseCompleteBody,
           style: GoogleFonts.lato(
             color: cs.onSurface.withOpacity(0.8),
             fontSize: 14,
@@ -411,6 +454,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Widget _buildHeaderBar(BuildContext context, int userPoints) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Row(
       children: [
@@ -434,7 +478,7 @@ class _ShopScreenState extends State<ShopScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: Text(
-            'Shop',
+            loc.shopTitle,
             style: GoogleFonts.lato(
               color: cs.onBackground,
               fontSize: 20,
@@ -470,6 +514,8 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Widget _buildFilters(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
 
     final regionItems = _regions;
     final districtItems = _selectedRegion == null
@@ -480,7 +526,7 @@ class _ShopScreenState extends State<ShopScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Choose your area',
+          loc.shopChooseAreaTitle,
           style: GoogleFonts.lato(
             color: cs.onBackground,
             fontWeight: FontWeight.w600,
@@ -492,9 +538,10 @@ class _ShopScreenState extends State<ShopScreen> {
           children: [
             Expanded(
               child: _FilterDropdown<String>(
-                label: 'City / Province',
+                label: loc.shopRegionLabel,
                 value: _selectedRegion,
                 items: regionItems,
+                displayBuilder: (id) => _displayRegionName(id, locale),
                 onChanged: (val) {
                   setState(() {
                     _selectedRegion = val;
@@ -507,9 +554,14 @@ class _ShopScreenState extends State<ShopScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: _FilterDropdown<String>(
-                label: 'Neighborhood / District',
+                label: loc.shopDistrictLabel,
                 value: _selectedDistrict,
                 items: districtItems,
+                displayBuilder: (id) => _displayDistrictName(
+                  _selectedRegion ?? '',
+                  id,
+                  locale,
+                ),
                 onChanged: (val) {
                   setState(() {
                     _selectedDistrict = val;
@@ -527,7 +579,8 @@ class _ShopScreenState extends State<ShopScreen> {
           decoration: BoxDecoration(
             color: cs.errorContainer,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: cs.onErrorContainer.withOpacity(0.6), width: 1),
+            border:
+                Border.all(color: cs.onErrorContainer.withOpacity(0.6), width: 1),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,8 +593,7 @@ class _ShopScreenState extends State<ShopScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Each Korean city/구 prints its own bag color. '
-                  'Pick your exact district first.',
+                  loc.shopWarningText,
                   style: GoogleFonts.lato(
                     color: cs.onErrorContainer,
                     fontSize: 12,
@@ -670,6 +722,7 @@ class _ShopScreenState extends State<ShopScreen> {
     final cs = Theme.of(context).colorScheme;
     final bag = visibleBags[index];
     final cost = _calcCostPoints(index, visibleBags);
+    final loc = AppLocalizations.of(context)!;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -764,7 +817,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Bag Size',
+                      loc.shopBagSizeLabel,
                       style: GoogleFonts.lato(
                         color: cs.onSurface.withOpacity(0.7),
                         fontSize: 12,
@@ -781,7 +834,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Quantity',
+                      loc.shopQuantityLabel,
                       style: GoogleFonts.lato(
                         color: cs.onSurface.withOpacity(0.7),
                         fontSize: 12,
@@ -797,7 +850,7 @@ class _ShopScreenState extends State<ShopScreen> {
 
           const SizedBox(height: 16),
 
-          // buy (UNCHANGED as you asked)
+          // buy
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -811,7 +864,7 @@ class _ShopScreenState extends State<ShopScreen> {
               ),
               onPressed: () => _tryBuy(index, visibleBags),
               child: Text(
-                'Buy',
+                loc.shopBuyButton,
                 style: GoogleFonts.lato(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
@@ -826,13 +879,14 @@ class _ShopScreenState extends State<ShopScreen> {
 
   Widget _buildBagListSection(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
     final visibleBags = _getVisibleBags();
 
     if (_loadingAddresses) {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
         child: Text(
-          'Loading locations…',
+          loc.shopLoadingLocations,
           style: GoogleFonts.lato(
             color: cs.onBackground.withOpacity(0.6),
             fontSize: 14,
@@ -845,7 +899,7 @@ class _ShopScreenState extends State<ShopScreen> {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
         child: Text(
-          'Select your city / province and district.',
+          loc.shopSelectAreaHint,
           style: GoogleFonts.lato(
             color: cs.onBackground.withOpacity(0.6),
             fontSize: 14,
@@ -858,7 +912,7 @@ class _ShopScreenState extends State<ShopScreen> {
       return Padding(
         padding: const EdgeInsets.only(top: 40),
         child: Text(
-          'No bag info for this district yet.',
+          loc.shopNoBagInfo,
           style: GoogleFonts.lato(
             color: cs.onBackground.withOpacity(0.6),
             fontSize: 14,
@@ -919,12 +973,14 @@ class _FilterDropdown<T> extends StatelessWidget {
   final T? value;
   final List<T> items;
   final ValueChanged<T?> onChanged;
+  final String Function(T)? displayBuilder;
 
   const _FilterDropdown({
     required this.label,
     required this.value,
     required this.items,
     required this.onChanged,
+    this.displayBuilder,
   });
 
   @override
@@ -961,7 +1017,12 @@ class _FilterDropdown<T> extends StatelessWidget {
                 .map(
                   (opt) => DropdownMenuItem<T>(
                     value: opt,
-                    child: Text('$opt', style: textStyle),
+                    child: Text(
+                      displayBuilder != null
+                          ? displayBuilder!(opt)
+                          : '$opt',
+                      style: textStyle,
+                    ),
                   ),
                 )
                 .toList(),
@@ -970,5 +1031,20 @@ class _FilterDropdown<T> extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+// Helper for localized names loaded from JSON
+class _LocaleName {
+  final String en;
+  final String ko;
+
+  _LocaleName({required this.en, required this.ko});
+
+  String forLocale(Locale locale) {
+    if (locale.languageCode == 'ko') {
+      return ko.isNotEmpty ? ko : en;
+    }
+    return en;
   }
 }

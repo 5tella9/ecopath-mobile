@@ -10,7 +10,7 @@ import 'package:ecopath/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../../providers/userProvider.dart';
 import 'dart:io';
-
+import 'package:image_picker/image_picker.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -20,6 +20,10 @@ class Profile extends StatefulWidget {
 
 class ProfileState extends State<Profile> {
   DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+
+  // NEW: picker + avatar file for camera/gallery
+  final ImagePicker _picker = ImagePicker();
+  File? _avatarFile;
 
   int _daysInMonth(DateTime d) => DateTime(d.year, d.month + 1, 0).day;
   int _firstWeekdayOfMonth(DateTime d) =>
@@ -47,6 +51,31 @@ class ProfileState extends State<Profile> {
       () => _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1));
   void _nextMonth() => setState(
       () => _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1));
+
+  // ===== Avatar picking helpers =====
+  Future<void> _pickAvatarFromCamera() async {
+    final XFile? picked =
+        await _picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+    if (picked == null) return;
+    setState(() {
+      _avatarFile = File(picked.path);
+    });
+    if (mounted) {
+      Navigator.pop(context); // close bottom sheet
+    }
+  }
+
+  Future<void> _pickAvatarFromGallery() async {
+    final XFile? picked =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (picked == null) return;
+    setState(() {
+      _avatarFile = File(picked.path);
+    });
+    if (mounted) {
+      Navigator.pop(context); // close bottom sheet
+    }
+  }
 
   void _showAvatarActionSheet() {
     final cs = Theme.of(context).colorScheme;
@@ -81,8 +110,14 @@ class ProfileState extends State<Profile> {
                 ),
               ),
             ),
-            _ActionSheetItem(text: l10n.changeAvatarTakePhoto, onTap: () {}),
-            _ActionSheetItem(text: l10n.changeAvatarChooseAlbum, onTap: () {}),
+            _ActionSheetItem(
+              text: l10n.changeAvatarTakePhoto,
+              onTap: _pickAvatarFromCamera,
+            ),
+            _ActionSheetItem(
+              text: l10n.changeAvatarChooseAlbum,
+              onTap: _pickAvatarFromGallery,
+            ),
             _ActionSheetItem(
               text: l10n.changeAvatarChooseCharacter,
               onTap: () async {
@@ -90,6 +125,7 @@ class ProfileState extends State<Profile> {
                 await Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const EditAvatarScreen()),
                 );
+                setState(() {}); // refresh after coming back
               },
             ),
             const SizedBox(height: 8),
@@ -282,7 +318,7 @@ class ProfileState extends State<Profile> {
                       Stack(
                         alignment: Alignment.center,
                         children: [
-                          // 🟢 BACKGROUND IMAGE FIRST (circle)
+                          // background circle
                           Container(
                             width: 100,
                             height: 100,
@@ -291,7 +327,7 @@ class ProfileState extends State<Profile> {
                               image: DecorationImage(
                                 image: user?.avatarBackground != null
                                     ? AssetImage(user!.avatarBackground!)
-                                    : const AssetImage('assets/images/green.png'), // default bg
+                                    : const AssetImage('assets/images/green.png'),
                                 fit: BoxFit.cover,
                               ),
                               boxShadow: [
@@ -304,24 +340,31 @@ class ProfileState extends State<Profile> {
                             ),
                           ),
 
-                          // 🐼 PROFILE AVATAR IMAGE ON TOP
+                          // avatar image (file > asset > default)
                           ClipOval(
-                            child: user?.profileImage != null
-                                ? Image.asset(                      // <-- using asset now
-                              user!.profileImage!,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.contain,
-                            )
-                                : Image.asset(
-                              'assets/images/profileimg.png',
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.contain,
-                            ),
+                            child: _avatarFile != null
+                                ? Image.file(
+                                    _avatarFile!,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  )
+                                : (user?.profileImage != null
+                                    ? Image.asset(
+                                        user!.profileImage!,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.contain,
+                                      )
+                                    : Image.asset(
+                                        'assets/images/profileimg.png',
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.contain,
+                                      )),
                           ),
 
-                          // ✏️ EDIT BUTTON (TOP RIGHT)
+                          // edit button
                           Positioned(
                             right: -4,
                             top: -4,
@@ -365,8 +408,7 @@ class ProfileState extends State<Profile> {
                 ),
                 const SizedBox(height: 24),
 
-
-                // stats (now using tracker)
+                // stats
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 36),
                   child: Row(
@@ -386,7 +428,7 @@ class ProfileState extends State<Profile> {
 
                 const SizedBox(height: 28),
 
-                // recycle history
+                // recycle history header
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
