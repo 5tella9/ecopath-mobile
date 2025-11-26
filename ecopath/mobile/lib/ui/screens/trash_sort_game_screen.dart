@@ -1,7 +1,3 @@
-// lib/ui/screens/trash_sort_game_screen.dart
-// ✔ Updated: integrated with ProgressTracker (energy + rewards + notifications)
-// ✔ Uses global energy + rewardFromGame for notifications
-
 import 'dart:async';
 import 'dart:math';
 
@@ -11,8 +7,7 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:ecopath/core/progress_tracker.dart';
 
 class TrashSortGameScreen extends StatefulWidget {
-  final int initialEnergy; // kept for compatibility, but we now use global energy
-
+  final int initialEnergy;
   const TrashSortGameScreen({super.key, required this.initialEnergy});
 
   @override
@@ -425,7 +420,8 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                   const SizedBox(height: 12),
                   Text(
                     'Tilt phone to sort!',
-                    style: GoogleFonts.alike(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+                    style: GoogleFonts.alike(
+                        fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                   const SizedBox(height: 8),
                   Expanded(
@@ -433,9 +429,11 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                       builder: (_, constraints) {
                         if (_currentItem == null) return const SizedBox.shrink();
 
-                        const double size = 130;
-                        final double top = (constraints.maxHeight - size) * _fallAnimation.value;
-                        final double left = (constraints.maxWidth - size) / 2 + _trashX;
+                        const double size = 90;
+                        final double top =
+                            (constraints.maxHeight - size) * _fallAnimation.value;
+                        final double left =
+                            (constraints.maxWidth - size) / 2 + _trashX;
 
                         return Stack(
                           children: [
@@ -453,16 +451,24 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                       },
                     ),
                   ),
-                  SizedBox(
-                    height: 190,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _buildBin(index: 0, assetPath: 'assets/images/othersb.png'),
-                        _buildBin(index: 1, assetPath: 'assets/images/plasticb.png', yOffset: -6),
-                        _buildBin(index: 2, assetPath: 'assets/images/canb.png'),
-                        _buildBin(index: 3, assetPath: 'assets/images/paperb.png'),
-                      ],
+                  // 🔼 bigger bins for kids + moved up so trash lands near lids
+                  Transform.translate(
+                    offset: const Offset(0, -60), 
+                    child: SizedBox(
+                      height: 260, // was 190
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _buildBin(index: 0, assetPath: 'assets/images/othersb.png'),
+                          _buildBin(
+                            index: 1,
+                            assetPath: 'assets/images/plasticb.png',
+                            yOffset: 0,
+                          ),
+                          _buildBin(index: 2, assetPath: 'assets/images/canb.png'),
+                          _buildBin(index: 3, assetPath: 'assets/images/paperb.png'),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -475,9 +481,21 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _scoreChip(icon: Icons.check_circle, label: 'Correct', value: _correct, color: Colors.green),
-                        _scoreChip(icon: Icons.cancel, label: 'Wrong', value: _wrong, color: Colors.redAccent),
-                        _scoreChip(icon: Icons.star, label: 'Points', value: _points, color: cs.primary),
+                        _scoreChip(
+                            icon: Icons.check_circle,
+                            label: 'Correct',
+                            value: _correct,
+                            color: Colors.green),
+                        _scoreChip(
+                            icon: Icons.cancel,
+                            label: 'Wrong',
+                            value: _wrong,
+                            color: Colors.redAccent),
+                        _scoreChip(
+                            icon: Icons.star,
+                            label: 'Points',
+                            value: _points,
+                            color: cs.primary),
                       ],
                     ),
                   ),
@@ -497,50 +515,71 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
 
   // ---------------- SMALL HELPERS ----------------
 
-  Widget _topChip({required IconData icon, required String text, required Color color}) {
+  Widget _topChip(
+      {required IconData icon,
+      required String text,
+      required Color color}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(12)),
       child: Row(
         children: [
           Icon(icon, size: 18, color: color),
           const SizedBox(width: 4),
-          Text(text, style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.w700, color: color)),
+          Text(text,
+              style: GoogleFonts.lato(
+                  fontSize: 16, fontWeight: FontWeight.w700, color: color)),
         ],
       ),
     );
   }
 
-  Widget _scoreChip({required IconData icon, required String label, required int value, required Color color}) {
+  Widget _scoreChip(
+      {required IconData icon,
+      required String label,
+      required int value,
+      required Color color}) {
     return Row(
       children: [
         Icon(icon, color: color, size: 18),
         const SizedBox(width: 4),
-        Text('$label: $value', style: GoogleFonts.lato(fontWeight: FontWeight.w700, fontSize: 14)),
+        Text('$label: $value',
+            style: GoogleFonts.lato(
+                fontWeight: FontWeight.w700, fontSize: 14)),
       ],
     );
   }
 
-  Widget _buildBin({required int index, required String assetPath, double yOffset = 0}) {
+  Widget _buildBin(
+      {required int index, required String assetPath, double yOffset = 0}) {
     final bool showFeedback = _feedbackBinIndex == index;
     final Color feedbackColor = _feedbackIsCorrect ? Colors.blue : Colors.red;
     final String feedbackText = _feedbackIsCorrect ? 'O' : 'X';
 
     return Expanded(
       child: SizedBox(
-        height: 180,
+        height: 210, // was 180
         child: Transform.translate(
           offset: Offset(0, yOffset),
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
-              Image.asset(assetPath, height: 150, fit: BoxFit.contain),
+              Image.asset(
+                assetPath,
+                height: 190, // was 150 – bigger bin image
+                fit: BoxFit.contain,
+              ),
               if (showFeedback)
                 Positioned(
                   top: -12,
                   child: Text(
                     feedbackText,
-                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: feedbackColor),
+                    style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        color: feedbackColor),
                   ),
                 ),
             ],
@@ -560,11 +599,14 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
           padding: const EdgeInsets.all(20),
           child: Container(
             padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(20)),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('How to Play: Tilt Sorting', style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.w800)),
+                Text('How to Play: Tilt Sorting',
+                    style: GoogleFonts.lato(
+                        fontSize: 20, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 12),
                 Text(
                   'Tilt your phone left/right to guide the falling trash.\n'
@@ -581,7 +623,8 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context, {'points': 0, 'energy': _energy}),
+                        onPressed: () =>
+                            Navigator.pop(context, {'points': 0, 'energy': _energy}),
                         child: const Text('Quit'),
                       ),
                     ),
@@ -615,11 +658,15 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
               child: Text(
                 showGo ? 'GO!' : '$_preCount',
                 key: ValueKey(showGo ? 'go' : '$_preCount'),
-                style: const TextStyle(fontSize: 80, fontWeight: FontWeight.w900, color: Colors.white),
+                style: const TextStyle(
+                    fontSize: 80,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white),
               ),
             ),
             const SizedBox(height: 10),
-            const Text('Tilt to play!', style: TextStyle(fontSize: 22, color: Colors.white70)),
+            const Text('Tilt to play!',
+                style: TextStyle(fontSize: 22, color: Colors.white70)),
           ],
         ),
       ),
@@ -632,19 +679,27 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
       child: Center(
         child: Container(
           padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(20)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.pause_circle_filled, size: 60, color: Colors.blueGrey),
+              const Icon(Icons.pause_circle_filled,
+                  size: 60, color: Colors.blueGrey),
               const SizedBox(height: 8),
-              const Text('Game Paused', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+              const Text('Game Paused',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: ElevatedButton(onPressed: _resumeGame, child: const Text('Continue'))),
+                  Expanded(
+                      child: ElevatedButton(
+                          onPressed: _resumeGame,
+                          child: const Text('Continue'))),
                   const SizedBox(width: 10),
-                  Expanded(child: OutlinedButton(onPressed: _exitToGames, child: const Text('Quit'))),
+                  Expanded(
+                      child: OutlinedButton(
+                          onPressed: _exitToGames, child: const Text('Quit'))),
                 ],
               ),
             ],
@@ -660,25 +715,34 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
       child: Center(
         child: Container(
           padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(20)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Game Over!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+              const Text('Game Over!',
+                  style:
+                      TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
               Text('Nice work!', style: GoogleFonts.alike(fontSize: 16)),
               const SizedBox(height: 12),
               Text(
                 'Points: $_points\nXP: $_xp',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.lato(fontSize: 16, fontWeight: FontWeight.w700),
+                style: GoogleFonts.lato(
+                    fontSize: 16, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: OutlinedButton(onPressed: _exitToGames, child: const Text('Exit'))),
+                  Expanded(
+                      child: OutlinedButton(
+                          onPressed: _exitToGames, child: const Text('Exit'))),
                   const SizedBox(width: 10),
-                  Expanded(child: ElevatedButton(onPressed: _playAgain, child: const Text('Play Again'))),
+                  Expanded(
+                      child: ElevatedButton(
+                          onPressed: _playAgain,
+                          child: const Text('Play Again'))),
                 ],
               ),
             ],
@@ -694,17 +758,22 @@ class _TrashSortGameScreenState extends State<TrashSortGameScreen>
       child: Center(
         child: Container(
           padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(20)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.battery_alert, size: 60, color: Colors.redAccent),
+              const Icon(Icons.battery_alert,
+                  size: 60, color: Colors.redAccent),
               const SizedBox(height: 8),
-              const Text('Not Enough Energy', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+              const Text('Not Enough Energy',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
               const SizedBox(height: 12),
-              const Text('Please wait for your energy to refill.', textAlign: TextAlign.center),
+              const Text('Please wait for your energy to refill.',
+                  textAlign: TextAlign.center),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _exitToGames, child: const Text('Quit')),
+              ElevatedButton(
+                  onPressed: _exitToGames, child: const Text('Quit')),
             ],
           ),
         ),
