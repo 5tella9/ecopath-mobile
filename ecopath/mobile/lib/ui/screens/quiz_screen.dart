@@ -154,7 +154,7 @@ class _QuizScreenState extends State<QuizScreen> {
       "houseType": user?.housingType.toString(),
       "ecoGoal": user?.ecoGoals,
       "gender" : user?.gender,
-      "birth date": user?.birthDate,
+      "birth_date": user?.birthDate,
       "name" : user?.fullName,
     };
 

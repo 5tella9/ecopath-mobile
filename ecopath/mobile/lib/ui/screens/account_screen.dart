@@ -404,10 +404,8 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _infoRowDob() {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final labelStyle =
-        theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
-    final valueStyle = theme.textTheme.bodyMedium
-        ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
 
     if (_isEditing) {
       return _LinedRow(
@@ -432,8 +430,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  icon: Icon(Icons.calendar_today_outlined,
-                      size: 20, color: cs.primary),
+                  icon: Icon(Icons.calendar_today_outlined, size: 20, color: cs.primary),
                   onPressed: _openDatePicker,
                 ),
               ],
@@ -458,8 +455,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _infoRowAddress() {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final labelStyle =
-        theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
+    final labelStyle = theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant);
     final valueStyle = theme.textTheme.bodyMedium
         ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500);
 

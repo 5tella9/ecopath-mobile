@@ -63,7 +63,6 @@ class UserProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user', jsonEncode(_user!.toJson()));
   }
-
   void updateAvatar(String image, String bg) {
     if (_user != null) {
       _user!.profileImage = image;      // 👈 UPDATE HERE
@@ -73,18 +72,18 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> save() async {
-    if (_user == null) return;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user', jsonEncode(_user!.toJson()));
-  }
-
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user'); // or prefs.clear() to remove everything
 
     _user = null;        // clear current user
     notifyListeners();   // tell UI to rebuild
+  }
+
+  Future<void> save() async {
+    if (_user == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', jsonEncode(_user!.toJson()));
   }
 
 }

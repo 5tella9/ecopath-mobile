@@ -11,6 +11,17 @@ import 'package:ecopath/core/progress_tracker.dart';
 import 'package:ecopath/ui/root_shell.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../models/enums.dart';
+import 'package:geocoding/geocoding.dart';
+
+class BagRule {
+  final String bagColor;
+  final String imagePath;
+  final WasteType wasteType;  // <-- use enum instead of string
+  final int basePointsPerLiter;
+
+  BagRule(this.bagColor, this.imagePath, this.wasteType,
+      {this.basePointsPerLiter = 1});
+}
 
 class ScanTrashScreen extends StatefulWidget {
   const ScanTrashScreen({super.key});
@@ -30,6 +41,8 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
 
   late final AnimationController _lineCtrl;
   late final Animation<double> _lineAnim;
+  String? _selectedRegion;
+  String? _selectedDistrict;
 
   int pointsEarned = 0;
 
@@ -37,6 +50,8 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   void initState() {
     super.initState();
     _initCamera();
+
+    _getAddressFromLocation();
 
     _lineCtrl = AnimationController(
       vsync: this,
@@ -144,6 +159,8 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
 
       if (res.statusCode == 200) {
         final result = jsonDecode(res.body);
+        final visibleBags = _getVisibleBags(); // based on location
+
 
         String wasteType = WasteType.values
             .firstWhere(
@@ -157,7 +174,12 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
           wasteType: wasteType,
         );
 
-        _finishScan(result);
+        final selectedBag = visibleBags.firstWhere(
+              (b) => b.wasteType.name.toLowerCase() == wasteType.toLowerCase(),
+          orElse: () => yellowFood, // default fallback
+        );
+
+        _finishScan(result, selectedBag);
       } else {
         debugPrint("❌ Error ${res.statusCode}: ${res.body}");
         _toast("Scan failed (${res.statusCode})");
@@ -169,6 +191,71 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
       if (mounted) setState(() => _isScanning = false);
     }
   }
+
+
+
+// ===== RECYCLABLES =====
+  final BagRule blueMetal   = BagRule("Blue Bag", "assets/images/bluebag.png", WasteType.Metal);
+  final BagRule blueGlass   = BagRule("Blue Bag", "assets/images/bluebag.png", WasteType.Glass);
+  final BagRule bluePaper   = BagRule("Blue Bag", "assets/images/bluebag.png", WasteType.PaperAndCardboard);
+  final BagRule bluePlastic = BagRule("Blue Bag", "assets/images/bluebag.png", WasteType.Plastic);
+
+// Yellow alternative for plastic in some areas
+  final BagRule yellowPlastic = BagRule("Yellow Bag", "assets/images/yellowbag.png", WasteType.Plastic);
+
+// ===== FOOD WASTE =====
+  final BagRule purpleFood  = BagRule("Purple Bag", "assets/images/purplebag.png", WasteType.BioWaste);
+  final BagRule yellowFood  = BagRule("Yellow Bag", "assets/images/yellowbag.png", WasteType.BioWaste);
+  final BagRule orangeFood  = BagRule("Orange Bag", "assets/images/orangebag.png", WasteType.BioWaste);
+  final BagRule blueFood   = BagRule("Green Bag", "assets/images/bluebag.png", WasteType.BioWaste);
+
+// ===== GENERAL WASTE =====
+  final BagRule whiteGeneral = BagRule("White Bag", "assets/images/whitebag.png", WasteType.GeneralWaste);
+
+
+
+
+
+  List<BagRule> _getVisibleBags() {
+
+    final Map<String, List<BagRule>> seoulDistrictRules = {
+      "Seocho-gu":   [bluePlastic, blueGlass, blueMetal, bluePaper, blueFood, whiteGeneral],
+      "Gwangjin-gu": [bluePlastic, blueGlass, blueMetal, bluePaper, purpleFood, whiteGeneral],
+      "Gangnam-gu":  [bluePlastic, blueGlass, blueMetal, bluePaper, yellowFood, whiteGeneral],
+      "Jung-gu":     [bluePlastic, blueGlass, blueMetal, bluePaper, purpleFood, whiteGeneral],
+      "Jongno-gu":   [bluePlastic, blueGlass, blueMetal, bluePaper, orangeFood, whiteGeneral],
+      "Songpa-gu":   [bluePlastic, blueGlass, blueMetal, bluePaper, yellowFood, whiteGeneral],
+      "Dobong-gu":   [yellowPlastic, blueGlass, blueMetal, bluePaper, yellowFood, whiteGeneral],
+
+      // Default: MOST districts in Seoul
+      "default":     [bluePlastic, blueGlass, blueMetal, bluePaper, yellowFood, whiteGeneral],
+    };
+
+    if (_selectedRegion != "Seoul" || _selectedDistrict == null) return [];
+
+    return seoulDistrictRules[_selectedDistrict!] ??
+        seoulDistrictRules["default"]!;
+  }
+
+
+
+  Future<void> _getAddressFromLocation() async {
+    Position position = await _getLocation();
+
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    Placemark place = placemarks.first;
+
+    setState(() {
+      _selectedRegion = place.administrativeArea; // Region / State
+      _selectedDistrict = place.locality;         // District / City
+    });
+  }
+
+
 
   Future<void> _sendToWasteScanAPI({
     required String base64Img,
@@ -229,12 +316,11 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   // ===========================================================
   //                     FINISH SCAN → SHOW RESULT
   // ===========================================================
-  void _finishScan(Map<String, dynamic> result) {
+  void _finishScan(Map<String, dynamic> result, BagRule selectedBag) {
     final cs = Theme.of(context).colorScheme;
 
     setState(() => pointsEarned += 15);
 
-    // ✅ Use game reward API so points + XP + notifications are handled
     ProgressTracker.instance.rewardFromGame(
       points: 15,
       gameName: 'Scan Trash',
@@ -260,15 +346,23 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
               ),
             ),
             const SizedBox(height: 8),
+
+            // 🟢 SHOW BAG IMAGE HERE
+            Image.asset(
+              selectedBag.imagePath,
+              height: 120,
+            ),
+            const SizedBox(height: 12),
+
             Text(
-              'You scanned ${result['item']}, this must go to ${result['bin_korea']} • +15 pts',
+              'You scanned ${result['item']} — this must go to\n${result['bin_korea']} (${selectedBag.bagColor}) • +15 pts',
               style: GoogleFonts.alike(color: cs.onSurface),
               textAlign: TextAlign.center,
             ),
+
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: cs.primary,
                 borderRadius: BorderRadius.circular(999),
