@@ -11,3 +11,12 @@ enum HousingType {
   condominium,
   townhouse,
 }
+
+enum WasteType {
+  Glass,
+  Plastic,
+  Metal,
+  PaperAndCardboard,
+  GeneralWaste,
+  BioWaste
+}

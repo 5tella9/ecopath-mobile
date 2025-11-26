@@ -7,9 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:ecopath/core/progress_tracker.dart';
 import 'package:ecopath/ui/root_shell.dart';
+import 'package:geolocator/geolocator.dart';
+import '../../models/enums.dart';
 
 class ScanTrashScreen extends StatefulWidget {
   const ScanTrashScreen({super.key});
@@ -143,6 +144,19 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
 
       if (res.statusCode == 200) {
         final result = jsonDecode(res.body);
+
+        String wasteType = WasteType.values
+            .firstWhere(
+              (e) => e.name.toLowerCase() == (result['item'] ?? '').toLowerCase(),
+          orElse: () => WasteType.GeneralWaste, // fallback 🚀
+        )
+            .name;
+
+        await _sendToWasteScanAPI(
+          base64Img: base64Image,
+          wasteType: wasteType,
+        );
+
         _finishScan(result);
       } else {
         debugPrint("❌ Error ${res.statusCode}: ${res.body}");
@@ -155,6 +169,62 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
       if (mounted) setState(() => _isScanning = false);
     }
   }
+
+  Future<void> _sendToWasteScanAPI({
+    required String base64Img,
+    required String wasteType,
+  }) async {
+    try {
+      final pos = await _getLocation();
+
+      final res = await http.post(
+        Uri.parse("https://api.ecopath.site/api/waste-scan"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "image": base64Img,
+          "timestamp" : DateTime.now().toIso8601String(),
+          "wasteType": wasteType,
+          "location": {
+            "longitude": pos.longitude,
+            "latitude": pos.latitude,
+          }
+        }),
+      );
+
+      if (res.statusCode == 200) {
+        debugPrint("Waste scan succesvol opgeslagen! 👍");
+      } else {
+        debugPrint("❌ Server error: ${res.statusCode} - ${res.body}");
+      }
+    } catch (e) {
+      debugPrint("⚠️ Fout bij POST: $e");
+    }
+  }
+
+  Future<Position> _getLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Locatieservices staan uit.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Locatie permissie geweigerd.');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Locatie permanent geblokkeerd.');
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
+
 
   // ===========================================================
   //                     FINISH SCAN → SHOW RESULT
@@ -450,4 +520,8 @@ class _CutoutPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CutoutPainter old) => old.t != t;
+
+
+
+
 }
