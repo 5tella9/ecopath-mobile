@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import '../../providers/userProvider.dart';
+
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -9,14 +12,15 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+
+  String _username = '';
+  String _dob = '';
+  String _fullAddress = '';
+  String _email = '';
+
+
   bool _isEditing = false;
 
-  String _username = 'eco_snow';
-  String _dob = '2003/07/15';
-  String _fullAddress =
-      'Sejong Univ Dorm 204, Gunja-dong, Gwangjin-gu, Seoul';
-
-  // removed _authProvider and _authAccount since Sign-in Method section is gone
 
   final _usernameCtrl = TextEditingController();
   final _dobCtrl = TextEditingController();
@@ -28,7 +32,20 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   void initState() {
     super.initState();
-    _syncControllersFromState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<UserProvider>().user;
+
+      if (user != null) {
+        setState(() {
+          _username = user.fullName ?? '';
+          _dob = user.birthDate ?? '';
+          _fullAddress = user?.location?.city ?? '';
+          _email = user.email ?? '';
+        });
+        _syncControllersFromState();
+      }
+    });
   }
 
   void _syncControllersFromState() {
@@ -194,8 +211,10 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  void _onTapLogout() {
-    // TODO: change '/login' to your actual login route if different
+  Future<void> _onTapLogout() async {
+    final userProvider = context.read<UserProvider>();
+    await userProvider.logout();
+
     Navigator.of(context, rootNavigator: true)
         .pushNamedAndRemoveUntil('/login', (route) => false);
   }
@@ -478,6 +497,8 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+
+
   Widget _buildMainCard() {
     final theme = Theme.of(context);
     return Padding(
@@ -559,6 +580,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<UserProvider>().user;
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,

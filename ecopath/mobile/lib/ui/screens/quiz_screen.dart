@@ -4,9 +4,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import '../../util/survey_storage.dart';
 import '../../util/life_storage.dart';
 import 'package:ecopath/core/progress_tracker.dart';
+import 'package:provider/provider.dart';
+import '../../providers/userProvider.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -139,21 +140,22 @@ class _QuizScreenState extends State<QuizScreen> {
   Future<void> _fetchQuiz() async {
     const apiUrl =
         'https://pos-guitar-pick-his.trycloudflare.com/quiz';
-    final surveyData = await SurveyStorage.load();
+    final user = context.read<UserProvider>().user;
 
     final payload = {
       "userId": "b2f84c7a-0d8c-4e41-b5e3-52ddf559fa66",
-      "from_date": "2025-01-01",
-      "to_date": "2025-01-31",
       "carbonFootprint": {
         "electricityKgCO2e": 14.2,
         "gasKgCO2e": 53.9,
         "wasteKgCO2e": 2.8,
         "totalKgCO2e": 70.9
       },
-      "household": surveyData?.livingWith,
-      "houseType": surveyData?.houseType,
-      "ecoGoal": surveyData?.ecoGoals.toList(),
+      "household": user?.householdSize,
+      "houseType": user?.housingType.toString(),
+      "ecoGoal": user?.ecoGoals,
+      "gender" : user?.gender,
+      "birth date": user?.birthDate,
+      "name" : user?.fullName,
     };
 
     try {

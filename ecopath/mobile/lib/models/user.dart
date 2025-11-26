@@ -11,6 +11,8 @@ class User {
   HousingType? housingType;
   Gender? gender;
   String? birthDate;
+  String? profileImage;
+  String? avatarBackground;
 
   User({
     required this.fullName,
@@ -21,6 +23,8 @@ class User {
     this.housingType,
     this.gender,
     this.birthDate,
+    this.profileImage,
+    this.avatarBackground,
   });
 
   /// Convert User to JSON (for saving to storage or sending to backend)
@@ -34,6 +38,8 @@ class User {
       'housingType': housingType?.name, // enum -> string
       'gender': gender?.name, // enum -> string
       'birthDate': birthDate,
+      'profileImage': profileImage,
+      'avatarBackground': avatarBackground,
     };
   }
 
@@ -54,6 +60,8 @@ class User {
           ? Gender.values.firstWhere((e) => e.name == json['gender'])
           : null,
       birthDate: json['birthDate'],
+      profileImage: json['profileImage'],
+      avatarBackground: json['avatarBackground'],
     );
   }
 

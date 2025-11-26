@@ -12,6 +12,10 @@ import 'education_screen.dart';
 
 // NEW: localization
 import 'package:ecopath/l10n/app_localizations.dart';
+import '../../providers/userProvider.dart';
+import 'package:provider/provider.dart';
+
+
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -119,6 +123,7 @@ class DashboardState extends State<Dashboard> {
     final (labels, values) = _buildSeries(_range);
     final total = values.fold<int>(0, (a, b) => a + b);
     final avg = values.isEmpty ? 0.0 : total / values.length;
+    final user = context.read<UserProvider>().user;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -149,7 +154,7 @@ class DashboardState extends State<Dashboard> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.profileName,
+                        Text(user?.fullName ?? '',
                             style: _ts(context, 20, fw: FontWeight.w600)),
                         const SizedBox(height: 6),
                         Text(

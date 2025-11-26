@@ -1,5 +1,7 @@
 // lib/ui/screens/edit_avatar_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/userProvider.dart';
 
 class EditAvatarScreen extends StatefulWidget {
   const EditAvatarScreen({super.key});
@@ -40,6 +42,9 @@ class _EditAvatarScreenState extends State<EditAvatarScreen> {
   Future<void> _saveAndClose() async {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final userProvider = context.read<UserProvider>();
+    userProvider.updateAvatar(_selectedChar, _selectedBg);
+
 
     // show alert: "Saved Successfully!"
     await showDialog(

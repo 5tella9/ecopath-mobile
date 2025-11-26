@@ -7,6 +7,10 @@ import 'notifications_screen.dart';
 import 'setting_screen.dart';
 import 'edit_avatar_screen.dart';
 import 'package:ecopath/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../../providers/userProvider.dart';
+import 'dart:io';
+
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -225,6 +229,7 @@ class ProfileState extends State<Profile> {
     final cs = Theme.of(context).colorScheme;
     final tracker = ProgressTracker.instance;
     final l10n = AppLocalizations.of(context)!;
+    final user = context.watch<UserProvider>().user;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -275,16 +280,48 @@ class ProfileState extends State<Profile> {
                   child: Column(
                     children: [
                       Stack(
-                        clipBehavior: Clip.none,
+                        alignment: Alignment.center,
                         children: [
-                          ClipOval(
-                            child: Image.asset(
-                              'assets/images/profileimg.png',
-                              width: 84,
-                              height: 84,
-                              fit: BoxFit.cover,
+                          // 🟢 BACKGROUND IMAGE FIRST (circle)
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: user?.avatarBackground != null
+                                    ? AssetImage(user!.avatarBackground!)
+                                    : const AssetImage('assets/images/green.png'), // default bg
+                                fit: BoxFit.cover,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: cs.shadow.withOpacity(0.25),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                           ),
+
+                          // 🐼 PROFILE AVATAR IMAGE ON TOP
+                          ClipOval(
+                            child: user?.profileImage != null
+                                ? Image.asset(                      // <-- using asset now
+                              user!.profileImage!,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.contain,
+                            )
+                                : Image.asset(
+                              'assets/images/profileimg.png',
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+
+                          // ✏️ EDIT BUTTON (TOP RIGHT)
                           Positioned(
                             right: -4,
                             top: -4,
@@ -298,8 +335,7 @@ class ProfileState extends State<Profile> {
                                   borderRadius: BorderRadius.circular(14),
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          cs.shadow.withOpacity(0.3),
+                                      color: cs.shadow.withOpacity(0.3),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
@@ -308,24 +344,27 @@ class ProfileState extends State<Profile> {
                                 child: Text(
                                   '...',
                                   style: TextStyle(
-                                      color: cs.onPrimary, fontSize: 14),
+                                    color: cs.onPrimary,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 14),
+
                       Text(
-                        l10n.profileName,
-                        style:
-                            TextStyle(color: cs.onSurface, fontSize: 18),
+                        user?.fullName ?? '',
+                        style: TextStyle(color: cs.onSurface, fontSize: 18),
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
+
 
                 // stats (now using tracker)
                 Padding(

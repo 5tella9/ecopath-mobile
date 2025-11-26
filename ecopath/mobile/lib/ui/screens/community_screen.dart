@@ -5,9 +5,9 @@ import 'package:ecopath/core/progress_tracker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-
-// NEW: localization
 import 'package:ecopath/l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../../providers/userProvider.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -20,7 +20,6 @@ class _CommunityScreenState extends State<CommunityScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tab;
 
-  static const _userAvatar = 'assets/images/profileimg.png';
   static const _keziaAvatar = 'assets/images/otter.png';
   static const _thomasAvatar = 'assets/images/polar.png';
   static const _jinAvatar = 'assets/images/bee.png';
@@ -28,7 +27,7 @@ class _CommunityScreenState extends State<CommunityScreen>
   static const _keziaFeedImg = 'assets/images/community1.png';
   static const _severusAvatar = 'assets/images/elephant.png';
 
-  final String _currentUserName = 'Stella';
+  String _currentUserName = '';
 
   int streak = 5;
   String? _filterTag;
@@ -69,7 +68,7 @@ class _CommunityScreenState extends State<CommunityScreen>
     Leader('Ginny', 140, _keziaAvatar),
     Leader('Draco', 130, _thomasAvatar),
     Leader('Neville', 120, _jinAvatar),
-    Leader('Stella', 90, _userAvatar),
+    Leader('Stella', 90, _minjiAvatar),
   ];
 
   final Set<String> _likedPosts = {};
@@ -124,12 +123,13 @@ class _CommunityScreenState extends State<CommunityScreen>
       registerUntil: 'Nov 21, 18:00',
     ),
   ];
-
+  String _userAvatar = '';
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 3, vsync: this);
-    _tab.addListener(() => setState(() {}));
+    final user = context.read<UserProvider>().user;
+    _currentUserName = user?.fullName ?? 'User';
+    _userAvatar = user?.profileImage ?? '';
   }
 
   @override
@@ -157,6 +157,10 @@ class _CommunityScreenState extends State<CommunityScreen>
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context)!;
+    final user = context.read<UserProvider>().user;
+
+    _currentUserName = user?.fullName ?? '';
+    _userAvatar = user?.profileImage ?? '';
 
     final Color dark1 = Color.lerp(Colors.black, cs.primary, 0.35)!;
     final Color dark2 = Color.lerp(Colors.black, cs.primary, 0.75)!;
@@ -276,9 +280,12 @@ class _CommunityScreenState extends State<CommunityScreen>
       child: Row(
         children: [
           CircleAvatar(
-            radius: 28,
-            backgroundColor: cs.surface,
-            backgroundImage: const AssetImage(_userAvatar),
+            radius: 24,
+            backgroundImage: _userAvatar.isNotEmpty
+                ? _userAvatar.startsWith('assets/') // check if asset path
+                ? AssetImage(_userAvatar) as ImageProvider
+                : FileImage(File(_userAvatar))
+                : const AssetImage('assets/images/default_avatar.png'),
           ),
           const SizedBox(width: 12),
           Expanded(
