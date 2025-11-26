@@ -79,4 +79,12 @@ class UserProvider with ChangeNotifier {
     await prefs.setString('user', jsonEncode(_user!.toJson()));
   }
 
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user'); // or prefs.clear() to remove everything
+
+    _user = null;        // clear current user
+    notifyListeners();   // tell UI to rebuild
+  }
+
 }

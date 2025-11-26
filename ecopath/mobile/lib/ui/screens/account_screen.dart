@@ -211,8 +211,10 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  void _onTapLogout() {
-    // TODO: change '/login' to your actual login route if different
+  Future<void> _onTapLogout() async {
+    final userProvider = context.read<UserProvider>();
+    await userProvider.logout();
+
     Navigator.of(context, rootNavigator: true)
         .pushNamedAndRemoveUntil('/login', (route) => false);
   }
