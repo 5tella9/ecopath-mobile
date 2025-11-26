@@ -208,7 +208,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 6),
                       TextFormField(
                         controller: _nameController,
-                        decoration: _inputDecoration(hint: "uniquename"),
+                        decoration: _inputDecoration(hint: "unique name"),
                         style: GoogleFonts.alike(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
