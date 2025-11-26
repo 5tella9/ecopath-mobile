@@ -10,6 +10,8 @@ import 'theme/app_theme.dart';
 import 'theme/theme_controller.dart';
 import 'theme/language_controller.dart';
 import 'core/notification_service.dart';
+import 'providers/userProvider.dart';
+
 
 import 'ui/root_shell.dart';
 
@@ -42,6 +44,11 @@ void main() async {
         ChangeNotifierProvider.value(value: themeController),
         ChangeNotifierProvider.value(value: languageController),
         ChangeNotifierProvider.value(value: userProvider),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider<UserProvider>(
+          create: (_)=> UserProvider(),
+        )
+
       ],
       child: const EcoPathRoot(),
     ),

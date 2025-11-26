@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
 import 'package:ecopath/core/api_config.dart'; // contains ApiConfig.baseUrl
+import 'package:ecopath/l10n/app_localizations.dart';
 
 class CarbonScreen extends StatefulWidget {
   const CarbonScreen({super.key});
@@ -241,6 +242,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
+    final loc = AppLocalizations.of(context)!;
     final kg = _estimateKgCO2();
 
     return Scaffold(
@@ -250,7 +252,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
         elevation: theme.appBarTheme.elevation ?? 0,
         centerTitle: true,
         title: Text(
-          'Carbon Footprint',
+          loc.carbonTitle,
           style: textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: theme.appBarTheme.foregroundColor ?? cs.onSurface,
@@ -265,7 +267,12 @@ class _CarbonScreenState extends State<CarbonScreen> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 300),
               children: [
                 // -------- Intro / Illustration --------
-                _IntroCard(textTheme: textTheme, cs: cs),
+                _IntroCard(
+                  textTheme: textTheme,
+                  cs: cs,
+                  title: loc.carbonIntroTitle,
+                  body: loc.carbonIntroBody,
+                ),
 
                 const SizedBox(height: 12),
 
@@ -283,7 +290,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                 const SizedBox(height: 20),
 
                 Text(
-                  "Your monthly trash",
+                  loc.carbonMonthlyTrashTitle,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: cs.onSurface,
@@ -291,7 +298,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Tell us how much you threw away this month.\nWe’ll turn that into CO₂.",
+                  loc.carbonMonthlyTrashBody,
                   style: textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant,
                     height: 1.4,
@@ -302,8 +309,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
 
                 // GLASS
                 _WasteCard(
-                  label: "Glass",
-                  desc: "Bottles, jars, broken glass containers.",
+                  label: loc.carbonGlassLabel,
+                  desc: loc.carbonGlassDesc,
                   value: _glass,
                   onChanged: (v) => setState(() => _glass = v),
                   cs: cs,
@@ -313,9 +320,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
 
                 // PLASTIC
                 _WasteCard(
-                  label: "Plastic (bag volume)",
-                  desc:
-                      "Choose based on bag size in liters.\nLow : 1L–5L\nMedium : 10L / 20L\nHigh : 30L+",
+                  label: loc.carbonPlasticLabel,
+                  desc: loc.carbonPlasticDesc,
                   value: _plastic,
                   onChanged: (v) => setState(() => _plastic = v),
                   cs: cs,
@@ -326,8 +332,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
 
                 // METAL
                 _WasteCard(
-                  label: "Metal",
-                  desc: "Cans, tins, aluminum packaging.",
+                  label: loc.carbonMetalLabel,
+                  desc: loc.carbonMetalDesc,
                   value: _metal,
                   onChanged: (v) => setState(() => _metal = v),
                   cs: cs,
@@ -337,8 +343,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
 
                 // CARDBOARD
                 _WasteCard(
-                  label: "Cardboard",
-                  desc: "Delivery boxes, packaging board.",
+                  label: loc.carbonCardboardLabel,
+                  desc: loc.carbonCardboardDesc,
                   value: _cardboard,
                   onChanged: (v) => setState(() => _cardboard = v),
                   cs: cs,
@@ -348,8 +354,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
 
                 // PAPER
                 _WasteCard(
-                  label: "Paper",
-                  desc: "Receipts, tissues, office paper, etc.",
+                  label: loc.carbonPaperLabel,
+                  desc: loc.carbonPaperDesc,
                   value: _paper,
                   onChanged: (v) => setState(() => _paper = v),
                   cs: cs,
@@ -359,9 +365,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
 
                 // GENERAL
                 _WasteCard(
-                  label: "General Waste",
-                  desc:
-                      "Regular trash (municipal solid waste).\nStuff that can’t be recycled.",
+                  label: loc.carbonGeneralLabel,
+                  desc: loc.carbonGeneralDesc,
                   value: _general,
                   onChanged: (v) => setState(() => _general = v),
                   cs: cs,
@@ -371,9 +376,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
 
                 // BIO
                 _WasteCard(
-                  label: "Bio / Organic",
-                  desc:
-                      "Food waste, peels, leftovers, compostable scraps.",
+                  label: loc.carbonBioLabel,
+                  desc: loc.carbonBioDesc,
                   value: _bio,
                   onChanged: (v) => setState(() => _bio = v),
                   cs: cs,
@@ -387,7 +391,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Your Trend",
+                      loc.carbonTrendTitle,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -435,10 +439,10 @@ class _CarbonScreenState extends State<CarbonScreen> {
                       const SizedBox(height: 12),
                       Text(
                         _range == CarbonRange.oneMonth
-                            ? "Last 4 weeks"
+                            ? loc.carbonTrendRange4w
                             : _range == CarbonRange.sixMonth
-                                ? "Last 6 months"
-                                : "Last 12 months",
+                                ? loc.carbonTrendRange6m
+                                : loc.carbonTrendRange12m,
                         style: textTheme.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
@@ -488,7 +492,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Your CO₂ estimate this month\n",
+                                text: '${loc.carbonSummaryTitle}\n',
                                 style: textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: cs.primary,
@@ -496,7 +500,8 @@ class _CarbonScreenState extends State<CarbonScreen> {
                                 ),
                               ),
                               TextSpan(
-                                text: "$kg kg CO₂e",
+                                text:
+                                    '$kg ${loc.carbonSummaryValueSuffix}',
                                 style: textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w800,
                                   color: cs.primary,
@@ -504,8 +509,7 @@ class _CarbonScreenState extends State<CarbonScreen> {
                                 ),
                               ),
                               TextSpan(
-                                text:
-                                    "\nLower number = lower impact. Try reducing general waste and plastic first 💚",
+                                text: '\n${loc.carbonSummaryBody}',
                                 style: textTheme.bodySmall?.copyWith(
                                   fontWeight: FontWeight.w500,
                                   color: cs.primary,
@@ -552,6 +556,7 @@ class _ServerPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     Widget _line(String label, double? v) {
       return Row(
@@ -563,7 +568,7 @@ class _ServerPanel extends StatelessWidget {
             ),
           ),
           Text(
-            v == null ? '—' : '${v.toStringAsFixed(1)} kg',
+            v == null ? '—' : '${v.toStringAsFixed(1)} ${loc.carbonServerUnitKg}',
             style: t.bodySmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: cs.onSurface,
@@ -590,23 +595,29 @@ class _ServerPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Server Carbon Footprint',
-              style: t.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800, color: cs.onSurface)),
+          Text(
+            loc.carbonServerPanelTitle,
+            style: t.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+            ),
+          ),
           const SizedBox(height: 8),
           if (error != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text('Error: $error',
-                  style: t.bodySmall?.copyWith(color: cs.error)),
+              child: Text(
+                '${loc.carbonServerPanelErrorPrefix} $error',
+                style: t.bodySmall?.copyWith(color: cs.error),
+              ),
             ),
-          _line('Electricity', electricity),
+          _line(loc.carbonServerElectricity, electricity),
           const SizedBox(height: 4),
-          _line('Gas', gas),
+          _line(loc.carbonServerGas, gas),
           const SizedBox(height: 4),
-          _line('Waste', waste),
+          _line(loc.carbonServerWaste, waste),
           const Divider(height: 18),
-          _line('Total', total),
+          _line(loc.carbonServerTotal, total),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
@@ -616,9 +627,14 @@ class _ServerPanel extends StatelessWidget {
                   ? const SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2))
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Icon(Icons.cloud_download_outlined, size: 18),
-              label: Text(loading ? 'Fetching…' : 'Fetch from server'),
+              label: Text(
+                loading
+                    ? loc.carbonServerFetchingButton
+                    : loc.carbonServerFetchButton,
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: cs.primary,
                 side: BorderSide(color: cs.primary),
@@ -637,10 +653,14 @@ class _ServerPanel extends StatelessWidget {
 class _IntroCard extends StatelessWidget {
   final TextTheme textTheme;
   final ColorScheme cs;
+  final String title;
+  final String body;
 
   const _IntroCard({
     required this.textTheme,
     required this.cs,
+    required this.title,
+    required this.body,
   });
 
   @override
@@ -678,7 +698,7 @@ class _IntroCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Monthly footprint check",
+                  title,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: cs.onSurface,
@@ -687,11 +707,7 @@ class _IntroCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Pick how much trash you made this month.\n"
-                  "For plastic, choose bag size:\n"
-                  "• Low  = 1L–5L\n"
-                  "• Medium = 10L / 20L\n"
-                  "• High = 30L+",
+                  body,
                   style: textTheme.bodySmall?.copyWith(
                     color: cs.onSurfaceVariant,
                     height: 1.4,
@@ -838,6 +854,8 @@ class _LevelPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Container(
       // width now comes from parent SizedBox
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -867,11 +885,23 @@ class _LevelPicker extends StatelessWidget {
           onChanged: (v) {
             if (v != null) onChanged(v);
           },
-          items: const [
-            DropdownMenuItem(value: 'none', child: Text('None')),
-            DropdownMenuItem(value: 'low', child: Text('Low')),
-            DropdownMenuItem(value: 'med', child: Text('Medium')),
-            DropdownMenuItem(value: 'high', child: Text('High')),
+          items: [
+            DropdownMenuItem(
+              value: 'none',
+              child: Text(loc.carbonLevelNone),
+            ),
+            DropdownMenuItem(
+              value: 'low',
+              child: Text(loc.carbonLevelLow),
+            ),
+            DropdownMenuItem(
+              value: 'med',
+              child: Text(loc.carbonLevelMedium),
+            ),
+            DropdownMenuItem(
+              value: 'high',
+              child: Text(loc.carbonLevelHigh),
+            ),
           ],
         ),
       ),

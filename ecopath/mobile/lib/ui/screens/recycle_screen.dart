@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:ecopath/core/progress_tracker.dart';
 import 'package:ecopath/core/recycle_history.dart';
+import 'package:ecopath/l10n/app_localizations.dart';
 
 enum RecycleCategory { plastic, paper, metal, glass, ewaste, other }
 
@@ -28,6 +29,20 @@ class _RecycleScreenState extends State<RecycleScreen> {
 
   static const int _energyCost = 3;
   static const int _pointsPerItem = 5;
+
+  bool _hasShownInstructions = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Show instructions automatically the first time the screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_hasShownInstructions) {
+        _showInstructionsSheet();
+        _hasShownInstructions = true;
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -53,7 +68,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.camera_alt_outlined),
-                title: const Text('Take a photo'),
+                title: Text(AppLocalizations.of(context)!.recycleTakePhoto),
                 onTap: () async {
                   Navigator.pop(ctx);
                   final XFile? picked =
@@ -65,7 +80,8 @@ class _RecycleScreenState extends State<RecycleScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Choose from gallery'),
+                title:
+                    Text(AppLocalizations.of(context)!.recycleChooseFromGallery),
                 onTap: () async {
                   Navigator.pop(ctx);
                   final XFile? picked =
@@ -85,6 +101,8 @@ class _RecycleScreenState extends State<RecycleScreen> {
 
   void _showNotEnoughEnergyDialog(int currentEnergy) {
     final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       barrierColor: cs.scrim.withOpacity(0.4),
@@ -108,7 +126,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Not enough energy",
+                  t.recycleNotEnoughEnergyTitle,
                   style: GoogleFonts.alike(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -117,8 +135,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "You need $_energyCost energy to recycle.\n"
-                  "Current energy: $currentEnergy",
+                  t.recycleNotEnoughEnergyBody(_energyCost, currentEnergy),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: cs.onSurfaceVariant,
@@ -142,7 +159,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
                       Navigator.pop(ctx); // close dialog
                       Navigator.pop(context); // quit recycle screen
                     },
-                    child: const Text("Quit"),
+                    child: Text(t.recycleNotEnoughEnergyQuit),
                   ),
                 ),
               ],
@@ -162,17 +179,18 @@ class _RecycleScreenState extends State<RecycleScreen> {
   Future<void> _handleSubmit() async {
     final tracker = ProgressTracker.instance;
     final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
 
     if (_category == null) {
-      _showValidationSnack("Please choose what you recycled.");
+      _showValidationSnack(t.recycleValidationChooseCategory);
       return;
     }
     if (_descController.text.trim().isEmpty) {
-      _showValidationSnack("Please add a short description.");
+      _showValidationSnack(t.recycleValidationAddDescription);
       return;
     }
     if (_imageFile == null) {
-      _showValidationSnack("Please upload a photo as proof.");
+      _showValidationSnack(t.recycleValidationAddPhoto);
       return;
     }
 
@@ -184,12 +202,12 @@ class _RecycleScreenState extends State<RecycleScreen> {
 
     setState(() => _submitting = true);
 
-    // Spend energy (void, always succeeds as long as we checked above)
+    // Spend energy
     tracker.spendEnergy(_energyCost);
 
     final int earnedPoints = _previewPoints;
 
-    // ✅ Use game reward API so points + XP + notifications are handled
+    // Reward through game API
     tracker.rewardFromGame(
       points: earnedPoints,
       gameName: 'Recycle',
@@ -217,7 +235,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Nice job! ♻️",
+                  t.recycleSuccessTitle,
                   style: GoogleFonts.alike(
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -226,8 +244,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "You earned $earnedPoints points for recycling.\n"
-                  "This will show up in your Recycle History on the Profile page.",
+                  t.recycleSuccessBody(earnedPoints),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: cs.onSurfaceVariant,
@@ -251,7 +268,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
                       Navigator.pop(ctx); // close sheet
                       Navigator.pop(context); // back to Games
                     },
-                    child: const Text("Back to Games"),
+                    child: Text(t.recycleSuccessBackButton),
                   ),
                 ),
               ],
@@ -263,19 +280,20 @@ class _RecycleScreenState extends State<RecycleScreen> {
   }
 
   String _categoryLabel(RecycleCategory cat) {
+    final t = AppLocalizations.of(context)!;
     switch (cat) {
       case RecycleCategory.plastic:
-        return "Plastic";
+        return t.recycleCategoryPlastic;
       case RecycleCategory.paper:
-        return "Paper";
+        return t.recycleCategoryPaper;
       case RecycleCategory.metal:
-        return "Metal";
+        return t.recycleCategoryMetal;
       case RecycleCategory.glass:
-        return "Glass";
+        return t.recycleCategoryGlass;
       case RecycleCategory.ewaste:
-        return "E-waste";
+        return t.recycleCategoryEwaste;
       case RecycleCategory.other:
-        return "Other";
+        return t.recycleCategoryOther;
     }
   }
 
@@ -296,11 +314,250 @@ class _RecycleScreenState extends State<RecycleScreen> {
     }
   }
 
+  // ---------- INSTRUCTIONS SHEET ----------
+
+  Future<void> _showInstructionsSheet() async {
+    final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: cs.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        t.recycleInstrTitle,
+                        style: GoogleFonts.alike(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: cs.onSurfaceVariant),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    t.recycleInstrIntro,
+                    style: TextStyle(
+                      color: cs.onSurfaceVariant,
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _ruleBullet(cs, t.recycleInstrRule1),
+                  _ruleBullet(cs, t.recycleInstrRule2),
+                  _ruleBullet(cs, t.recycleInstrRule3),
+                  _ruleBullet(cs, t.recycleInstrRule4),
+                  const SizedBox(height: 16),
+
+                  Text(
+                    t.recycleInstrWhatGoesWhere,
+                    style: GoogleFonts.alike(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recyclePaperTitle,
+                    prep: t.recyclePaperPrep,
+                    disposal: t.recyclePaperDisposal,
+                  ),
+                  const SizedBox(height: 8),
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recyclePaperPackTitle,
+                    prep: t.recyclePaperPackPrep,
+                    disposal: t.recyclePaperPackDisposal,
+                  ),
+                  const SizedBox(height: 8),
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recycleCansMetalsTitle,
+                    prep: t.recycleCansMetalsPrep,
+                    disposal: t.recycleCansMetalsDisposal,
+                  ),
+                  const SizedBox(height: 8),
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recycleGlassTitle,
+                    prep: t.recycleGlassPrep,
+                    disposal: t.recycleGlassDisposal,
+                  ),
+                  const SizedBox(height: 8),
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recyclePlasticsTitle,
+                    prep: t.recyclePlasticsPrep,
+                    disposal: t.recyclePlasticsDisposal,
+                  ),
+                  const SizedBox(height: 8),
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recycleVinylTitle,
+                    prep: t.recycleVinylPrep,
+                    disposal: t.recycleVinylDisposal,
+                  ),
+                  const SizedBox(height: 8),
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recycleStyrofoamTitle,
+                    prep: t.recycleStyrofoamPrep,
+                    disposal: t.recycleStyrofoamDisposal,
+                  ),
+                  const SizedBox(height: 18),
+
+                  Text(
+                    t.recycleInstrBagsTitle,
+                    style: GoogleFonts.alike(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recycleBagGeneralTitle,
+                    prep: t.recycleBagGeneralPrep,
+                    disposal: t.recycleBagGeneralDisposal,
+                  ),
+                  const SizedBox(height: 8),
+                  _categoryCard(
+                    cs: cs,
+                    title: t.recycleBagFoodTitle,
+                    prep: t.recycleBagFoodPrep,
+                    disposal: t.recycleBagFoodDisposal,
+                  ),
+                  const SizedBox(height: 18),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        foregroundColor: cs.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text(t.recycleInstrGotIt),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _ruleBullet(ColorScheme cs, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.check_circle_outline,
+              size: 16, color: cs.primary.withOpacity(0.9)),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: cs.onSurfaceVariant,
+                fontSize: 13,
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _categoryCard({
+    required ColorScheme cs,
+    required String title,
+    required String prep,
+    required String disposal,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: cs.onSurface,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            prep,
+            style: TextStyle(
+              color: cs.onSurfaceVariant,
+              fontSize: 11,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            disposal,
+            style: TextStyle(
+              color: cs.onSurfaceVariant,
+              fontSize: 11,
+              height: 1.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------- BUILD UI ----------
+
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    final cs = t.colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final tracker = ProgressTracker.instance;
+    final t = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -309,7 +566,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Recycle',
+          t.recycleTitle,
           style: GoogleFonts.alike(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -328,9 +585,35 @@ class _RecycleScreenState extends State<RecycleScreen> {
                 energyMax: ProgressTracker.maxEnergy,
                 energyCost: _energyCost,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+
+              // Instructions button
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _showInstructionsSheet,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                  ),
+                  icon: Icon(
+                    Icons.info_outline,
+                    size: 18,
+                    color: cs.primary,
+                  ),
+                  label: Text(
+                    t.recycleInstructionsButton,
+                    style: TextStyle(
+                      color: cs.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+
               Text(
-                "Complete your recycling mission",
+                t.recycleCompleteMissionTitle,
                 style: GoogleFonts.alike(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -338,15 +621,15 @@ class _RecycleScreenState extends State<RecycleScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              _buildCategorySection(cs),
+              _buildCategorySection(context, cs),
               const SizedBox(height: 16),
-              _buildDescriptionSection(cs),
+              _buildDescriptionSection(context, cs),
               const SizedBox(height: 16),
-              _buildPhotoSection(cs),
+              _buildPhotoSection(context, cs),
               const SizedBox(height: 16),
-              _buildQuantitySection(cs),
+              _buildQuantitySection(context, cs),
               const SizedBox(height: 20),
-              _buildPointsPreview(cs),
+              _buildPointsPreview(context, cs),
               const SizedBox(height: 18),
               SizedBox(
                 width: double.infinity,
@@ -367,7 +650,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Text(
-                          "Recycle & claim points",
+                          t.recycleSubmitButton,
                           style: GoogleFonts.alike(fontSize: 16),
                         ),
                 ),
@@ -379,7 +662,8 @@ class _RecycleScreenState extends State<RecycleScreen> {
     );
   }
 
-  Widget _buildCategorySection(ColorScheme cs) {
+  Widget _buildCategorySection(BuildContext context, ColorScheme cs) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -390,7 +674,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Step 1 • What did you recycle?",
+            t.recycleStep1Title,
             style: TextStyle(
               color: cs.onSurface,
               fontWeight: FontWeight.w600,
@@ -450,7 +734,8 @@ class _RecycleScreenState extends State<RecycleScreen> {
     );
   }
 
-  Widget _buildDescriptionSection(ColorScheme cs) {
+  Widget _buildDescriptionSection(BuildContext context, ColorScheme cs) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -461,7 +746,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Step 2 • Add a short note",
+            t.recycleStep2Title,
             style: TextStyle(
               color: cs.onSurface,
               fontWeight: FontWeight.w600,
@@ -473,7 +758,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
             controller: _descController,
             maxLines: 3,
             decoration: InputDecoration(
-              hintText: "e.g. 3 plastic bottles and 2 cans",
+              hintText: t.recycleStep2Hint,
               hintStyle: TextStyle(color: cs.onSurfaceVariant),
               filled: true,
               fillColor: cs.surfaceContainerHighest,
@@ -498,7 +783,8 @@ class _RecycleScreenState extends State<RecycleScreen> {
     );
   }
 
-  Widget _buildPhotoSection(ColorScheme cs) {
+  Widget _buildPhotoSection(BuildContext context, ColorScheme cs) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -509,7 +795,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Step 3 • Upload a photo",
+            t.recycleStep3Title,
             style: TextStyle(
               color: cs.onSurface,
               fontWeight: FontWeight.w600,
@@ -538,7 +824,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
                             size: 28, color: cs.onSurfaceVariant),
                         const SizedBox(height: 8),
                         Text(
-                          "Tap to take or choose a photo\nas proof of your recycling",
+                          t.recycleStep3Hint,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: cs.onSurfaceVariant,
@@ -563,7 +849,8 @@ class _RecycleScreenState extends State<RecycleScreen> {
     );
   }
 
-  Widget _buildQuantitySection(ColorScheme cs) {
+  Widget _buildQuantitySection(BuildContext context, ColorScheme cs) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -574,7 +861,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "How many items?",
+            t.recycleQtyTitle,
             style: TextStyle(
               color: cs.onSurface,
               fontWeight: FontWeight.w600,
@@ -583,7 +870,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            "Move the slider to estimate how many items you recycled.",
+            t.recycleQtySubtitle,
             style: TextStyle(
               color: cs.onSurfaceVariant,
               fontSize: 12,
@@ -627,7 +914,8 @@ class _RecycleScreenState extends State<RecycleScreen> {
     );
   }
 
-  Widget _buildPointsPreview(ColorScheme cs) {
+  Widget _buildPointsPreview(BuildContext context, ColorScheme cs) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -651,7 +939,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Estimated reward",
+                  t.recycleEstimatedRewardTitle,
                   style: TextStyle(
                     color: cs.onSurface,
                     fontWeight: FontWeight.w600,
@@ -660,7 +948,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "$_previewPoints points · $_quantity item(s)",
+                  '$_previewPoints pts · $_quantity item(s)',
                   style: TextStyle(
                     color: cs.onSurfaceVariant,
                     fontSize: 12,
@@ -689,6 +977,8 @@ class _HeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final t = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -706,7 +996,7 @@ class _HeaderCard extends StatelessWidget {
             ),
             child: const Center(
               child: Text(
-                "♻️",
+                '♻️',
                 style: TextStyle(fontSize: 26),
               ),
             ),
@@ -717,7 +1007,7 @@ class _HeaderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Recycle to earn points",
+                  t.recycleHeaderTitle,
                   style: GoogleFonts.alike(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -726,7 +1016,7 @@ class _HeaderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "Upload proof of your recycling. Each mission costs $energyCost energy.",
+                  t.recycleHeaderSubtitle(energyCost),
                   style: TextStyle(
                     color: cs.onSurfaceVariant,
                     fontSize: 12,
@@ -749,7 +1039,7 @@ class _HeaderCard extends StatelessWidget {
                 Icon(Icons.bolt, size: 16, color: cs.onSecondaryContainer),
                 const SizedBox(width: 4),
                 Text(
-                  "$energyCurrent/$energyMax",
+                  '$energyCurrent/$energyMax',
                   style: TextStyle(
                     color: cs.onSecondaryContainer,
                     fontWeight: FontWeight.w600,
