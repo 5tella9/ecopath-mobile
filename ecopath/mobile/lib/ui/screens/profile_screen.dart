@@ -125,7 +125,9 @@ class ProfileState extends State<Profile> {
                 await Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const EditAvatarScreen()),
                 );
-                setState(() {}); // refresh after coming back
+                setState(() {
+                  _avatarFile=null;
+                }); // refresh after coming back
               },
             ),
             const SizedBox(height: 8),
