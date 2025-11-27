@@ -317,6 +317,7 @@ class ProfileState extends State<Profile> {
                     children: [
                       Stack(
                         alignment: Alignment.center,
+                        clipBehavior: Clip.none,
                         children: [
                           // background circle
                           Container(
