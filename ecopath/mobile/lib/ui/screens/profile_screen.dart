@@ -357,7 +357,7 @@ class ProfileState extends State<Profile> {
                                         fit: BoxFit.contain,
                                       )
                                     : Image.asset(
-                                        'assets/images/profileimg.png',
+                                        'assets/images/default_avatar.png',
                                         width: 80,
                                         height: 80,
                                         fit: BoxFit.contain,

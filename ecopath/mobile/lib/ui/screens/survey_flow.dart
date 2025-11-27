@@ -170,16 +170,42 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
   }
 
   Future<void> _loadAddressJson() async {
-    try {
-      final raw = await rootBundle.loadString('assets/data/kr_address.json');
-      final Map<String, dynamic> m = json.decode(raw);
-      _sidoSigungu = m.map((k, v) => MapEntry(k, List<String>.from(v)));
-    } catch (_) {
-      _sidoSigungu = {};
-    } finally {
-      if (mounted) setState(() => _loadingAddr = false);
+  try {
+    final raw = await rootBundle.loadString('assets/data/kr_address.json');
+    final decoded = json.decode(raw) as Map<String, dynamic>;
+
+    final List<dynamic> regions = decoded['regions'] ?? [];
+
+    final Map<String, List<String>> map = {};
+
+    for (final region in regions) {
+      final r = region as Map<String, dynamic>;
+
+      // Use English names for survey (as you said)
+      final String regionName = r['en'] as String;
+
+      final List<dynamic> districts = r['districts'] ?? [];
+      final List<String> districtNames = districts
+          .map((d) => (d as Map<String, dynamic>)['en'] as String)
+          .toList();
+
+      map[regionName] = districtNames;
     }
+
+    if (!mounted) return;
+    setState(() {
+      _sidoSigungu = map;
+      _loadingAddr = false;
+    });
+  } catch (e) {
+    if (!mounted) return;
+    setState(() {
+      _sidoSigungu = {};
+      _loadingAddr = false;
+    });
   }
+}
+
 
   void _next() => setState(() {
         index = (index + 1).clamp(0, _steps.length - 1);
