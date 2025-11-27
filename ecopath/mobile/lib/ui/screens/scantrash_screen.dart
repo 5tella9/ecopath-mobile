@@ -396,19 +396,18 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   }
 
   Future<void> _goToGamesTab() async {
-    try {
-      await _controller?.dispose();
-    } catch (_) {}
+  try {
+    await _controller?.dispose();
+  } catch (_) {}
 
-    _controller = null;
+  _controller = null;
 
-    if (!mounted) return;
+  if (!mounted) return;
 
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const RootShell(initialIndex: 3)),
-      (route) => false,
-    );
-  }
+  
+  Navigator.of(context).pop();
+}
+
 
   // ===========================================================
   //                           UI
