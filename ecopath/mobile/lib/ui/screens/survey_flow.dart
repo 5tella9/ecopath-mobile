@@ -149,7 +149,7 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
             imageAsset: 'assets/images/survey1.png',
             onNext: _next,
           ),
-      () => _EnergyPlanStep(data: data, onNext: _next),
+      
       () => _QuizNotifyStep(data: data, onNext: _next),
       () => _FinishStep(
             data: data,
@@ -229,7 +229,7 @@ class _SurveyFlowState extends State<SurveyFlow> with TickerProviderStateMixin {
       'How many people do you live with?',
       'Your eco goals',
       '', // 9 interstitial
-      'Energy bills & providers',
+    
       'Quizzes & notifications',
       'All set!',
     ];
@@ -1045,88 +1045,7 @@ class _GoalsStepState extends State<_GoalsStep> {
   }
 }
 
-class _EnergyPlanStep extends StatefulWidget {
-  final SurveyData data;
-  final VoidCallback onNext;
-  const _EnergyPlanStep({required this.data, required this.onNext});
 
-  @override
-  State<_EnergyPlanStep> createState() => _EnergyPlanStepState();
-}
-
-class _EnergyPlanStepState extends State<_EnergyPlanStep> {
-  final _elecCtl = TextEditingController();
-  final _gasCtl = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _elecCtl.text = widget.data.electricProvider;
-    _gasCtl.text = widget.data.gasProvider;
-  }
-
-  @override
-  void dispose() {
-    _elecCtl.dispose();
-    _gasCtl.dispose();
-    super.dispose();
-  }
-
-  void _go() {
-    widget.data.electricProvider = _elecCtl.text.trim();
-    widget.data.gasProvider = _gasCtl.text.trim();
-    widget.onNext();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _hint('Set up bill linking and points deduction preferences'),
-          const SizedBox(height: 10),
-
-          _toggleRow(
-            label: 'Use electricity bill features',
-            value: widget.data.hasElectricBill,
-            onChanged: (v) =>
-                setState(() => widget.data.hasElectricBill = v),
-          ),
-          if (widget.data.hasElectricBill) ...[
-            const SizedBox(height: 8),
-            _label('Electricity provider'),
-            _darkTextField(
-              controller: _elecCtl,
-              hint: 'e.g., KEPCO (한국전력)',
-            ),
-          ],
-
-          const SizedBox(height: 12),
-
-          _toggleRow(
-            label: 'Use gas bill features',
-            value: widget.data.hasGasBill,
-            onChanged: (v) =>
-                setState(() => widget.data.hasGasBill = v),
-          ),
-          if (widget.data.hasGasBill) ...[
-            const SizedBox(height: 8),
-            _label('Gas provider'),
-            _darkTextField(
-              controller: _gasCtl,
-              hint: 'e.g., City Gas ○○',
-              onDone: _go,
-            ),
-          ],
-
-          const SizedBox(height: 16),
-          _nextBtn('Next', _go),
-        ],
-      ),
-    );
-  }
-}
 
 class _QuizNotifyStep extends StatefulWidget {
   final SurveyData data;
