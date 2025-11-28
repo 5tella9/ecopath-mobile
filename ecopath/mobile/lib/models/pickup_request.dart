@@ -19,7 +19,7 @@ class PickupRequest {
       "postalCode": "05000"
     },
         'image': image,
-        'timestamp': timestamp,
+        'timestamp': "2026-01-01 10:00:00.000000 +00:00",
         'notes': notes,
       };
 }
