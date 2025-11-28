@@ -56,13 +56,6 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    // Validate inputs
-    if (_locationController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.notiTruckSnackLocationMissing)),
-      );
-      return;
-    }
 
     if (_imageFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
