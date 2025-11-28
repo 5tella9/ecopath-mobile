@@ -264,7 +264,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
   }) async {
     try {
       final pos = await _getLocation();
-
+      debugPrint("Geolocation: ${pos.latitude}, ${pos.longitude}");
       final res = await http.post(
 
         Uri.parse(ApiConfig.baseUrl + "/api/waste-scans"),
@@ -274,8 +274,8 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
           "timestamp" : DateTime.now().toIso8601String(),
           "wasteType": wasteType,
           "geolocation": {
-            "longitude": pos.longitude,
             "latitude": pos.latitude,
+            "longitude": pos.longitude,
           }
         }),
       );
