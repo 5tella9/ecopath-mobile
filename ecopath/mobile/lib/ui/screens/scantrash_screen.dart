@@ -267,7 +267,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
 
       final res = await http.post(
 
-        Uri.parse(ApiConfig.baseUrl + "/api/waste-scan"),
+        Uri.parse(ApiConfig.baseUrl + "/api/waste-scans"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "image": base64Img,
