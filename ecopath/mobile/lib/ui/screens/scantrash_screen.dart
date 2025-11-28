@@ -273,7 +273,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
           "image": base64Img,
           "timestamp" : DateTime.now().toIso8601String(),
           "wasteType": wasteType,
-          "geolocation": {
+          "geoLocation": {
             "latitude": pos.latitude,
             "longitude": pos.longitude,
           }
