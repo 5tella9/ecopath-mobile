@@ -234,17 +234,6 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Location
-              TextField(
-                controller: _locationController,
-                decoration: _inputDecoration(
-                  context,
-                  l10n.notiTruckLocationLabel,
-                  hint: l10n.notiTruckLocationHint,
-                ),
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 20),
 
               // Photo buttons
               Text(

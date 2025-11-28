@@ -280,7 +280,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
         }),
       );
 
-      if (res.statusCode == 200) {
+      if (res.statusCode == 201) {
         debugPrint("Waste scan succesvol opgeslagen! 👍");
       } else {
         debugPrint("❌ Server error: ${res.statusCode} - ${res.body}");

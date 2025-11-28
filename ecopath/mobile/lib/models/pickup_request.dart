@@ -12,7 +12,12 @@ class PickupRequest {
   });
 
   Map<String, dynamic> toJson() => {
-        'location': location.toJson(),
+    "location": {
+      "houseNumber": "12B",
+      "street": "neungdong-ro",
+      "city": "Seoul",
+      "postalCode": "05000"
+    },
         'image': image,
         'timestamp': timestamp,
         'notes': notes,
