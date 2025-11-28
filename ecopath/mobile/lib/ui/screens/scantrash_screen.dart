@@ -271,7 +271,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "image": base64Img,
-          "timestamp" : DateTime.now().toIso8601String(),
+          "timestamp" : "2025-01-01 10:00:00.000000 +00:00",
           "wasteType": wasteType,
           "geoLocation": {
             "latitude": pos.latitude,
