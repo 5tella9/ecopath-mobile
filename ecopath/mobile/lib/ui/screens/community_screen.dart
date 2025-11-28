@@ -91,7 +91,7 @@ class _CommunityScreenState extends State<CommunityScreen>
       author: 'Ron',
       avatar: _thomasAvatar,
       content:
-          'Pro tip: freeze veggie scraps to make broth later. #ZeroWaste #Composting',
+      'Pro tip: freeze veggie scraps to make broth later. #ZeroWaste #Composting',
       tags: ['#ZeroWaste', '#Composting'],
       likes: 9,
       comments: 1,
@@ -127,6 +127,7 @@ class _CommunityScreenState extends State<CommunityScreen>
   @override
   void initState() {
     super.initState();
+    _tab = TabController(length: 3, vsync: this);
     final user = context.read<UserProvider>().user;
     _currentUserName = user?.fullName ?? 'User';
     _userAvatar = user?.profileImage ?? '';
@@ -171,7 +172,7 @@ class _CommunityScreenState extends State<CommunityScreen>
     );
 
     final Color pillColor =
-        Color.lerp(cs.primaryContainer, Colors.black, 0.35)!;
+    Color.lerp(cs.primaryContainer, Colors.black, 0.35)!;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -240,11 +241,11 @@ class _CommunityScreenState extends State<CommunityScreen>
       ),
       floatingActionButton: _tab.index == 1
           ? FloatingActionButton(
-              backgroundColor: pillColor,
-              onPressed: _composePost,
-              child: Icon(Icons.add, color: cs.onPrimary),
-              tooltip: l10n.fabAddEcoTip,
-            )
+        backgroundColor: pillColor,
+        onPressed: _composePost,
+        child: Icon(Icons.add, color: cs.onPrimary),
+        tooltip: l10n.fabAddEcoTip,
+      )
           : null,
     );
   }
@@ -256,7 +257,7 @@ class _CommunityScreenState extends State<CommunityScreen>
     final xp = tracker.currentXp;
     final xpToNext = tracker.xpToNext;
     final progress =
-        xpToNext == 0 ? 0.0 : (xp / xpToNext).clamp(0.0, 1.0);
+    xpToNext == 0 ? 0.0 : (xp / xpToNext).clamp(0.0, 1.0);
 
     final l10n = AppLocalizations.of(context)!;
 
@@ -440,14 +441,14 @@ class _CommunityScreenState extends State<CommunityScreen>
 
     final leaders = _leaders
         .map((l) => l.name == _currentUserName
-            ? Leader(l.name, tracker.currentXp, l.avatar)
-            : Leader(l.name, l.xp, l.avatar))
+        ? Leader(l.name, tracker.currentXp, l.avatar)
+        : Leader(l.name, l.xp, l.avatar))
         .toList();
 
     final sorted = [...leaders]..sort((a, b) => b.xp.compareTo(a.xp));
     final top5 = sorted.take(5).toList();
     final currentIndex =
-        sorted.indexWhere((l) => l.name == _currentUserName);
+    sorted.indexWhere((l) => l.name == _currentUserName);
     final showCurrentOutsideTop5 = currentIndex >= 5 && currentIndex != -1;
     final currentRank = currentIndex + 1;
 
@@ -725,7 +726,7 @@ class _CommunityScreenState extends State<CommunityScreen>
               children: [
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -735,9 +736,9 @@ class _CommunityScreenState extends State<CommunityScreen>
                             .textTheme
                             .titleMedium
                             ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       IconButton(
                         onPressed: () => Navigator.of(ctx).pop(),
@@ -750,7 +751,7 @@ class _CommunityScreenState extends State<CommunityScreen>
                 Expanded(
                   child: ListView.builder(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemCount: comments.length,
                     itemBuilder: (_, i) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -773,10 +774,10 @@ class _CommunityScreenState extends State<CommunityScreen>
                           decoration: InputDecoration(
                             hintText: l10n.commentsHint,
                             hintStyle:
-                                const TextStyle(color: Colors.white70),
+                            const TextStyle(color: Colors.white70),
                             border: const OutlineInputBorder(
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(16)),
+                              BorderRadius.all(Radius.circular(16)),
                             ),
                             filled: true,
                             fillColor: Colors.black54,
@@ -821,7 +822,7 @@ class _CommunityScreenState extends State<CommunityScreen>
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color:
-              active ? cs.primaryContainer : cs.surface.withOpacity(0.25),
+          active ? cs.primaryContainer : cs.surface.withOpacity(0.25),
           borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
@@ -878,15 +879,15 @@ class _CommunityScreenState extends State<CommunityScreen>
               borderRadius: BorderRadius.circular(12),
               child: p.isLocal
                   ? Image.file(
-                      File(p.image!),
-                      height: 170,
-                      fit: BoxFit.cover,
-                    )
+                File(p.image!),
+                height: 170,
+                fit: BoxFit.cover,
+              )
                   : Image.asset(
-                      p.image!,
-                      height: 170,
-                      fit: BoxFit.cover,
-                    ),
+                p.image!,
+                height: 170,
+                fit: BoxFit.cover,
+              ),
             ),
           ],
           const SizedBox(height: 8),
@@ -1042,7 +1043,7 @@ class _CommunityScreenState extends State<CommunityScreen>
   Future<void> _composePost() async {
     final contentController = TextEditingController();
     final tagsController =
-        TextEditingController(text: '#EcoTips #ZeroWaste');
+    TextEditingController(text: '#EcoTips #ZeroWaste');
     String? pickedImagePath;
 
     final l10n = AppLocalizations.of(context)!;

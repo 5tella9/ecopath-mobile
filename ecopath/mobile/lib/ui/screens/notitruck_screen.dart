@@ -1,10 +1,10 @@
 // lib/ui/screens/notitruck_screen.dart
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecopath/l10n/app_localizations.dart';
+import 'package:ecopath/core/pickup_service.dart';
 
 class NotiTruckScreen extends StatefulWidget {
   const NotiTruckScreen({super.key});
@@ -52,9 +52,11 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
     }
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
 
+    // Validate inputs
     if (_locationController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.notiTruckSnackLocationMissing)),
@@ -62,42 +64,100 @@ class _NotiTruckScreenState extends State<NotiTruckScreen> {
       return;
     }
 
-    // TODO: connect to your website / API here if needed
+    if (_imageFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please take or select a photo')),
+      );
+      return;
+    }
 
+    // Show loading dialog
     showDialog(
       context: context,
-      builder: (ctx) {
-        final cs = Theme.of(context).colorScheme;
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            l10n.notiTruckDialogTitle,
-            style: GoogleFonts.alike(
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
-            ),
-          ),
-          content: Text(
-            l10n.notiTruckDialogMessage,
-            style: GoogleFonts.alike(
-              fontSize: 14,
-              color: cs.onSurface,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop(); // close dialog
-                Navigator.of(context).pop(); // go back to Features screen
-              },
-              child: Text(l10n.notiTruckDialogDone),
-            ),
-          ],
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
         );
       },
     );
+
+    try {
+      // Call the API
+      final pickupService = PickupService();
+      final response = await pickupService.submitPickupRequest(
+        location: _locationController.text.trim(),
+        imageFile: _imageFile!,
+        notes: _noteController.text.trim(),
+      );
+
+      // Hide loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show result dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) {
+            final isSuccess = response['success'] == true;
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Text(
+                isSuccess ? l10n.notiTruckDialogTitle : 'Error',
+                style: GoogleFonts.alike(
+                  fontWeight: FontWeight.w700,
+                  color: isSuccess ? cs.onSurface : Colors.red,
+                ),
+              ),
+              content: Text(
+                isSuccess 
+                    ? l10n.notiTruckDialogMessage 
+                    : response['error'] ?? 'An unknown error occurred',
+                style: GoogleFonts.alike(
+                  fontSize: 14,
+                  color: cs.onSurface,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop(); // close dialog
+                    if (isSuccess) {
+                      Navigator.of(context).pop(); // go back to previous screen
+                    }
+                  },
+                  child: Text(isSuccess ? l10n.notiTruckDialogDone : 'OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // Hide loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error dialog
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Failed to submit request: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   InputDecoration _inputDecoration(BuildContext context, String label,
