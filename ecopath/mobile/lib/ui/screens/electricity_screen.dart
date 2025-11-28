@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:ecopath/l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:ecopath/core/api_config.dart';
 
 TextStyle _ts(BuildContext context, double size,
     {FontWeight? fw, Color? color, double? height}) {
@@ -34,7 +37,9 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
   String _avgUnit = 'kWh';
 
   static const String _demoSmartMeterId =
-      '80c22b98-7799-41c6-abfc-59047915ca3c';
+      'c7d42103-dbc7-4a3a-8813-3be0c1587f78';
+
+
 
   @override
   void initState() {
