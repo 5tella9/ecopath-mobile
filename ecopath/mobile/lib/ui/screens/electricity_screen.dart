@@ -51,9 +51,9 @@ class _ElectricityScreenState extends State<ElectricityScreen> {
     setState(() => _loadingAvg = true);
     try {
       final result = await MetersApi.fetchAverageReading(
-        smartMeterId: _demoSmartMeterId,
         from: '2025-01-01',
         to: '2025-01-31',
+        interval: 'week',
       );
       final avg = (result['average'] as num?)?.toDouble();
       final unit = (result['unit'] as String?) ?? 'kWh';
