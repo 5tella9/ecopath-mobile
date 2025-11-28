@@ -194,7 +194,7 @@
   "electricityUsageChartTitle": "사용량 차트",
   "electricityProjectionPrefix": "예상치:",
 
-    "gasTitle": "도시가스",
+  "gasTitle": "도시가스",
   "gasIntro": "월별 가스 사용량을 확인하고\n탄소 영향을 추정해 보세요.",
 
   "gasQuickConverterTitle": "간편 변환기",

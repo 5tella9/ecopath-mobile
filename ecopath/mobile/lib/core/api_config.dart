@@ -1,3 +1,3 @@
 class ApiConfig {
-  static const String baseUrl = 'https://mobileapp.ecopath.site';
+  static const String baseUrl = 'https://backendapi.ecopath.site';
 }
