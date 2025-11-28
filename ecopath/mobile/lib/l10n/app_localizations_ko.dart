@@ -405,13 +405,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get electricityVsLastPeriod => '이전 기간 대비';
 
   @override
-  String get electricityBackendLoading => '백엔드에서 2025년 1월 평균을 가져오는 중…';
+  String get electricityBackendLoading => '2025년 1월 평균을 가져오는 중…';
 
   @override
-  String get electricityBackendNone => '백엔드 평균 데이터를 가져올 수 없어요.';
+  String get electricityBackendNone => '정보가 없습니다.';
 
   @override
-  String get electricityBackendLabel => '백엔드 평균 (2025년 1월):';
+  String get electricityBackendLabel => '평균 (2025년 1월):';
 
   @override
   String get electricityRefresh => '새로고침';

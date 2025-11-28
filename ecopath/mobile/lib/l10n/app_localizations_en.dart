@@ -405,13 +405,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get electricityVsLastPeriod => 'vs last period';
 
   @override
-  String get electricityBackendLoading => 'Fetching backend average for Jan 2025…';
+  String get electricityBackendLoading => 'Fetching data for Jan 2025…';
 
   @override
-  String get electricityBackendNone => 'No backend average available.';
+  String get electricityBackendNone => 'No information available.';
 
   @override
-  String get electricityBackendLabel => 'Backend Avg (Jan 2025):';
+  String get electricityBackendLabel => 'Avg (Jan 2025):';
 
   @override
   String get electricityRefresh => 'Refresh';

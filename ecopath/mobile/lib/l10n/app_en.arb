@@ -182,9 +182,9 @@
   "electricityTrendDown": "Down",
   "electricityVsLastPeriod": "vs last period",
 
-  "electricityBackendLoading": "Fetching backend average for Jan 2025…",
-  "electricityBackendNone": "No backend average available.",
-  "electricityBackendLabel": "Backend Avg (Jan 2025):",
+  "electricityBackendLoading": "Fetching data for Jan 2025…",
+  "electricityBackendNone": "No information available.",
+  "electricityBackendLabel": "Avg (Jan 2025):",
   "electricityRefresh": "Refresh",
 
   "electricityRangeWeekButton": "Week",

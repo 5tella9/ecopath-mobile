@@ -182,9 +182,9 @@
   "electricityTrendDown": "감소",
   "electricityVsLastPeriod": "이전 기간 대비",
 
-  "electricityBackendLoading": "백엔드에서 2025년 1월 평균을 가져오는 중…",
-  "electricityBackendNone": "백엔드 평균 데이터를 가져올 수 없어요.",
-  "electricityBackendLabel": "백엔드 평균 (2025년 1월):",
+  "electricityBackendLoading": "2025년 1월 평균을 가져오는 중…",
+  "electricityBackendNone": "정보가 없습니다.",
+  "electricityBackendLabel": "평균 (2025년 1월):",
   "electricityRefresh": "새로고침",
 
   "electricityRangeWeekButton": "주간",

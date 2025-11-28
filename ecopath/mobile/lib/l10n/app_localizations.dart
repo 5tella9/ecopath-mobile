@@ -890,19 +890,19 @@ abstract class AppLocalizations {
   /// No description provided for @electricityBackendLoading.
   ///
   /// In en, this message translates to:
-  /// **'Fetching backend average for Jan 2025…'**
+  /// **'Fetching data for Jan 2025…'**
   String get electricityBackendLoading;
 
   /// No description provided for @electricityBackendNone.
   ///
   /// In en, this message translates to:
-  /// **'No backend average available.'**
+  /// **'No information available.'**
   String get electricityBackendNone;
 
   /// No description provided for @electricityBackendLabel.
   ///
   /// In en, this message translates to:
-  /// **'Backend Avg (Jan 2025):'**
+  /// **'Avg (Jan 2025):'**
   String get electricityBackendLabel;
 
   /// No description provided for @electricityRefresh.
