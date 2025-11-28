@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:ecopath/core/api_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -265,13 +266,14 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
       final pos = await _getLocation();
 
       final res = await http.post(
-        Uri.parse("https://api.ecopath.site/api/waste-scan"),
+
+        Uri.parse(ApiConfig.baseUrl + "/api/waste-scan"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "image": base64Img,
           "timestamp" : DateTime.now().toIso8601String(),
           "wasteType": wasteType,
-          "location": {
+          "geolocation": {
             "longitude": pos.longitude,
             "latitude": pos.latitude,
           }

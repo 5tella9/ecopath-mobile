@@ -1,10 +1,14 @@
 // lib/ui/screens/recycle_screen.dart
 import 'dart:io';
-
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:path/path.dart' as path;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:ecopath/core/api_config.dart';
 import 'package:ecopath/core/progress_tracker.dart';
 import 'package:ecopath/core/recycle_history.dart';
 import 'package:ecopath/l10n/app_localizations.dart';
@@ -202,21 +206,60 @@ class _RecycleScreenState extends State<RecycleScreen> {
 
     setState(() => _submitting = true);
 
-    // Spend energy
-    tracker.spendEnergy(_energyCost);
+    try {
+      // Get current position
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
-    final int earnedPoints = _previewPoints;
+      // Read image file as bytes and convert to base64
+      final bytes = await _imageFile!.readAsBytes();
+      final base64Img = base64Encode(bytes);
 
-    // Reward through game API
-    tracker.rewardFromGame(
-      points: earnedPoints,
-      gameName: 'Recycle',
-    );
+      // Make API call to waste-scan endpoint
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/api/waste-scan'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'image': base64Img,
+          'timestamp': DateTime.now().toIso8601String(),
+          'wasteType': _category.toString().split('.').last,
+          'geolocation': {
+            'longitude': position.longitude,
+            'latitude': position.latitude,
+          },
+          'description': _descController.text.trim(),
+        }),
+      );
 
-    // Log recycle history (for Profile calendar)
-    RecycleHistory.instance.addRecycle(DateTime.now(), earnedPoints);
 
-    setState(() => _submitting = false);
+      // Spend energy only after successful API call
+      tracker.spendEnergy(_energyCost);
+
+      final int earnedPoints = _previewPoints;
+
+      // Reward through game API
+      tracker.rewardFromGame(
+        points: earnedPoints,
+        gameName: 'Recycle',
+      );
+
+      // Log recycle history (for Profile calendar)
+      RecycleHistory.instance.addRecycle(DateTime.now(), earnedPoints);
+
+      setState(() => _submitting = false);
+    } catch (e) {
+      setState(() => _submitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error submitting waste scan: ${e.toString()}'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
 
     // Show success bottom sheet
     showModalBottomSheet(
@@ -244,7 +287,7 @@ class _RecycleScreenState extends State<RecycleScreen> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  t.recycleSuccessBody(earnedPoints),
+                  t.recycleSuccessBody(_previewPoints),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: cs.onSurfaceVariant,
