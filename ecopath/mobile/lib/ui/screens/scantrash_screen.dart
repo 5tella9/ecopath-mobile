@@ -146,7 +146,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
     }
 
     const String apiUrl =
-        "https://pos-guitar-pick-his.trycloudflare.com/predict";
+        "https://inventory-abs-provides-monkey.trycloudflare.com/predict";
 
     try {
       final bytes = await photo.readAsBytes();
