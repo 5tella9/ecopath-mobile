@@ -146,7 +146,7 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
     }
 
     const String apiUrl =
-        "https://inventory-abs-provides-monkey.trycloudflare.com/predict";
+        "https://lounge-animals-approximately-anything.trycloudflare.com/predict";
 
     try {
       final bytes = await photo.readAsBytes();
@@ -454,14 +454,6 @@ class _ScanTrashScreenState extends State<ScanTrashScreen>
                 top: 8,
                 child: Row(
                   children: [
-                    IconButton.filled(
-                      style: IconButton.styleFrom(
-                        backgroundColor: cs.primary,
-                      ),
-                      onPressed: _goToGamesTab,
-                      icon:
-                          Icon(Icons.arrow_back_rounded, color: cs.onPrimary),
-                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Scan Trash',

@@ -139,7 +139,7 @@ class _QuizScreenState extends State<QuizScreen> {
   // =====================================================
   Future<void> _fetchQuiz() async {
     const apiUrl =
-        'https://inventory-abs-provides-monkey.trycloudflare.com/quiz';
+        'https://lounge-animals-approximately-anything.trycloudflare.com/quiz';
     final user = context.read<UserProvider>().user;
 
     final payload = {
